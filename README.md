@@ -38,9 +38,13 @@ nothing survives an app restart until the store is backed by PowerSync tables;
 only the language choice is stored on the phone. Each list in the store maps to
 one future Supabase table.
 
-Not working yet, by design (the button explains it in the app): QR sticker
-scanning, video playback, opening/downloading documents, and the audit PDF
-export. Call and WhatsApp buttons work and use `DemoData.jogooPhone`.
+The spare-parts screen can scan equipment QR stickers or accept a serial number.
+Learn videos are represented in this demo by offline, illustrated step-by-step
+walkthroughs (the project does not include video or audio clips). Document
+previews and downloads generate clearly marked demo PDFs from the sample data;
+they are not original JOGOO technical documents. Maintenance logs can be shared
+as a PDF. These features work without backend credentials. Call and WhatsApp
+buttons work and use `DemoData.jogooPhone`.
 
 Mia answers through the `mia` Edge Function when Supabase is configured and the
 user is signed in. Otherwise the chat offers a phone call or WhatsApp instead.

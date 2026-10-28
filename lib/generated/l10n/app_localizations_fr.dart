@@ -443,7 +443,33 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get playVideo => 'Lire la vidéo';
+  String illustratedMinutes(int minutes) {
+    return 'Guide illustré · $minutes min';
+  }
+
+  @override
+  String get playVideo => 'Lire le guide illustré';
+
+  @override
+  String get illustratedWalkthrough => 'Guide illustré hors ligne';
+
+  @override
+  String walkthroughStep(int current, int total) {
+    return 'Étape $current sur $total';
+  }
+
+  @override
+  String get walkthroughOfflineNote =>
+      'Guide de démonstration avec photos et texte intégrés. Aucune vidéo ni piste audio.';
+
+  @override
+  String get pauseWalkthrough => 'Mettre en pause';
+
+  @override
+  String get previousStep => 'Étape précédente';
+
+  @override
+  String get nextStep => 'Étape suivante';
 
   @override
   String get askMiaAboutThis => 'Poser une question à Mia';
@@ -452,7 +478,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get offlineLibrary => 'Bibliothèque hors ligne';
 
   @override
-  String get librarySubtitle => 'Lire et regarder sans internet';
+  String get librarySubtitle =>
+      'Lire et suivre les guides illustrés sans internet';
 
   @override
   String get serviceHours => 'Lun. au ven., 9h00 à 18h00';
@@ -638,6 +665,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get scanSticker => 'Scanner l\'étiquette JOGOO';
+
+  @override
+  String get pointCameraAtSticker =>
+      'Pointez la caméra vers une étiquette ou un code QR de l\'équipement.';
 
   @override
   String get orTypeSerial => 'Ou saisissez le numéro de série';
@@ -831,6 +862,26 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get generatedDemoPdf =>
+      'PDF de démonstration · document original non fourni';
+
+  @override
+  String serialNumber(String serial) {
+    return 'Numéro de série : $serial';
+  }
+
+  @override
+  String get demoDocumentNotice =>
+      'Démonstration uniquement. Généré à partir des données d\'exemple de l\'application ; ce document n\'est pas un plan, un contrat ni un document technique JOGOO original.';
+
+  @override
+  String get demoCopy => 'COPIE DE DÉMONSTRATION';
+
+  @override
+  String get pdfExportFailed =>
+      'Impossible de créer ou de partager le PDF. Réessayez.';
+
+  @override
   String get downloadsLaterTitle => 'Documents pas encore connectés';
 
   @override
@@ -854,6 +905,9 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get loggedByLabel => 'Saisi par';
+
+  @override
   String get waitingToSync => 'En attente';
 
   @override
@@ -861,6 +915,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get exportPdf => 'Exporter pour audit (PDF)';
+
+  @override
+  String get logReportTitle => 'Journal d\'entretien JOGOO';
 
   @override
   String get emptyLog => 'Aucune saisie. Touchez + pour noter un travail.';
@@ -981,8 +1038,8 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count vidéos',
-      one: '1 vidéo',
+      other: '$count guides illustrés',
+      one: '1 guide illustré',
     );
     return '$_temp0';
   }
@@ -994,7 +1051,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get userManuals => 'Manuels d\'utilisation';
 
   @override
-  String get videos => 'Vidéos';
+  String get illustratedGuides => 'Guides illustrés';
 
   @override
   String get wifiOnly => 'Télécharger en Wi-Fi uniquement';

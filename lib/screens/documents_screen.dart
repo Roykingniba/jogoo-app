@@ -5,7 +5,7 @@ import '../app/theme.dart';
 import '../data/jogoo_store.dart';
 import '../generated/l10n/app_localizations.dart';
 import '../models/models.dart';
-import '../utils/format.dart';
+import '../utils/pdf_exports.dart';
 import '../widgets/jogoo_widgets.dart';
 
 enum _Filter { all, plans, electrical, warranty }
@@ -145,9 +145,16 @@ class _EquipmentDocs extends StatelessWidget {
 
 /// One file with its offline state, shared with the offline library.
 class DocumentRow extends StatelessWidget {
-  const DocumentRow(this.doc, {super.key});
+  const DocumentRow(
+    this.doc, {
+    super.key,
+    this.onDownload,
+    this.onOpen,
+  });
 
   final FarmDocument doc;
+  final VoidCallback? onDownload;
+  final VoidCallback? onOpen;
 
   @override
   Widget build(BuildContext context) {
@@ -162,33 +169,28 @@ class DocumentRow extends StatelessWidget {
     return ListRow(
       leading: TintIcon(icon, tone: tone, size: 52),
       title: doc.title.of(context),
-      subtitle: l.pdfSize(decimal(context, doc.sizeMb)),
-      trailing: doc.savedOffline
-          ? Tooltip(
-              message: l.savedOffline,
-              child: const CircleAvatar(
-                radius: 22,
-                backgroundColor: JColors.limeTint,
-                child: Icon(Icons.check, color: JColors.olive),
-              ),
-            )
-          : CircleButton(
-              icon: Icons.download_outlined,
-              tooltip: l.download,
-              outlined: true,
-              color: JColors.navy,
-              size: 44,
-              onPressed: () => showJogooToast(
-                context,
-                l.downloadsLaterTitle,
-                l.downloadsLaterBody,
-              ),
+      subtitle: l.generatedDemoPdf,
+      trailing: CircleButton(
+        icon: Icons.download_outlined,
+        tooltip: l.download,
+        outlined: true,
+        color: JColors.navy,
+        size: 44,
+        onPressed:
+            onDownload ??
+            () => downloadFarmDocument(
+              context,
+              doc,
+              JogooScope.read(context).equipmentById(doc.equipmentId),
             ),
-      onTap: () => showJogooToast(
-        context,
-        l.downloadsLaterTitle,
-        l.downloadsLaterBody,
       ),
+      onTap:
+          onOpen ??
+          () => previewFarmDocument(
+            context,
+            doc,
+            JogooScope.read(context).equipmentById(doc.equipmentId),
+          ),
     );
   }
 }

@@ -5,9 +5,9 @@ import '../app/theme.dart';
 import '../data/jogoo_store.dart';
 import '../generated/l10n/app_localizations.dart';
 import '../models/models.dart';
-import '../utils/actions.dart';
 import '../widgets/jogoo_widgets.dart';
 import 'mia_screen.dart';
+import 'walkthrough_screen.dart';
 
 /// Reader for one guide, crop sheet or video summary from the Learn library.
 class GuideScreen extends StatelessWidget {
@@ -29,7 +29,7 @@ class GuideScreen extends StatelessWidget {
           ScreenHeader(
             title: guide.title.of(context),
             subtitle: isVideo
-                ? l.videoMinutes(guide.minutes)
+                ? l.illustratedMinutes(guide.minutes)
                 : l.readMinutes(guide.minutes),
           ),
           Expanded(
@@ -48,7 +48,10 @@ class GuideScreen extends StatelessWidget {
                             color: Colors.white,
                             background: JColors.navy,
                             size: 64,
-                            onPressed: () => showComingSoon(context),
+                            onPressed: () => push(
+                              context,
+                              WalkthroughScreen(guideId: guide.id),
+                            ),
                           ),
                       ],
                     ),

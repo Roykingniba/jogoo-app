@@ -848,11 +848,53 @@ abstract class AppLocalizations {
   /// **'{minutes} min read'**
   String readMinutes(int minutes);
 
+  /// No description provided for @illustratedMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Illustrated · {minutes} min'**
+  String illustratedMinutes(int minutes);
+
   /// No description provided for @playVideo.
   ///
   /// In en, this message translates to:
-  /// **'Play the video'**
+  /// **'Play the walkthrough'**
   String get playVideo;
+
+  /// No description provided for @illustratedWalkthrough.
+  ///
+  /// In en, this message translates to:
+  /// **'Illustrated offline walkthrough'**
+  String get illustratedWalkthrough;
+
+  /// No description provided for @walkthroughStep.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {current} of {total}'**
+  String walkthroughStep(int current, int total);
+
+  /// No description provided for @walkthroughOfflineNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Demo guide using bundled photos and text. No video or audio clip is included.'**
+  String get walkthroughOfflineNote;
+
+  /// No description provided for @pauseWalkthrough.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get pauseWalkthrough;
+
+  /// No description provided for @previousStep.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous step'**
+  String get previousStep;
+
+  /// No description provided for @nextStep.
+  ///
+  /// In en, this message translates to:
+  /// **'Next step'**
+  String get nextStep;
 
   /// No description provided for @askMiaAboutThis.
   ///
@@ -869,7 +911,7 @@ abstract class AppLocalizations {
   /// No description provided for @librarySubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Read and watch without internet'**
+  /// **'Read and follow illustrated guides without internet'**
   String get librarySubtitle;
 
   /// No description provided for @serviceHours.
@@ -1178,6 +1220,12 @@ abstract class AppLocalizations {
   /// **'Scan the JOGOO sticker'**
   String get scanSticker;
 
+  /// No description provided for @pointCameraAtSticker.
+  ///
+  /// In en, this message translates to:
+  /// **'Point your camera at an equipment sticker or QR code.'**
+  String get pointCameraAtSticker;
+
   /// No description provided for @orTypeSerial.
   ///
   /// In en, this message translates to:
@@ -1478,6 +1526,36 @@ abstract class AppLocalizations {
   /// **'PDF · {size} MB'**
   String pdfSize(String size);
 
+  /// No description provided for @generatedDemoPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Generated demo PDF · not an original document'**
+  String get generatedDemoPdf;
+
+  /// No description provided for @serialNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Serial number: {serial}'**
+  String serialNumber(String serial);
+
+  /// No description provided for @demoDocumentNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Demonstration only. Generated from sample app data; this is not an original JOGOO plan, contract, or technical document.'**
+  String get demoDocumentNotice;
+
+  /// No description provided for @demoCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'DEMONSTRATION COPY'**
+  String get demoCopy;
+
+  /// No description provided for @pdfExportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The PDF could not be created or shared. Please try again.'**
+  String get pdfExportFailed;
+
   /// No description provided for @downloadsLaterTitle.
   ///
   /// In en, this message translates to:
@@ -1502,6 +1580,12 @@ abstract class AppLocalizations {
   /// **'Logged by {name}'**
   String loggedBy(String name);
 
+  /// No description provided for @loggedByLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Logged by'**
+  String get loggedByLabel;
+
   /// No description provided for @waitingToSync.
   ///
   /// In en, this message translates to:
@@ -1519,6 +1603,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Export for audit (PDF)'**
   String get exportPdf;
+
+  /// No description provided for @logReportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'JOGOO maintenance log'**
+  String get logReportTitle;
 
   /// No description provided for @emptyLog.
   ///
@@ -1721,7 +1811,7 @@ abstract class AppLocalizations {
   /// No description provided for @videosCount.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 video} other{{count} videos}}'**
+  /// **'{count, plural, =1{1 walkthrough} other{{count} walkthroughs}}'**
   String videosCount(int count);
 
   /// No description provided for @worksOffline.
@@ -1736,11 +1826,11 @@ abstract class AppLocalizations {
   /// **'User manuals'**
   String get userManuals;
 
-  /// No description provided for @videos.
+  /// No description provided for @illustratedGuides.
   ///
   /// In en, this message translates to:
-  /// **'Videos'**
-  String get videos;
+  /// **'Illustrated guides'**
+  String get illustratedGuides;
 
   /// No description provided for @wifiOnly.
   ///

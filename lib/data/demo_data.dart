@@ -471,6 +471,7 @@ abstract final class DemoData {
       icon: Icons.play_arrow_rounded,
       tone: Tone.blue,
       photo: fieldPhoto,
+      savedOffline: true,
       body: Bi(
         'Switch the pump off, open the filter housing, rinse the discs in clean '
             'water and check the seal before closing. A clean filter keeps the '
@@ -488,6 +489,7 @@ abstract final class DemoData {
       icon: Icons.play_arrow_rounded,
       tone: Tone.blue,
       photo: fieldPhoto,
+      savedOffline: true,
       body: Bi(
         'Water early in the morning, check the soil at root depth before each '
             'cycle and lengthen cycles rather than adding more of them.',

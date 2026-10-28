@@ -5,6 +5,7 @@ import '../app/theme.dart';
 import '../data/jogoo_store.dart';
 import '../generated/l10n/app_localizations.dart';
 import '../models/models.dart';
+import '../utils/pdf_exports.dart';
 import '../widgets/jogoo_widgets.dart';
 import 'documents_screen.dart';
 import 'guide_screen.dart';
@@ -67,7 +68,22 @@ class OfflineLibraryScreen extends StatelessWidget {
                     children: [
                       Text(l.userManuals, style: text.titleMedium),
                       DividedColumn(
-                        children: [for (final m in manuals) DocumentRow(m)],
+                        children: [
+                          for (final m in manuals)
+                            DocumentRow(
+                              m,
+                              onDownload: () => downloadFarmDocument(
+                                context,
+                                m,
+                                store.equipmentById(m.equipmentId),
+                              ),
+                              onOpen: () => previewFarmDocument(
+                                context,
+                                m,
+                                store.equipmentById(m.equipmentId),
+                              ),
+                            ),
+                        ],
                       ),
                     ],
                   ),
@@ -77,7 +93,7 @@ class OfflineLibraryScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text(l.videos, style: text.titleMedium),
+                      Text(l.illustratedGuides, style: text.titleMedium),
                       DividedColumn(
                         children: [
                           for (final video in videos)
@@ -87,28 +103,15 @@ class OfflineLibraryScreen extends StatelessWidget {
                                 size: 52,
                               ),
                               title: video.title.of(context),
-                              subtitle: l.videoMinutes(video.minutes),
-                              trailing: video.savedOffline
-                                  ? const CircleAvatar(
-                                      radius: 22,
-                                      backgroundColor: JColors.limeTint,
-                                      child: Icon(
-                                        Icons.check,
-                                        color: JColors.olive,
-                                      ),
-                                    )
-                                  : CircleButton(
-                                      icon: Icons.download_outlined,
-                                      tooltip: l.download,
-              outlined: true,
-                                      color: JColors.navy,
-                                      size: 44,
-                                      onPressed: () => showJogooToast(
-                                        context,
-                                        l.downloadsLaterTitle,
-                                        l.downloadsLaterBody,
-                                      ),
-                                    ),
+                              subtitle: l.illustratedMinutes(video.minutes),
+                              trailing: const CircleAvatar(
+                                radius: 22,
+                                backgroundColor: JColors.limeTint,
+                                child: Icon(
+                                  Icons.check,
+                                  color: JColors.olive,
+                                ),
+                              ),
                               onTap: () => push(
                                 context,
                                 GuideScreen(guideId: video.id),

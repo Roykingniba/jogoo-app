@@ -257,10 +257,34 @@
       }
     }
   },
-  "playVideo": "Play the video",
+  "illustratedMinutes": "Illustrated · {minutes} min",
+  "@illustratedMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "playVideo": "Play the walkthrough",
+  "illustratedWalkthrough": "Illustrated offline walkthrough",
+  "walkthroughStep": "Step {current} of {total}",
+  "@walkthroughStep": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "walkthroughOfflineNote": "Demo guide using bundled photos and text. No video or audio clip is included.",
+  "pauseWalkthrough": "Pause",
+  "previousStep": "Previous step",
+  "nextStep": "Next step",
   "askMiaAboutThis": "Ask Mia about this",
   "offlineLibrary": "Offline library",
-  "librarySubtitle": "Read and watch without internet",
+  "librarySubtitle": "Read and follow illustrated guides without internet",
   "serviceHours": "Mon to Fri, 9:00 to 18:00",
   "actionReport": "Report",
   "actionBookVisit": "Book visit",
@@ -368,6 +392,7 @@
   "partsTitle": "Parts for my farm",
   "partsSubtitle": "Matched to your installations",
   "scanSticker": "Scan the JOGOO sticker",
+  "pointCameraAtSticker": "Point your camera at an equipment sticker or QR code.",
   "orTypeSerial": "Or type the serial number",
   "serialNotFound": "No installation found with serial {serial}.",
   "@serialNotFound": {
@@ -495,6 +520,18 @@
     }
   },
   "pdfSize": "PDF · {size} MB",
+  "generatedDemoPdf": "Generated demo PDF · not an original document",
+  "serialNumber": "Serial number: {serial}",
+  "@serialNumber": {
+    "placeholders": {
+      "serial": {
+        "type": "String"
+      }
+    }
+  },
+  "demoDocumentNotice": "Demonstration only. Generated from sample app data; this is not an original JOGOO plan, contract, or technical document.",
+  "demoCopy": "DEMONSTRATION COPY",
+  "pdfExportFailed": "The PDF could not be created or shared. Please try again.",
   "@pdfSize": {
     "placeholders": {
       "size": {
@@ -520,9 +557,11 @@
       }
     }
   },
+  "loggedByLabel": "Logged by",
   "waitingToSync": "Waiting to sync",
   "synced": "Synced",
   "exportPdf": "Export for audit (PDF)",
+  "logReportTitle": "JOGOO maintenance log",
   "emptyLog": "No entries yet. Tap + to log a job.",
   "newEntry": "New entry",
   "entryService": "Service",
@@ -593,7 +632,7 @@
       }
     }
   },
-  "videosCount": "{count, plural, =1{1 video} other{{count} videos}}",
+  "videosCount": "{count, plural, =1{1 walkthrough} other{{count} walkthroughs}}",
   "@videosCount": {
     "placeholders": {
       "count": {
@@ -603,7 +642,7 @@
   },
   "worksOffline": "Everything here works without internet",
   "userManuals": "User manuals",
-  "videos": "Videos",
+  "illustratedGuides": "Illustrated guides",
   "wifiOnly": "Download on Wi-Fi only",
   "wifiOnlyHelp": "Saves your mobile data"
 }

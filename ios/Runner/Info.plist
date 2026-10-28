@@ -14,7 +14,7 @@
 		<string>fr</string>
 	</array>
 	<key>NSCameraUsageDescription</key>
-	<string>Take photos and videos of your equipment or crops for JOGOO service and Mia.</string>
+	<string>Scan JOGOO equipment stickers and take photos of your equipment or crops for JOGOO service and Mia.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Choose photos and videos of your equipment or crops to send to JOGOO.</string>
 	<key>NSMicrophoneUsageDescription</key>

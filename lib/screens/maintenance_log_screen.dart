@@ -5,8 +5,8 @@ import '../app/theme.dart';
 import '../data/jogoo_store.dart';
 import '../generated/l10n/app_localizations.dart';
 import '../models/models.dart';
-import '../utils/actions.dart';
 import '../utils/format.dart';
+import '../utils/pdf_exports.dart';
 import '../widgets/jogoo_widgets.dart';
 import 'new_log_entry_screen.dart';
 
@@ -96,7 +96,11 @@ class MaintenanceLogScreen extends StatelessWidget {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: OutlinedButton(
-                    onPressed: () => showComingSoon(context),
+                    onPressed: () => shareMaintenanceLog(
+                      context,
+                      equipment,
+                      entries,
+                    ),
                     child: Text(l.exportPdf),
                   ),
                 ),

@@ -432,7 +432,33 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get playVideo => 'Play the video';
+  String illustratedMinutes(int minutes) {
+    return 'Illustrated · $minutes min';
+  }
+
+  @override
+  String get playVideo => 'Play the walkthrough';
+
+  @override
+  String get illustratedWalkthrough => 'Illustrated offline walkthrough';
+
+  @override
+  String walkthroughStep(int current, int total) {
+    return 'Step $current of $total';
+  }
+
+  @override
+  String get walkthroughOfflineNote =>
+      'Demo guide using bundled photos and text. No video or audio clip is included.';
+
+  @override
+  String get pauseWalkthrough => 'Pause';
+
+  @override
+  String get previousStep => 'Previous step';
+
+  @override
+  String get nextStep => 'Next step';
 
   @override
   String get askMiaAboutThis => 'Ask Mia about this';
@@ -441,7 +467,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get offlineLibrary => 'Offline library';
 
   @override
-  String get librarySubtitle => 'Read and watch without internet';
+  String get librarySubtitle =>
+      'Read and follow illustrated guides without internet';
 
   @override
   String get serviceHours => 'Mon to Fri, 9:00 to 18:00';
@@ -619,6 +646,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get scanSticker => 'Scan the JOGOO sticker';
+
+  @override
+  String get pointCameraAtSticker =>
+      'Point your camera at an equipment sticker or QR code.';
 
   @override
   String get orTypeSerial => 'Or type the serial number';
@@ -808,6 +839,26 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get generatedDemoPdf =>
+      'Generated demo PDF · not an original document';
+
+  @override
+  String serialNumber(String serial) {
+    return 'Serial number: $serial';
+  }
+
+  @override
+  String get demoDocumentNotice =>
+      'Demonstration only. Generated from sample app data; this is not an original JOGOO plan, contract, or technical document.';
+
+  @override
+  String get demoCopy => 'DEMONSTRATION COPY';
+
+  @override
+  String get pdfExportFailed =>
+      'The PDF could not be created or shared. Please try again.';
+
+  @override
   String get downloadsLaterTitle => 'Documents are not connected yet';
 
   @override
@@ -831,6 +882,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get loggedByLabel => 'Logged by';
+
+  @override
   String get waitingToSync => 'Waiting to sync';
 
   @override
@@ -838,6 +892,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get exportPdf => 'Export for audit (PDF)';
+
+  @override
+  String get logReportTitle => 'JOGOO maintenance log';
 
   @override
   String get emptyLog => 'No entries yet. Tap + to log a job.';
@@ -957,8 +1014,8 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count videos',
-      one: '1 video',
+      other: '$count walkthroughs',
+      one: '1 walkthrough',
     );
     return '$_temp0';
   }
@@ -970,7 +1027,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get userManuals => 'User manuals';
 
   @override
-  String get videos => 'Videos';
+  String get illustratedGuides => 'Illustrated guides';
 
   @override
   String get wifiOnly => 'Download on Wi-Fi only';

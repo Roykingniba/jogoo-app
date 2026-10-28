@@ -5,9 +5,9 @@ import '../app/theme.dart';
 import '../data/jogoo_store.dart';
 import '../generated/l10n/app_localizations.dart';
 import '../models/models.dart';
-import '../utils/actions.dart';
 import '../utils/format.dart';
 import '../widgets/jogoo_widgets.dart';
+import 'qr_scanner_screen.dart';
 
 /// Screen 11: find the right part without knowing its name.
 class SparePartsScreen extends StatefulWidget {
@@ -27,12 +27,12 @@ class _SparePartsScreenState extends State<SparePartsScreen> {
     super.dispose();
   }
 
-  void _find() {
+  void _find([String? scannedValue]) {
     final l = AppLocalizations.of(context);
     final store = JogooScope.read(context);
-    final serial = _serial.text.trim();
+    final serial = (scannedValue ?? _serial.text).trim();
     if (serial.isEmpty) return;
-    final match = store.equipmentBySerial(serial);
+    final match = _findEquipment(store.equipment, serial);
     FocusScope.of(context).unfocus();
     if (match == null) {
       ScaffoldMessenger.of(
@@ -40,8 +40,33 @@ class _SparePartsScreenState extends State<SparePartsScreen> {
       ).showSnackBar(SnackBar(content: Text(l.serialNotFound(serial))));
       return;
     }
-    setState(() => _equipmentId = match.id);
+    setState(() {
+      _equipmentId = match.id;
+      _serial.text = match.serial;
+    });
     showJogooToast(context, l.serialFound(match.name.of(context)));
+  }
+
+  Equipment? _findEquipment(List<Equipment> equipment, String value) {
+    final uri = Uri.tryParse(value);
+    final code = uri == null
+        ? value
+        : uri.queryParameters['serial'] ??
+              uri.queryParameters['id'] ??
+              (uri.pathSegments.isEmpty ? value : uri.pathSegments.last);
+    for (final item in equipment) {
+      if (item.id.toLowerCase() == code.toLowerCase() ||
+          item.serial.toUpperCase() == code.toUpperCase()) {
+        return item;
+      }
+    }
+    return null;
+  }
+
+  Future<void> _scanSticker() async {
+    final value = await push<String>(context, const QrScannerScreen());
+    if (!mounted || value == null) return;
+    _find(value);
   }
 
   @override
@@ -69,7 +94,7 @@ class _SparePartsScreenState extends State<SparePartsScreen> {
                             tooltip: l.scanSticker,
                             color: JColors.navy,
                             size: 60,
-                            onPressed: () => showComingSoon(context),
+                            onPressed: _scanSticker,
                           ),
                           const SizedBox(width: 16),
                           Expanded(
