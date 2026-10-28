@@ -1,0 +1,9 @@
+{
+  "name": "jogoo_app",
+  "version": "1.0.0",
+  "description": "Local Supabase CLI tooling for the Jogoo Flutter app",
+  "devDependencies": {
+    "supabase": "^2.119.0"
+  },
+  "private": true
+}

@@ -1,0 +1,609 @@
+{
+  "@@locale": "en",
+  "appTitle": "Jogoo",
+  "navHome": "Home",
+  "navMyFarm": "My farm",
+  "navShop": "Shop",
+  "navLearn": "Learn",
+  "navService": "Service",
+  "back": "Back",
+  "close": "Close",
+  "cancel": "Cancel",
+  "save": "Save",
+  "send": "Send",
+  "edit": "Edit",
+  "add": "Add",
+  "added": "Added",
+  "remove": "Remove",
+  "view": "View",
+  "open": "Open",
+  "find": "Find",
+  "share": "Share",
+  "call": "Call",
+  "track": "Track",
+  "order": "Order",
+  "request": "Request",
+  "total": "Total",
+  "today": "Today",
+  "earlier": "Earlier",
+  "yesterday": "yesterday",
+  "download": "Download",
+  "savedOffline": "Saved offline",
+  "comingSoonTitle": "Coming in a later version",
+  "comingSoonBody": "This part of the app is not ready yet.",
+  "cannotOpenLink": "This phone could not open the link.",
+  "cannotOpenCamera": "The camera or gallery could not be opened.",
+  "takePhoto": "Take a photo",
+  "recordVideo": "Record a video",
+  "chooseFromGallery": "Choose from the gallery",
+  "sendPhoto": "Send a photo",
+  "callJogoo": "Call JOGOO",
+  "fillIn": "Fill in: {field}",
+  "@fillIn": {
+    "placeholders": {
+      "field": {
+        "type": "String"
+      }
+    }
+  },
+  "greetingMorning": "Good morning, {name}",
+  "@greetingMorning": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "greetingAfternoon": "Good afternoon, {name}",
+  "@greetingAfternoon": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "greetingEvening": "Good evening, {name}",
+  "@greetingEvening": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "switchLanguage": "Passer en français",
+  "openProfile": "Open my profile",
+  "askMia": "Ask Mia",
+  "nextVisit": "Next visit",
+  "confirmed": "Confirmed",
+  "equipmentCheck": "{name} check",
+  "@equipmentCheck": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pickedForYourFarm": "Picked for your farm",
+  "newCount": "{count} new",
+  "@newCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "installationsAt": "{count, plural, =1{1 installation} other{{count} installations}} · {place}",
+  "@installationsAt": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "place": {
+        "type": "String"
+      }
+    }
+  },
+  "addEquipment": "Add equipment",
+  "addEquipmentBody": "Tell us about a new installation or a product bought elsewhere. The JOGOO team will add it to your farm.",
+  "addEquipmentHint": "For example: water tank 5,000 L",
+  "addEquipmentSavedTitle": "Saved for the JOGOO team",
+  "addEquipmentSavedBody": "A technician will confirm the details with you.",
+  "tabEquipment": "Equipment",
+  "tabOrders": "Orders",
+  "tabInvoices": "Invoices",
+  "statusGood": "Good",
+  "statusOpen": "Open",
+  "statusDueSoon": "Due soon",
+  "warrantyLeft": "Warranty left",
+  "monthsOf": "{left} of {total} months",
+  "@monthsOf": {
+    "placeholders": {
+      "left": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "myDocuments": "My documents",
+  "maintenanceLog": "Maintenance log",
+  "orderDelivered": "Delivered",
+  "orderOnTheRoad": "On the road",
+  "invoicePaid": "Paid",
+  "invoiceDue": "To pay",
+  "equipmentTitle": "Equipment",
+  "installedOn": "Installed {date}",
+  "@installedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "workingWell": "Working well",
+  "requestOpen": "Service request open",
+  "monthsShort": "{count} mo",
+  "@monthsShort": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "lastService": "Last service",
+  "maintenance": "Maintenance",
+  "doneOn": "Done {date}",
+  "@doneOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "dueOn": "Due {date}",
+  "@dueOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "reportProblem": "Report a problem",
+  "bookService": "Book service",
+  "bookServiceBody": "JOGOO will call you to agree a visit date for your {equipment}.",
+  "@bookServiceBody": {
+    "placeholders": {
+      "equipment": {
+        "type": "String"
+      }
+    }
+  },
+  "visitRequestedTitle": "Visit request saved",
+  "visitRequestedBody": "JOGOO will call you to confirm the date.",
+  "detailsCopied": "Details copied",
+  "shopSubtitle": "JOGOO range, picked for your farm",
+  "searchProducts": "Search products and parts",
+  "searchResults": "Search results",
+  "noProducts": "No product matches. Try another word or ask Mia.",
+  "catForYou": "For you",
+  "catFilters": "Filters",
+  "catValves": "Valves",
+  "catSprinklers": "Sprinklers",
+  "catPivots": "Pivots",
+  "catKits": "Kits",
+  "upsellTitle": "Water your last hectare",
+  "upsellBody": "Extend your drip system to plot C",
+  "getQuote": "Get a quote",
+  "forYourEquipment": "For your equipment",
+  "requestSavedTitle": "Request saved for JOGOO sales",
+  "requestSavedBody": "{item} · a JOGOO adviser will call you back",
+  "@requestSavedBody": {
+    "placeholders": {
+      "item": {
+        "type": "String"
+      }
+    }
+  },
+  "cart": "Cart",
+  "cartTitle": "Your cart",
+  "cartEmpty": "Your cart is empty.",
+  "sendOrderRequest": "Send order request",
+  "orderRequestSavedTitle": "Order request saved",
+  "orderRequestSavedBody": "JOGOO will call you to confirm price, fitting and delivery.",
+  "paymentLater": "No payment now. You pay by mobile money once JOGOO confirms the order.",
+  "saveForLater": "Save for later",
+  "priceOnQuote": "Price on quote",
+  "addToCart": "Add to cart",
+  "addedToCart": "Added to cart",
+  "miaSubtitle": "Your JOGOO assistant",
+  "messageMia": "Message Mia",
+  "miaTyping": "Mia is writing…",
+  "miaUnavailable": "Mia is not connected yet. A JOGOO adviser can help you now by phone or WhatsApp.",
+  "urgentCall": "Urgent? Call {phone}",
+  "@urgentCall": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "bookAgronomist": "Book an agronomist",
+  "talkToPerson": "Talk to a person",
+  "readGuide": "Read the guide: {title}",
+  "@readGuide": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "learnSubtitle": "Guides from JOGOO agronomists",
+  "searchGuides": "Search guides",
+  "noGuides": "No guide matches. Try another word or ask Mia.",
+  "videoMinutes": "Video · {minutes} min",
+  "@videoMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "readMinutes": "{minutes} min read",
+  "@readMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "playVideo": "Play the video",
+  "askMiaAboutThis": "Ask Mia about this",
+  "offlineLibrary": "Offline library",
+  "librarySubtitle": "Read and watch without internet",
+  "serviceHours": "Mon to Fri, 9:00 to 18:00",
+  "actionReport": "Report",
+  "actionBookVisit": "Book visit",
+  "actionWarranty": "Warranty",
+  "myRequests": "My requests",
+  "openCount": "{count} open",
+  "@openCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "visitOn": "Visit {date}",
+  "@visitOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "visitToBeScheduled": "Visit to be scheduled",
+  "resolvedOn": "Resolved {date}",
+  "@resolvedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "rate": "Rate",
+  "rateTitle": "How was the repair?",
+  "starsLabel": "{count, plural, =1{1 star} other{{count} stars}}",
+  "@starsLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "callJogooCameroon": "Call JOGOO Cameroon",
+  "warrantyEnded": "Warranty ended",
+  "warrantyNote": "Repairs on parts under warranty are free. The technician confirms cover before any work.",
+  "bookVisitTitle": "Book a visit",
+  "bookVisitBody": "Which installation needs a visit? JOGOO will call you to agree a date.",
+  "requestTitle": "Request {id}",
+  "@requestTitle": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "technicianVisit": "Technician visit",
+  "technicianToAssign": "Technician to be assigned",
+  "callTechnician": "Call the technician",
+  "progress": "Progress",
+  "stepReceived": "Request received",
+  "stepDiagnosed": "Diagnosis",
+  "stepBooked": "Visit booked",
+  "stepFixed": "Fixed",
+  "coveredByWarranty": "Covered by warranty",
+  "notCovered": "Not covered by warranty",
+  "yourNotes": "Your notes",
+  "reschedule": "Reschedule",
+  "addDetails": "Add details",
+  "detailsHint": "A note for the technician",
+  "noteAdded": "Note added",
+  "pickNewDate": "Pick a new date",
+  "rescheduleNote": "Asked to move the visit to {date}",
+  "@rescheduleNote": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "rescheduleSentTitle": "New date requested",
+  "rescheduleSentBody": "The technician will call you to confirm.",
+  "clientSince": "JOGOO client since {date}",
+  "@clientSince": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "location": "Location",
+  "area": "Area",
+  "hectares": "{value} ha",
+  "@hectares": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "thisSeasonIWant": "This season I want",
+  "goalsHelp": "Your goals shape JOGOO's offers and advice.",
+  "goalHigherYields": "Higher yields",
+  "goalMoreLand": "More land watered",
+  "goalSaveWater": "Save water",
+  "goalLessLabour": "Less labour",
+  "editFarmTitle": "Edit my farm",
+  "partsTitle": "Parts for my farm",
+  "partsSubtitle": "Matched to your installations",
+  "scanSticker": "Scan the JOGOO sticker",
+  "orTypeSerial": "Or type the serial number",
+  "serialNotFound": "No installation found with serial {serial}.",
+  "@serialNotFound": {
+    "placeholders": {
+      "serial": {
+        "type": "String"
+      }
+    }
+  },
+  "serialFound": "Showing parts for {name}",
+  "@serialFound": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "reorderTitle": "Reorder inputs",
+  "sizedFor": "Sized for your {area} ha",
+  "@sizedFor": {
+    "placeholders": {
+      "area": {
+        "type": "String"
+      }
+    }
+  },
+  "yourUsualOrder": "Your usual order",
+  "lastBought": "last bought {date}",
+  "@lastBought": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "bags": "{count, plural, =1{1 bag} other{{count} bags}}",
+  "@bags": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "fewerBags": "Fewer bags",
+  "moreBags": "More bags",
+  "recommendedFor": "Recommended for {area} ha",
+  "@recommendedFor": {
+    "placeholders": {
+      "area": {
+        "type": "String"
+      }
+    }
+  },
+  "reorderOneTap": "Reorder in one tap",
+  "reorderSavedTitle": "Reorder saved for JOGOO sales",
+  "remindBeforeSeason": "Remind me before each season",
+  "orderTitle": "Order {id}",
+  "@orderTitle": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "arriving": "Arriving",
+  "dropOffPoint": "Drop-off point: {place}",
+  "@dropOffPoint": {
+    "placeholders": {
+      "place": {
+        "type": "String"
+      }
+    }
+  },
+  "collectionCode": "Collection code",
+  "showCode": "Show the code in large",
+  "changeDropOff": "Change drop-off",
+  "callDriver": "Call the driver",
+  "dropOffChangeTitle": "Change requested",
+  "dropOffChangeBody": "JOGOO will call you to agree the new drop-off point.",
+  "whichEquipment": "Which equipment?",
+  "whatIsWrong": "What is wrong?",
+  "describeProblem": "Describe the problem",
+  "describeProblemHint": "Where is it, and since when?",
+  "photosAndVideos": "Photos and videos",
+  "sendRequest": "Send request",
+  "pickProblemFirst": "Choose the equipment and the problem first.",
+  "reportSavedTitle": "Request {id} saved",
+  "@reportSavedTitle": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "reportSavedBody": "JOGOO will call you today.",
+  "agronomistsTitle": "JOGOO agronomists",
+  "repliesWeekdays": "Replies Mon to Fri",
+  "wateringPlanThisWeek": "Watering plan this week",
+  "updatedOn": "Updated {date}",
+  "@updatedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "bookFieldVisit": "Book a field visit",
+  "askTheAgronomists": "Ask the agronomists",
+  "messageSavedTitle": "Message saved",
+  "messageSavedBody": "The agronomists reply Monday to Friday.",
+  "fieldVisitTitle": "Field visit requested",
+  "fieldVisitBody": "An agronomist will call you to agree a date.",
+  "documentsSubtitle": "Saved on this phone, readable offline",
+  "filterAll": "All",
+  "filterPlans": "Plans",
+  "filterElectrical": "Electrical",
+  "filterWarranty": "Warranty",
+  "noDocuments": "No document of this type yet.",
+  "documentsCount": "{count, plural, =1{1 document} other{{count} documents}}",
+  "@documentsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pdfSize": "PDF · {size} MB",
+  "@pdfSize": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "downloadsLaterTitle": "Documents are not connected yet",
+  "downloadsLaterBody": "Opening and downloading files will work once JOGOO documents are online.",
+  "pendingSync": "{count, plural, =1{1 entry waiting to sync} other{{count} entries waiting to sync}}",
+  "@pendingSync": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "loggedBy": "Logged by {name}",
+  "@loggedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "waitingToSync": "Waiting to sync",
+  "synced": "Synced",
+  "exportPdf": "Export for audit (PDF)",
+  "emptyLog": "No entries yet. Tap + to log a job.",
+  "newEntry": "New entry",
+  "entryService": "Service",
+  "entryPartReplaced": "Part replaced",
+  "entryFertigation": "Fertigation",
+  "date": "Date",
+  "equipment": "Equipment",
+  "product": "Product",
+  "quantity": "Quantity",
+  "waterVolume": "Water volume",
+  "workDone": "Work done",
+  "workDoneHint": "e.g. Filter cleaned",
+  "part": "Part",
+  "partHint": "e.g. Valve 32 mm",
+  "checklist": "Checklist",
+  "checkFilterBeforeInjection": "Filter cleaned before injection",
+  "checkTankRinsed": "Tank rinsed",
+  "checkLinesFlushed": "Lines flushed after injection",
+  "checkFilterCleaned": "Filter cleaned",
+  "checkPressure": "Pressure checked",
+  "checkLeaks": "Lines checked for leaks",
+  "checkOldPartKept": "Old part kept for the technician",
+  "checkSystemTested": "System tested after fitting",
+  "fertigationEntry": "Fertigation: {product}, {quantity} in {water}",
+  "@fertigationEntry": {
+    "placeholders": {
+      "product": {
+        "type": "String"
+      },
+      "quantity": {
+        "type": "String"
+      },
+      "water": {
+        "type": "String"
+      }
+    }
+  },
+  "partReplacedEntry": "Part replaced: {part}",
+  "@partReplacedEntry": {
+    "placeholders": {
+      "part": {
+        "type": "String"
+      }
+    }
+  },
+  "saveOnPhone": "Save on this phone",
+  "syncLater": "It will sync by itself when you are back online",
+  "entrySavedTitle": "Saved on this phone",
+  "notificationsTitle": "Notifications",
+  "notificationsSubtitle": "Choose how JOGOO reaches you",
+  "channelPush": "Push",
+  "savedSummary": "{guides} and {videos} saved",
+  "@savedSummary": {
+    "placeholders": {
+      "guides": {
+        "type": "String"
+      },
+      "videos": {
+        "type": "String"
+      }
+    }
+  },
+  "guidesCount": "{count, plural, =1{1 guide} other{{count} guides}}",
+  "@guidesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "videosCount": "{count, plural, =1{1 video} other{{count} videos}}",
+  "@videosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "worksOffline": "Everything here works without internet",
+  "userManuals": "User manuals",
+  "videos": "Videos",
+  "wifiOnly": "Download on Wi-Fi only",
+  "wifiOnlyHelp": "Saves your mobile data"
+}

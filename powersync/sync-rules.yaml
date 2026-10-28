@@ -1,0 +1,10 @@
+# PowerSync sync rules: paste into the PowerSync dashboard (or service config)
+# once the PowerSync instance is connected to the Supabase database.
+# Each device only downloads rows for farms its user belongs to; Supabase RLS
+# enforces the same boundary for uploads.
+bucket_definitions:
+  user_farms:
+    parameters: SELECT farm_id FROM farm_members WHERE user_id = request.user_id()
+    data:
+      - SELECT * FROM farms WHERE id = bucket.farm_id
+      - SELECT * FROM farm_members WHERE farm_id = bucket.farm_id
