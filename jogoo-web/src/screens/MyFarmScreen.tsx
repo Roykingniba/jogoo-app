@@ -1,13 +1,14 @@
 // Screen 02: all installations, orders and invoices after purchase.
 // Ported from lib/screens/my_farm_screen.dart.
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Button, ChoicePill, CircleButton, Divided, JCard, ListRow, Page, PageTitle, PhotoCircle, PillRow,
+  ChoicePill, CircleButton, Divided, ExampleBanner, JCard, ListRow, Page, PageTitle, PhotoCircle, PillRow,
   SectionTitle, Stack, StatusPill, TintIcon,
 } from '../components/ui';
 import { Icon } from '../components/Icon';
-import { Sheet, showToast } from '../components/overlays';
+import { showToast } from '../components/overlays';
+import { ContactJogooSheet } from '../components/service/ContactJogoo';
 import { HealthPill } from '../components/farm/farmParts';
 import { bi, type Equipment } from '../data/models';
 import { equipmentList, invoices, orders, useStore } from '../data/store';
@@ -38,6 +39,7 @@ export default function MyFarmScreen() {
         subtitle={t('installationsAt', { count: equipmentList.length, place: town })}
         trailing={<CircleButton icon="add" label={t('addEquipment')} color="#fff" background="var(--navy)" size={60} onClick={() => setAdding(true)} />}
       />
+      <ExampleBanner />
       <div className="farm-tabs">
         <PillRow>
           {tabs.map(([key, label]) => (
@@ -59,30 +61,21 @@ function AddEquipmentSheet({ open, onClose }: { open: boolean; onClose: () => vo
   const { t } = useI18n();
   const requestFromSales = useStore((s) => s.requestFromSales);
   const [text, setText] = useState('');
+  const value = text.trim();
   const close = () => { setText(''); onClose(); };
-  const submit = () => {
-    const value = text.trim();
-    close();
+  const record = () => {
     if (value === '') return;
     requestFromSales(bi(`New equipment: ${value}`, `Nouvel équipement : ${value}`));
     showToast(t('addEquipmentSavedTitle'), t('addEquipmentSavedBody'));
   };
   return (
-    <Sheet open={open} onClose={close} title={t('addEquipment')}>
-      <form onSubmit={(e) => { e.preventDefault(); submit(); }}>
-        <Stack gap={12}>
-          <p className="t-body-l">{t('addEquipmentBody')}</p>
-          <label className="field">
-            <span className="sr-only">{t('addEquipment')}</span>
-            <input className="input" autoFocus value={text} placeholder={t('addEquipmentHint')} onChange={(e) => setText(e.target.value)} />
-          </label>
-          <div className="row" style={{ justifyContent: 'flex-end', marginTop: 4 }}>
-            <Button variant="text" onClick={close}>{t('cancel')}</Button>
-            <Button type="submit">{t('send')}</Button>
-          </div>
-        </Stack>
-      </form>
-    </Sheet>
+    <ContactJogooSheet open={open} onClose={close} title={t('addEquipment')} body={t('addEquipmentBody')}
+      message={t('waAddEquipment', { item: value })} canSend={value !== ''} onContact={record}>
+      <label className="field">
+        <span className="lbl">{t('addEquipment')}</span>
+        <input className="input" autoFocus value={text} placeholder={t('addEquipmentHint')} onChange={(e) => setText(e.target.value)} />
+      </label>
+    </ContactJogooSheet>
   );
 }
 
@@ -111,23 +104,7 @@ function EquipmentTab() {
       </JCard>
       {/* Tablet and desktop: a grid of equipment cards. */}
       <div className="grid g3 farm-wide-only">
-        {equipmentList.map((item) => (
-          <JCard key={item.id} onClick={() => navigate(paths.equipment(item.id))} ariaLabel={b(item.name)}>
-            <div className="farm-eq-card">
-              <div className="farm-eq-top">
-                <EquipmentVisual item={item} size={72} />
-                <div className="grow">
-                  <h2 className="t-title-m">{b(item.name)}</h2>
-                  <p className="t-body-m" style={{ marginTop: 4 }}>{b(item.healthNote)}</p>
-                </div>
-              </div>
-              <div className="farm-eq-foot">
-                <HealthPill health={item.health} />
-                <Icon name="chevron_right" />
-              </div>
-            </div>
-          </JCard>
-        ))}
+        {equipmentList.map((item) => <EquipmentCard key={item.id} item={item} onOpen={() => navigate(paths.equipment(item.id))} />)}
       </div>
 
       <div className="grid g2" style={{ alignItems: 'start' }}>
@@ -151,6 +128,28 @@ function EquipmentTab() {
         </JCard>
       </div>
     </Stack>
+  );
+}
+
+function EquipmentCard({ item, onOpen }: { item: Equipment; onOpen: () => void }) {
+  const { b } = useI18n();
+  const id = useId();
+  return (
+    <JCard onClick={onOpen} labelledBy={`${id}-t`} describedBy={`${id}-d`}>
+      <div className="farm-eq-card">
+        <div className="farm-eq-top">
+          <EquipmentVisual item={item} size={72} />
+          <div className="grow">
+            <h2 className="t-title-m" id={`${id}-t`}>{b(item.name)}</h2>
+            <p className="t-body-m" id={`${id}-d`} style={{ marginTop: 4 }}>{b(item.healthNote)}</p>
+          </div>
+        </div>
+        <div className="farm-eq-foot">
+          <HealthPill health={item.health} />
+          <Icon name="chevron_right" />
+        </div>
+      </div>
+    </JCard>
   );
 }
 

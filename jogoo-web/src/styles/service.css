@@ -111,3 +111,6 @@
 .service-chat-page { display: flex; flex-direction: column; min-height: calc(100vh - var(--nav-h) - var(--safe-b)); min-height: calc(100dvh - var(--nav-h) - var(--safe-b)); }
 .service-chat-page > .service-chat { flex: 1 0 auto; }
 @media (min-width: 720px) { .service-chat-page { min-height: 100vh; min-height: 100dvh; } }
+
+/* Agronomists: questions open in WhatsApp. */
+.service-wa-note { margin: 0 0 12px; font-size: 13.5px; color: var(--muted); }

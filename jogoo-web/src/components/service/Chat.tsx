@@ -38,7 +38,8 @@ export function ChatList({ children, scrollKey }: { children: ReactNode; scrollK
   const first = useRef(true);
   useEffect(() => {
     // The page wrapper scrolls to the top on mount, so wait a frame first.
-    const smooth = !first.current;
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    const smooth = !first.current && !reduce;
     first.current = false;
     const id = window.requestAnimationFrame(() => {
       window.scrollTo({ top: document.documentElement.scrollHeight, behavior: smooth ? 'smooth' : 'auto' });
@@ -50,9 +51,11 @@ export function ChatList({ children, scrollKey }: { children: ReactNode; scrollK
 
 /** Message field with an optional camera button and the lime send button. */
 export function ChatInputBar({
-  value, onChange, hint, onSend, onCamera, showCamera = false, disabled = false, above, below,
+  value, onChange, hint, onSend, onCamera, showCamera = false, disabled = false, above, below, sendLabel,
 }: {
   value: string;
+  /** Accessible name of the send button (defaults to "Send"). */
+  sendLabel?: string;
   onChange: (v: string) => void;
   hint: string;
   onSend: () => void;
@@ -81,7 +84,7 @@ export function ChatInputBar({
           onChange={(e) => onChange(e.target.value)} />
       </label>
       {/* A submit button, so it can't reuse CircleButton. */}
-      <button type="submit" className="circle-btn send" aria-label={t('send')} title={t('send')} disabled={disabled}
+      <button type="submit" className="circle-btn send" aria-label={sendLabel ?? t('send')} title={sendLabel ?? t('send')} disabled={disabled}
         style={{ width: 56, height: 56, ['--cb-bg' as string]: 'var(--lime-soft)', ['--cb-fg' as string]: 'var(--ink)' }}>
         <Icon name="send_outlined" size={24} />
       </button>

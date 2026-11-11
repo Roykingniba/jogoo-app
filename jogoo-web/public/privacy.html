@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Privacy · JOGOO Agriculture</title>
+<!--
+  DRAFT written from what the app actually stores (server/sql/schema.mysql.sql,
+  server/api). JOGOO must review it, fill in the contact email and check it
+  against Cameroon's personal data rules before launch. Keep EN and FR in step.
+-->
+<style>
+  :root { --ink: #0e2338; --muted: #56657a; --navy: #004a87; --bg: #f3f0e8; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 720px; margin: 0 auto; padding: 24px 16px 48px; }
+  h1 { color: var(--navy); font-size: 28px; margin: 8px 0 4px; }
+  h2 { font-size: 19px; margin: 28px 0 6px; }
+  p, li { color: var(--ink); }
+  small, .muted { color: var(--muted); }
+  nav a { color: var(--navy); font-weight: 700; margin-right: 16px; }
+  section + section { border-top: 1px solid #d8d2c4; margin-top: 40px; padding-top: 8px; }
+</style>
+</head>
+<body>
+<main>
+<nav><a href="#en">English</a><a href="#fr" lang="fr">Français</a><a href="./">← Jogoo</a></nav>
+
+<section id="en">
+<h1>Privacy</h1>
+<p class="muted">JOGOO Agriculture · Jogoo app</p>
+
+<h2>What we keep</h2>
+<ul>
+  <li>Your account: name, email, and if you give them, phone number, town or village, and farm size; your language.</li>
+  <li>Your password, stored only in a scrambled form (bcrypt) that cannot be turned back into the password.</li>
+  <li>Your project status: each step (signed up, contacted, site visit…), when it happened, and notes JOGOO staff write for you.</li>
+  <li>For security: the devices you are signed in on (browser name), and sign-in attempts with the internet address they came from, kept 2 days to stop password guessing.</li>
+</ul>
+<p>Requests, orders, photos and messages you prepare in the app's farm, shop and service screens stay on your phone screen: the app does not send them to JOGOO. When you choose WhatsApp or a phone call, what you send there is between you and JOGOO on that service.</p>
+
+<h2>Why</h2>
+<p>To give you an account, to follow your irrigation project from first contact to installation, and so a JOGOO advisor can contact you about it. We email you codes to confirm it is you. We do not sell your data or use it for advertising.</p>
+
+<h2>Who can see it</h2>
+<p>You, and JOGOO staff who follow clients' projects. It is stored on JOGOO's web hosting.</p>
+
+<h2>How long</h2>
+<p>Until you delete your account. Sign-in sessions end after 30 days; security records are deleted after 2 days.</p>
+
+<h2>Your choices</h2>
+<ul>
+  <li>Change your name, phone, town and farm size in <b>My profile</b>.</li>
+  <li>Delete your account and everything above in <b>My profile → Delete my account</b>. It is immediate and cannot be undone.</li>
+  <li>For a copy of your data or any question: <!-- TODO JOGOO: contact email --> [JOGOO contact email], or call <a href="tel:+237653291311">+237 6 53 29 13 11</a>.</li>
+</ul>
+</section>
+
+<section id="fr" lang="fr">
+<h1>Confidentialité</h1>
+<p class="muted">JOGOO Agriculture · application Jogoo</p>
+
+<h2>Ce que nous conservons</h2>
+<ul>
+  <li>Votre compte : nom, e-mail et, si vous les donnez, téléphone, ville ou village et taille de la ferme ; votre langue.</li>
+  <li>Votre mot de passe, uniquement sous une forme brouillée (bcrypt) qui ne permet pas de le retrouver.</li>
+  <li>Le suivi de votre projet : chaque étape (inscription, prise de contact, visite…), sa date, et les notes que l'équipe JOGOO écrit pour vous.</li>
+  <li>Pour la sécurité : les appareils sur lesquels vous êtes connecté (nom du navigateur), et les tentatives de connexion avec l'adresse internet d'origine, gardées 2 jours pour bloquer les essais de mots de passe.</li>
+</ul>
+<p>Les demandes, commandes, photos et messages que vous préparez dans les écrans ferme, boutique et service restent sur l'écran de votre téléphone : l'application ne les envoie pas à JOGOO. Quand vous choisissez WhatsApp ou un appel, ce que vous y envoyez se passe entre vous et JOGOO sur ce service.</p>
+
+<h2>Pourquoi</h2>
+<p>Pour vous donner un compte, suivre votre projet d'irrigation du premier contact à l'installation, et permettre à un conseiller JOGOO de vous contacter à ce sujet. Nous vous envoyons des codes par e-mail pour confirmer que c'est bien vous. Nous ne vendons pas vos données et ne les utilisons pas pour de la publicité.</p>
+
+<h2>Qui peut les voir</h2>
+<p>Vous, et l'équipe JOGOO qui suit les projets des clients. Elles sont stockées sur l'hébergement web de JOGOO.</p>
+
+<h2>Combien de temps</h2>
+<p>Jusqu'à la suppression de votre compte. Les sessions de connexion expirent après 30 jours ; les données de sécurité sont supprimées après 2 jours.</p>
+
+<h2>Vos choix</h2>
+<ul>
+  <li>Modifiez votre nom, téléphone, ville et taille de ferme dans <b>Mon profil</b>.</li>
+  <li>Supprimez votre compte et tout ce qui précède dans <b>Mon profil → Supprimer mon compte</b>. C'est immédiat et irréversible.</li>
+  <li>Pour obtenir une copie de vos données ou pour toute question : [e-mail de contact JOGOO], ou appelez le <a href="tel:+237653291311">+237 6 53 29 13 11</a>.</li>
+</ul>
+</section>
+</main>
+</body>
+</html>

@@ -4,10 +4,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  asset, BrandCard, Button, CircleButton, Divided, JCard, ListRow, Page, PageTitle, PhotoCircle,
+  asset, BrandCard, Button, CircleButton, Divided, ExampleBanner, JCard, ListRow, Page, PageTitle, PhotoCircle,
   SearchBox, SectionTitle, TintIcon,
 } from '../components/ui';
 import { Sheet, showToast } from '../components/overlays';
+import { ContactJogooButtons, ContactJogooSheet } from '../components/service/ContactJogoo';
 import { Icon, type IconName } from '../components/Icon';
 import { useDesktop } from '../components/shop/useMedia';
 import { useI18n, type T } from '../i18n/i18n';
@@ -16,6 +17,9 @@ import { cartCount, cartTotal, products, useStore } from '../data/store';
 import { formatAmount } from '../utils/format';
 import { paths } from '../routes';
 import '../styles/shop.css';
+
+/** Lower case without accents, so "ecran" finds "écran" and "vanne" finds "Vanne". */
+const fold = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 
 const shownCategories: ProductCategory[] = ['filters', 'valves', 'sprinklers', 'pivots'];
 
@@ -38,12 +42,13 @@ export default function ShopScreen() {
   const [category, setCategory] = useState<ProductCategory | null>(null); // null = "For you"
   const [query, setQuery] = useState('');
   const [cartOpen, setCartOpen] = useState(false);
+  const [quoteOpen, setQuoteOpen] = useState(false);
 
-  const q = query.trim().toLowerCase();
+  const q = fold(query.trim());
   let shown: Product[];
   let heading: string;
   if (q !== '') {
-    shown = products.filter((p) => p.name.en.toLowerCase().includes(q) || p.name.fr.toLowerCase().includes(q));
+    shown = products.filter((p) => fold(p.name.en).includes(q) || fold(p.name.fr).includes(q));
     heading = t('searchResults');
   } else if (category == null) {
     shown = products.filter((p) => p.recommended);
@@ -60,13 +65,14 @@ export default function ShopScreen() {
           <h2 className="ttl">{t('upsellTitle')}</h2>
           <p className="bdy">{t('upsellBody')}</p>
         </div>
-        <Button onDark onClick={() => {
+        <Button onDark onClick={() => setQuoteOpen(true)}>{t('getQuote')}</Button>
+      </div>
+      <ContactJogooSheet open={quoteOpen} onClose={() => setQuoteOpen(false)} title={t('getQuote')}
+        body={t('upsellBody')} message={t('waPriceRequest', { item: t('upsellBody') })}
+        onContact={() => {
           requestFromSales(bi('Quote: extend drip system to plot C', 'Devis : extension goutte-à-goutte parcelle C'));
           showToast(t('requestSavedTitle'), t('requestSavedBody', { item: t('upsellTitle') }));
-        }}>
-          {t('getQuote')}
-        </Button>
-      </div>
+        }} />
     </BrandCard>
   );
 
@@ -91,8 +97,10 @@ export default function ShopScreen() {
   );
 
   const results = (
-    <section aria-live="polite" className="stack" style={{ ['--gap' as string]: '12px', marginTop: 6 }}>
+    <section className="stack" style={{ ['--gap' as string]: '12px', marginTop: 6 }}>
       <SectionTitle>{heading}</SectionTitle>
+      {/* Only the count is announced, not the whole grid. */}
+      <p className="sr-only" role="status" aria-live="polite">{q !== '' ? t('resultsCount', { count: shown.length }) : ''}</p>
       {shown.length === 0
         ? <JCard><p className="t-body-l">{t('noProducts')}</p></JCard>
         : <div className="shop-grid">{shown.map((p) => <ProductCard key={p.id} product={p} />)}</div>}
@@ -103,6 +111,7 @@ export default function ShopScreen() {
     <Page>
       <PageTitle title={t('navShop')} subtitle={t('shopSubtitle')}
         trailing={desktop ? undefined : <CartButton count={cartCount(cart)} onClick={() => setCartOpen(true)} />} />
+      <ExampleBanner />
       {desktop ? (
         <div className="shop-layout">
           <div className="stack">
@@ -163,7 +172,9 @@ function ProductCard({ product }: { product: Product }) {
   const { t, b } = useI18n();
   const navigate = useNavigate();
   const requestFromSales = useStore((s) => s.requestFromSales);
-  const request = () => {
+  const [asking, setAsking] = useState(false);
+  // No one-tap request: a confirm sheet explains that the app does not send it, then WhatsApp or Call.
+  const record = () => {
     requestFromSales(bi(`Price request: ${product.name.en}`, `Demande de prix : ${product.name.fr}`));
     showToast(t('requestSavedTitle'), t('requestSavedBody', { item: b(product.name) }));
   };
@@ -174,7 +185,10 @@ function ProductCard({ product }: { product: Product }) {
         <span className="t-title-s">{b(product.name)}</span>
         {product.fitNote && <span className={product.highlightFit ? 'fit hi' : 'fit'}>{b(product.fitNote)}</span>}
       </button>
-      <Button small variant={product.highlightFit ? 'filled' : 'outlined'} onClick={request}>{t('request')}</Button>
+      <Button small variant={product.highlightFit ? 'filled' : 'outlined'} onClick={() => setAsking(true)}>{t('request')}</Button>
+      <ContactJogooSheet open={asking} onClose={() => setAsking(false)} title={t('requestPriceTitle')}
+        body={t('requestPriceBody', { item: b(product.name) })}
+        message={t('waPriceRequest', { item: b(product.name) })} onContact={record} />
     </JCard>
   );
 }
@@ -191,8 +205,8 @@ function CartButton({ count, onClick }: { count: number; onClick: () => void }) 
 }
 
 /**
- * Cart review. No online payment yet: the order request goes to JOGOO
- * sales, who confirm price, fitting and delivery by phone.
+ * Cart review. No online ordering yet: the cart becomes a WhatsApp message to
+ * JOGOO sales (or the client calls), who confirm price, fitting and delivery.
  */
 function CartContents({ onSubmitted }: { onSubmitted?: () => void }) {
   const { t, b } = useI18n();
@@ -208,12 +222,14 @@ function CartContents({ onSubmitted }: { onSubmitted?: () => void }) {
       </div>
     );
   }
+  const lines = cart.map((l) => `• ${b(l.title)} × ${l.quantity}`).join('\n');
+  const message = t('waOrder', { lines, total: formatAmount(cartTotal(cart)) });
   return (
     <div>
       <Divided>
         {cart.map((line) => (
           <ListRow key={line.id} title={b(line.title)}
-            subtitle={`${line.quantity} × ${formatAmount(line.unitPrice)} F`}
+            subtitle={`${line.quantity} × ${formatAmount(line.unitPrice)} FCFA`}
             trailing={<CircleButton icon="delete_outline" label={t('remove')} size={44} background="var(--bg)"
               onClick={() => removeFromCart(line.id)} />} />
         ))}
@@ -222,15 +238,15 @@ function CartContents({ onSubmitted }: { onSubmitted?: () => void }) {
         <span className="t-body-l">{t('total')}</span>
         <span className="t-title-m">{formatAmount(cartTotal(cart))} FCFA</span>
       </div>
-      <div style={{ marginTop: 16 }}>
-        <Button block onClick={() => {
+      <p className="t-body-m" style={{ margin: '12px 0' }}>{t('cartNotSent')}</p>
+      <ContactJogooButtons message={message} whatsAppLabel={t('sendOrderRequest')}
+        onContact={(channel) => {
+          // Only a WhatsApp hand-off empties the cart; after a call the client may still want the list.
+          if (channel !== 'whatsapp') return;
           submitCart();
           onSubmitted?.();
           showToast(t('orderRequestSavedTitle'), t('orderRequestSavedBody'));
-        }}>
-          {t('sendOrderRequest')}
-        </Button>
-      </div>
+        }} />
       <p className="t-body-s center" style={{ marginTop: 8 }}>{t('paymentLater')}</p>
     </div>
   );

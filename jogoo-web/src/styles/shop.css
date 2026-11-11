@@ -109,6 +109,7 @@
 .parts-scan-sub { color: #c9dbec; margin: 2px 0 0; }
 .parts-serial { height: 56px; padding: 0 6px 0 20px; background: #fff; border-radius: 999px; display: flex; align-items: center; gap: 8px; margin-top: 16px; }
 .parts-serial input { flex: 1; min-width: 0; border: 0; outline: 0; background: none; font: inherit; font-weight: 600; font-size: 15px; color: var(--ink); text-transform: uppercase; }
+.parts-serial:focus-within { box-shadow: 0 0 0 3px var(--lime-soft); }
 .parts-serial input::placeholder { text-transform: none; color: var(--muted); font-weight: 500; }
 .parts-serial .btn { min-height: 44px; padding: 8px 18px; }
 .parts-row-hl { background: var(--tint-lime); border-radius: var(--radius-sm); margin: 0 -10px; padding-left: 10px !important; padding-right: 10px !important; width: calc(100% + 20px); }

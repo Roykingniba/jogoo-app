@@ -1,4 +1,5 @@
-// Screen 18: log a fertigation or a repair in seconds, even offline.
+// Screen 18: log a fertigation or a repair in seconds.
+// Entries only live in this screen's memory for now: they are not sent to JOGOO.
 // Ported from lib/screens/new_log_entry_screen.dart.
 import { useState, type ReactNode } from 'react';
 import { useParams } from 'react-router-dom';
@@ -41,9 +42,9 @@ function NewEntryForm({ initialEquipmentId }: { initialEquipmentId: string }) {
   const [type, setType] = useState<LogEntryType>('fertigation');
   const [date, setDate] = useState(() => new Date());
   const [equipmentId, setEquipmentId] = useState(initialEquipmentId);
-  const [product, setProduct] = useState('NPK 20-20-20');
-  const [quantity, setQuantity] = useState('2 kg');
-  const [water, setWater] = useState('200 L');
+  const [product, setProduct] = useState('');
+  const [quantity, setQuantity] = useState('');
+  const [water, setWater] = useState('');
   const [work, setWork] = useState('');
   const [checked, setChecked] = useState<Set<number>>(() => new Set());
 
@@ -51,13 +52,15 @@ function NewEntryForm({ initialEquipmentId }: { initialEquipmentId: string }) {
   const today = new Date();
   const yearAgo = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 365);
 
-  const missing = (field: string) => showToast(t('fillIn', { field }));
+  const missing = (field: string) => showToast(t('fillIn', { field }), undefined, 'error');
 
   const save = () => {
     let title: string;
     switch (type) {
       case 'fertigation':
         if (product.trim() === '') return missing(t('product'));
+        if (quantity.trim() === '') return missing(t('quantity'));
+        if (water.trim() === '') return missing(t('waterVolume'));
         title = t('fertigationEntry', { product: product.trim(), quantity: quantity.trim(), water: water.trim() });
         break;
       case 'service':
@@ -121,13 +124,13 @@ function NewEntryForm({ initialEquipmentId }: { initialEquipmentId: string }) {
               {type === 'fertigation' ? (
                 <>
                   <FieldRow label={t('product')} htmlFor="farm-product">
-                    <input id="farm-product" className="farm-inline" value={product} onChange={(e) => setProduct(e.target.value)} />
+                    <input id="farm-product" className="farm-inline" value={product} placeholder="NPK 20-20-20" onChange={(e) => setProduct(e.target.value)} />
                   </FieldRow>
                   <FieldRow label={t('quantity')} htmlFor="farm-qty">
-                    <input id="farm-qty" className="farm-inline" value={quantity} onChange={(e) => setQuantity(e.target.value)} />
+                    <input id="farm-qty" className="farm-inline" value={quantity} placeholder="2 kg" onChange={(e) => setQuantity(e.target.value)} />
                   </FieldRow>
                   <FieldRow label={t('waterVolume')} htmlFor="farm-water">
-                    <input id="farm-water" className="farm-inline" value={water} onChange={(e) => setWater(e.target.value)} />
+                    <input id="farm-water" className="farm-inline" value={water} placeholder="200 L" onChange={(e) => setWater(e.target.value)} />
                   </FieldRow>
                 </>
               ) : (

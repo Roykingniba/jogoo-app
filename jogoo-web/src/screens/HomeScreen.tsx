@@ -2,9 +2,10 @@
 // Ported from lib/screens/home_screen.dart. Phones keep the Flutter layout
 // (navy header, shortcuts card, next visit, picks); tablets and desktops turn
 // it into a dashboard with equipment health, season alert, watering plan and Mia.
+import { useId } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  BrandCard, Button, CircleButton, InitialsAvatar, JCard, ListRow, Page, PhotoCircle,
+  BrandCard, Button, CircleButton, ExampleBanner, InitialsAvatar, JCard, ListRow, Page, PhotoCircle,
   RoundShortcut, SectionTitle, StatusPill, TintIcon, Divided, asset,
 } from '../components/ui';
 import { Icon } from '../components/Icon';
@@ -26,6 +27,7 @@ export default function HomeScreen() {
   const picks = products.filter((p) => p.recommended);
   const pick = picks[0];
   const visitEquipment = visit ? equipmentById(visit.equipmentId) : undefined;
+  const planId = useId();
 
   return (
     <Page className="home-page">
@@ -40,6 +42,7 @@ export default function HomeScreen() {
           </nav>
         </JCard>
       </div>
+      <ExampleBanner className="home-banner" />
 
       <div className="home-dash">
         {visit && visit.visitAt && (
@@ -109,9 +112,9 @@ export default function HomeScreen() {
           </div>
         </BrandCard>
 
-        <JCard className="home-cell home-extra" onClick={() => navigate(paths.agronomist)} ariaLabel={t('wateringPlanThisWeek')}>
+        <JCard className="home-cell home-extra" onClick={() => navigate(paths.agronomist)} labelledBy={planId}>
           <SectionTitle trailing={<StatusPill label={t('updatedOn', { date: dayMonth(lang, DemoData.wateringPlanUpdated) })} tone="cyan" />}>
-            {t('wateringPlanThisWeek')}
+            <span id={planId}>{t('wateringPlanThisWeek')}</span>
           </SectionTitle>
           <div style={{ height: 6 }} />
           {DemoData.wateringPlan.map((plot) => (

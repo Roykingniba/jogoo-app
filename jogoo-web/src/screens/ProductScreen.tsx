@@ -7,6 +7,7 @@ import {
   BottomActionBar, Button, CircleButton, Divided, JCard, Page, PhotoCircle, ScreenHeader, StatusPill, TintIcon, useBack,
 } from '../components/ui';
 import { showToast } from '../components/overlays';
+import { ContactJogooSheet } from '../components/service/ContactJogoo';
 import { useDesktop } from '../components/shop/useMedia';
 import { useI18n } from '../i18n/i18n';
 import { bi, same, type AddOn, type Product } from '../data/models';
@@ -39,6 +40,7 @@ function ProductView({ product }: { product: Product }) {
     () => new Set(product.addOns.filter((a) => a.selectedByDefault).map((a) => a.id)),
   );
   const [saved, setSaved] = useState(false);
+  const [quoting, setQuoting] = useState(false);
   const onQuote = product.price === 0;
 
   const total = product.price + product.addOns.filter((a) => selected.has(a.id)).reduce((n, a) => n + a.price, 0);
@@ -69,7 +71,7 @@ function ProductView({ product }: { product: Product }) {
   };
 
   const action = (
-    <Button block={desktop} onClick={onQuote ? requestQuote : addAll}>{onQuote ? t('getQuote') : t('addToCart')}</Button>
+    <Button block={desktop} onClick={onQuote ? () => setQuoting(true) : addAll}>{onQuote ? t('getQuote') : t('addToCart')}</Button>
   );
 
   const hero = (
@@ -100,6 +102,12 @@ function ProductView({ product }: { product: Product }) {
     </JCard>
   );
 
+  const quoteSheet = (
+    <ContactJogooSheet open={quoting} onClose={() => setQuoting(false)} title={t('getQuote')}
+      body={t('requestPriceBody', { item: b(product.name) })}
+      message={t('waPriceRequest', { item: b(product.name) })} onContact={requestQuote} />
+  );
+
   const header = (
     <div className="screen-header">
       <CircleButton icon="chevron_left" label={t('back')} onClick={back} />
@@ -128,6 +136,7 @@ function ProductView({ product }: { product: Product }) {
             </JCard>
           </aside>
         </div>
+        {quoteSheet}
       </Page>
     );
   }
@@ -148,6 +157,7 @@ function ProductView({ product }: { product: Product }) {
         )}
         {action}
       </BottomActionBar>
+      {quoteSheet}
     </Page>
   );
 }

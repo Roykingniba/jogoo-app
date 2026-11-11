@@ -6,7 +6,8 @@ import {
   BottomActionBar, BrandCard, Button, CircleButton, InitialsAvatar, JCard, Page, ScreenHeader, SectionTitle, Timeline,
   type TimelineItem,
 } from '../components/ui';
-import { Sheet, showToast } from '../components/overlays';
+import { showToast } from '../components/overlays';
+import { ContactJogooSheet } from '../components/service/ContactJogoo';
 import { RatingSheet, Stars } from '../components/service/ServiceSheets';
 import { useI18n, type T } from '../i18n/i18n';
 import { equipmentById, requestById, useStore } from '../data/store';
@@ -119,25 +120,22 @@ function AddDetailsSheet({ request, onClose }: { request: ServiceRequest; onClos
   const { t } = useI18n();
   const addRequestNote = useStore((s) => s.addRequestNote);
   const [note, setNote] = useState('');
-  const save = () => {
-    const text = note.trim();
-    onClose();
+  const text = note.trim();
+  const keep = () => {
     if (text === '') return;
     addRequestNote(request.id, text);
     showToast(t('noteAdded'));
   };
   return (
-    <Sheet open onClose={onClose} title={t('addDetails')}>
+    <ContactJogooSheet open onClose={onClose} title={t('addDetails')}
+      message={t('waRequestNote', { id: request.id, note: text })} canSend={text !== ''} onContact={keep}>
       <label className="field">
         <span className="sr-only">{t('addDetails')}</span>
         <textarea className="textarea" rows={4} autoFocus placeholder={t('detailsHint')} value={note}
           onChange={(e) => setNote(e.target.value)} />
       </label>
-      <div className="row" style={{ justifyContent: 'flex-end', marginTop: 16 }}>
-        <Button variant="text" onClick={onClose}>{t('cancel')}</Button>
-        <Button onClick={save}>{t('save')}</Button>
-      </div>
-    </Sheet>
+      <Button variant="text" disabled={text === ''} onClick={() => { keep(); onClose(); }}>{t('keepOnScreen')}</Button>
+    </ContactJogooSheet>
   );
 }
 
@@ -152,25 +150,22 @@ function RescheduleSheet({ request, onClose }: { request: ServiceRequest; onClos
   const initial = request.visitAt && request.visitAt > now ? request.visitAt : now;
   const [value, setValue] = useState(isoDay(initial));
   const valid = value >= isoDay(now) && value <= isoDay(last);
+  const [y, m, d] = value.split('-').map(Number);
+  const dateLabel = valid ? fullDate(lang, new Date(y, m - 1, d)) : '';
 
-  const confirm = () => {
+  const record = () => {
     if (!valid) return;
-    const [y, m, d] = value.split('-').map(Number);
-    onClose();
-    addRequestNote(request.id, t('rescheduleNote', { date: fullDate(lang, new Date(y, m - 1, d)) }));
+    addRequestNote(request.id, t('rescheduleNote', { date: dateLabel }));
     showToast(t('rescheduleSentTitle'), t('rescheduleSentBody'));
   };
   return (
-    <Sheet open onClose={onClose} title={t('pickNewDate')}>
+    <ContactJogooSheet open onClose={onClose} title={t('pickNewDate')}
+      message={t('waReschedule', { id: request.id, date: dateLabel })} canSend={valid} onContact={record}>
       <label className="field">
         <span className="sr-only">{t('pickNewDate')}</span>
         <input className="input" type="date" lang={lang} min={isoDay(now)} max={isoDay(last)} value={value}
           onChange={(e) => setValue(e.target.value)} />
       </label>
-      <div className="row" style={{ justifyContent: 'flex-end', marginTop: 16 }}>
-        <Button variant="text" onClick={onClose}>{t('cancel')}</Button>
-        <Button onClick={confirm} disabled={!valid}>{t('save')}</Button>
-      </div>
-    </Sheet>
+    </ContactJogooSheet>
   );
 }

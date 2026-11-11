@@ -1,7 +1,7 @@
 // Screen 17: a shared logbook between client and JOGOO.
 // Ported from lib/screens/maintenance_log_screen.dart.
 import { useNavigate, useParams } from 'react-router-dom';
-import { Button, Divided, JCard, Page, ScreenHeader, Stack, StatusPill } from '../components/ui';
+import { Button, Divided, ExampleBanner, JCard, Page, ScreenHeader, Stack, StatusPill } from '../components/ui';
 import { Icon } from '../components/Icon';
 import DateBadge from '../components/farm/DateBadge';
 import { NotFound } from '../components/farm/farmParts';
@@ -31,10 +31,11 @@ function LogView({ equipment }: { equipment: Equipment }) {
     <Page narrow>
       <ScreenHeader title={t('maintenanceLog')} subtitle={b(equipment.name)}
         trailing={<span className="farm-wide-only"><Button icon="add" onClick={newEntry}>{t('newEntry')}</Button></span>} />
+      <ExampleBanner />
       <Stack>
         {pending > 0 && (
           <div className="farm-pending" role="status">
-            <span className="dot"><Icon name="cloud_off_outlined" size={20} /></span>
+            <span className="dot"><Icon name="error_outline" size={20} /></span>
             <span className="grow">{t('pendingSync', { count: pending })}</span>
           </div>
         )}

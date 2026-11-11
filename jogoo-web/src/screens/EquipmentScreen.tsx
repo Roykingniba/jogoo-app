@@ -3,11 +3,12 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
-  BottomActionBar, Button, CircleButton, Divided, JCard, ListRow, Page, PhotoCircle, ScreenHeader,
+  BottomActionBar, Button, CircleButton, Divided, ExampleBanner, JCard, ListRow, Page, PhotoCircle, ScreenHeader,
   SectionTitle, StatusPill, Timeline, TintIcon, type TimelineItem,
 } from '../components/ui';
 import { Icon } from '../components/Icon';
-import { Sheet, showToast } from '../components/overlays';
+import { showToast } from '../components/overlays';
+import { ContactJogooSheet } from '../components/service/ContactJogoo';
 import { NotFound } from '../components/farm/farmParts';
 import { bi, type Equipment, type MaintenanceStep } from '../data/models';
 import { equipmentById, openRequestFor, partByCode, useStore } from '../data/store';
@@ -70,7 +71,6 @@ function EquipmentDetail({ item }: { item: Equipment }) {
   };
 
   const confirmBooking = () => {
-    setBooking(false);
     requestFromSales(bi(`Service visit: ${item.name.en}`, `Visite d'entretien : ${item.name.fr}`));
     showToast(t('visitRequestedTitle'), t('visitRequestedBody'));
   };
@@ -105,6 +105,7 @@ function EquipmentDetail({ item }: { item: Equipment }) {
     <Page className="farm-eq-page">
       <ScreenHeader title={t('equipmentTitle')} centerTitle
         trailing={<CircleButton icon="share_outlined" label={t('share')} onClick={copyDetails} />} />
+      <ExampleBanner />
 
       <div className="split">
         <div className="stack">
@@ -146,13 +147,9 @@ function EquipmentDetail({ item }: { item: Equipment }) {
         </aside>
       </div>
 
-      <Sheet open={booking} onClose={() => setBooking(false)} title={t('bookService')}>
-        <p className="t-body-l">{t('bookServiceBody', { equipment: b(item.name) })}</p>
-        <div className="row" style={{ justifyContent: 'flex-end', marginTop: 20 }}>
-          <Button variant="text" onClick={() => setBooking(false)}>{t('cancel')}</Button>
-          <Button onClick={confirmBooking}>{t('bookService')}</Button>
-        </div>
-      </Sheet>
+      <ContactJogooSheet open={booking} onClose={() => setBooking(false)} title={t('bookService')}
+        body={t('bookServiceBody', { equipment: b(item.name) })}
+        message={t('waServiceVisit', { equipment: `${b(item.name)} (${item.serial})` })} onContact={confirmBooking} />
 
       <BottomActionBar>
         {reportBtn()}

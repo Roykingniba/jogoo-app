@@ -43,7 +43,7 @@ export default function SparePartsScreen() {
     (document.activeElement as HTMLElement | null)?.blur();
     const match = findEquipment(value);
     if (!match) {
-      showToast(t('serialNotFound', { serial: value }));
+      showToast(t('serialNotFound', { serial: value }), undefined, 'error');
       return;
     }
     setEquipmentId(match.id);
