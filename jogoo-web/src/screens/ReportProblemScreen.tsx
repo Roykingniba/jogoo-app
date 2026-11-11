@@ -8,10 +8,12 @@ import {
 import { Icon } from '../components/Icon';
 import { showToast } from '../components/overlays';
 import { useMediaPicker } from '../components/service/ServiceSheets';
+import { NotSentNote } from '../components/service/ContactJogoo';
 import { useI18n } from '../i18n/i18n';
 import { equipmentById, equipmentList, useStore } from '../data/store';
 import { bi, type Bi } from '../data/models';
 import { paths } from '../routes';
+import { callJogoo, openWhatsApp } from '../utils/actions';
 import '../styles/service.css';
 
 type Problem = 'leak' | 'lowPressure' | 'brokenPart' | 'leafSymptoms';
@@ -45,15 +47,22 @@ export default function ReportProblemScreen() {
 
   const send = () => {
     if (!equipmentId || !problem) {
-      showToast(t('pickProblemFirst'));
+      showToast(t('pickProblemFirst'), undefined, 'error');
       return;
     }
+    const equipment = equipmentById(equipmentId);
     const request = reportProblem({
       equipmentId,
       problem: problems[problem],
       description: description.trim(),
       mediaPaths: media.map((m) => m.url),
     });
+    // The app cannot deliver the report: keep it on this screen and hand it to WhatsApp.
+    const text = [
+      t('waProblem', { equipment: equipment ? `${b(equipment.name)} (${equipment.serial})` : equipmentId, problem: b(problems[problem]) }),
+      ...(description.trim() !== '' ? [t('waProblemDetails', { details: description.trim() })] : []),
+    ].join('\n');
+    openWhatsApp(text);
     showToast(t('reportSavedTitle', { id: request.id }), t('reportSavedBody'));
     navigate(paths.serviceRequest(request.id), { replace: true });
   };
@@ -111,8 +120,11 @@ export default function ReportProblemScreen() {
         </div>
       </div>
 
+      <div style={{ marginTop: 16 }}><NotSentNote extra={t('photosOnWhatsApp')} /></div>
+
       <BottomActionBar>
-        <Button onClick={send}>{t('sendRequest')}</Button>
+        <Button variant="outlined" icon="call_outlined" onClick={callJogoo}>{t('callJogoo')}</Button>
+        <Button variant="wa" icon="chat_bubble_outline" onClick={send}>{t('sendRequest')}</Button>
       </BottomActionBar>
       {picker.sheet}
     </Page>

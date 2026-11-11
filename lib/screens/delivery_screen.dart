@@ -117,9 +117,17 @@ class DeliveryScreen extends StatelessWidget {
   void _changeDropOff(BuildContext context, Order order) {
     final l = AppLocalizations.of(context);
     JogooScope.read(context).requestFromSales(
-      Bi('Change drop-off for ${order.id}', 'Changer le retrait de ${order.id}'),
+      Bi(
+        'Change drop-off for ${order.id}',
+        'Changer le retrait de ${order.id}',
+      ),
     );
-    showJogooToast(context, l.dropOffChangeTitle, l.dropOffChangeBody);
+    contactJogooAbout(
+      context,
+      title: l.dropOffChangeTitle,
+      body: l.dropOffChangeBody,
+      message: l.waDropOff(order.id),
+    );
   }
 }
 

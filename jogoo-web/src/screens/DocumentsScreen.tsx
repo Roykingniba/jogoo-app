@@ -1,7 +1,7 @@
 // Screen 16: the as-built project vault, offline.
 // Ported from lib/screens/documents_screen.dart.
 import { useState } from 'react';
-import { ChoicePill, Divided, JCard, ListRow, Page, PillRow, ScreenHeader, Stack, TintIcon } from '../components/ui';
+import { ChoicePill, Divided, ExampleBanner, JCard, ListRow, Page, PillRow, ScreenHeader, Stack, TintIcon } from '../components/ui';
 import { Icon } from '../components/Icon';
 import { DocumentRow } from '../components/farm/farmParts';
 import type { Equipment, FarmDocument } from '../data/models';
@@ -43,6 +43,7 @@ export default function DocumentsScreen() {
   return (
     <Page>
       <ScreenHeader title={t('myDocuments')} subtitle={t('documentsSubtitle')} />
+      <ExampleBanner />
       <Stack>
         <div className="farm-tabs">
           <PillRow>

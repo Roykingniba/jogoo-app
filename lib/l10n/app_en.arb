@@ -104,10 +104,10 @@
     }
   },
   "addEquipment": "Add equipment",
-  "addEquipmentBody": "Tell us about a new installation or a product bought elsewhere. The JOGOO team will add it to your farm.",
+  "addEquipmentBody": "Describe a new installation or a product bought elsewhere, then send it to JOGOO on WhatsApp so the team can add it to your farm.",
   "addEquipmentHint": "For example: water tank 5,000 L",
-  "addEquipmentSavedTitle": "Saved for the JOGOO team",
-  "addEquipmentSavedBody": "A technician will confirm the details with you.",
+  "addEquipmentSavedTitle": "Not sent to JOGOO yet",
+  "addEquipmentSavedBody": "Finish sending it on WhatsApp, or call JOGOO, so the team can add it to your farm.",
   "tabEquipment": "Equipment",
   "tabOrders": "Orders",
   "tabInvoices": "Invoices",
@@ -171,7 +171,7 @@
   },
   "reportProblem": "Report a problem",
   "bookService": "Book service",
-  "bookServiceBody": "JOGOO will call you to agree a visit date for your {equipment}.",
+  "bookServiceBody": "To book a visit for your {equipment}, send a WhatsApp message or call JOGOO. The app cannot book visits by itself yet.",
   "@bookServiceBody": {
     "placeholders": {
       "equipment": {
@@ -179,8 +179,8 @@
       }
     }
   },
-  "visitRequestedTitle": "Visit request saved",
-  "visitRequestedBody": "JOGOO will call you to confirm the date.",
+  "visitRequestedTitle": "Visit not booked yet",
+  "visitRequestedBody": "Only noted on this screen. Agree the date with JOGOO on WhatsApp or by phone.",
   "detailsCopied": "Details copied",
   "shopSubtitle": "JOGOO range, picked for your farm",
   "searchProducts": "Search products and parts",
@@ -196,8 +196,8 @@
   "upsellBody": "Extend your drip system to plot C",
   "getQuote": "Get a quote",
   "forYourEquipment": "For your equipment",
-  "requestSavedTitle": "Request saved for JOGOO sales",
-  "requestSavedBody": "{item} · a JOGOO adviser will call you back",
+  "requestSavedTitle": "Request not sent yet",
+  "requestSavedBody": "{item} · only noted on this screen. Finish on WhatsApp or call JOGOO.",
   "@requestSavedBody": {
     "placeholders": {
       "item": {
@@ -208,9 +208,9 @@
   "cart": "Cart",
   "cartTitle": "Your cart",
   "cartEmpty": "Your cart is empty.",
-  "sendOrderRequest": "Send order request",
-  "orderRequestSavedTitle": "Order request saved",
-  "orderRequestSavedBody": "JOGOO will call you to confirm price, fitting and delivery.",
+  "sendOrderRequest": "Send order on WhatsApp",
+  "orderRequestSavedTitle": "Order not sent by the app",
+  "orderRequestSavedBody": "Send the WhatsApp message, or call JOGOO, to confirm price, fitting and delivery.",
   "paymentLater": "No payment now. You pay by mobile money once JOGOO confirms the order.",
   "saveForLater": "Save for later",
   "priceOnQuote": "Price on quote",
@@ -329,7 +329,7 @@
   "warrantyEnded": "Warranty ended",
   "warrantyNote": "Repairs on parts under warranty are free. The technician confirms cover before any work.",
   "bookVisitTitle": "Book a visit",
-  "bookVisitBody": "Which installation needs a visit? JOGOO will call you to agree a date.",
+  "bookVisitBody": "Which installation needs a visit? You then send the request to JOGOO on WhatsApp or by phone.",
   "requestTitle": "Request {id}",
   "@requestTitle": {
     "placeholders": {
@@ -352,7 +352,7 @@
   "reschedule": "Reschedule",
   "addDetails": "Add details",
   "detailsHint": "A note for the technician",
-  "noteAdded": "Note added",
+  "noteAdded": "Note kept on this screen only",
   "pickNewDate": "Pick a new date",
   "rescheduleNote": "Asked to move the visit to {date}",
   "@rescheduleNote": {
@@ -362,8 +362,8 @@
       }
     }
   },
-  "rescheduleSentTitle": "New date requested",
-  "rescheduleSentBody": "The technician will call you to confirm.",
+  "rescheduleSentTitle": "New date not sent yet",
+  "rescheduleSentBody": "Only noted on this screen. Agree the new date with JOGOO on WhatsApp or by phone.",
   "clientSince": "JOGOO client since {date}",
   "@clientSince": {
     "placeholders": {
@@ -446,8 +446,8 @@
       }
     }
   },
-  "reorderOneTap": "Reorder in one tap",
-  "reorderSavedTitle": "Reorder saved for JOGOO sales",
+  "reorderOneTap": "Reorder on WhatsApp",
+  "reorderSavedTitle": "Reorder not sent yet",
   "remindBeforeSeason": "Remind me before each season",
   "orderTitle": "Order {id}",
   "@orderTitle": {
@@ -470,16 +470,16 @@
   "showCode": "Show the code in large",
   "changeDropOff": "Change drop-off",
   "callDriver": "Call the driver",
-  "dropOffChangeTitle": "Change requested",
-  "dropOffChangeBody": "JOGOO will call you to agree the new drop-off point.",
+  "dropOffChangeTitle": "Change not sent yet",
+  "dropOffChangeBody": "Agree the new drop-off point with JOGOO on WhatsApp or by phone.",
   "whichEquipment": "Which equipment?",
   "whatIsWrong": "What is wrong?",
   "describeProblem": "Describe the problem",
   "describeProblemHint": "Where is it, and since when?",
   "photosAndVideos": "Photos and videos",
-  "sendRequest": "Send request",
+  "sendRequest": "Send on WhatsApp",
   "pickProblemFirst": "Choose the equipment and the problem first.",
-  "reportSavedTitle": "Request {id} saved",
+  "reportSavedTitle": "Request {id} noted on this screen",
   "@reportSavedTitle": {
     "placeholders": {
       "id": {
@@ -487,7 +487,7 @@
       }
     }
   },
-  "reportSavedBody": "JOGOO will call you today.",
+  "reportSavedBody": "The app does not send it to JOGOO. Finish sending it on WhatsApp, or call JOGOO.",
   "agronomistsTitle": "JOGOO agronomists",
   "repliesWeekdays": "Replies Mon to Fri",
   "wateringPlanThisWeek": "Watering plan this week",
@@ -501,11 +501,11 @@
   },
   "bookFieldVisit": "Book a field visit",
   "askTheAgronomists": "Ask the agronomists",
-  "messageSavedTitle": "Message saved",
-  "messageSavedBody": "The agronomists reply Monday to Friday.",
-  "fieldVisitTitle": "Field visit requested",
-  "fieldVisitBody": "An agronomist will call you to agree a date.",
-  "documentsSubtitle": "Saved on this phone, readable offline",
+  "messageSavedTitle": "Question not sent by the app",
+  "messageSavedBody": "Send it in WhatsApp to reach the agronomists. They reply Monday to Friday.",
+  "fieldVisitTitle": "Field visit not booked yet",
+  "fieldVisitBody": "Agree a date with a JOGOO agronomist on WhatsApp or by phone.",
+  "documentsSubtitle": "Plans, wiring and warranty papers",
   "filterAll": "All",
   "filterPlans": "Plans",
   "filterElectrical": "Electrical",
@@ -541,7 +541,7 @@
   },
   "downloadsLaterTitle": "Documents are not connected yet",
   "downloadsLaterBody": "Opening and downloading files will work once JOGOO documents are online.",
-  "pendingSync": "{count, plural, =1{1 entry waiting to sync} other{{count} entries waiting to sync}}",
+  "pendingSync": "{count, plural, =1{1 entry is only on this screen. It is not sent to JOGOO.} other{{count} entries are only on this screen. They are not sent to JOGOO.}}",
   "@pendingSync": {
     "placeholders": {
       "count": {
@@ -558,8 +558,8 @@
     }
   },
   "loggedByLabel": "Logged by",
-  "waitingToSync": "Waiting to sync",
-  "synced": "Synced",
+  "waitingToSync": "This screen only",
+  "synced": "From JOGOO",
   "exportPdf": "Export for audit (PDF)",
   "logReportTitle": "JOGOO maintenance log",
   "emptyLog": "No entries yet. Tap + to log a job.",
@@ -607,9 +607,9 @@
       }
     }
   },
-  "saveOnPhone": "Save on this phone",
-  "syncLater": "It will sync by itself when you are back online",
-  "entrySavedTitle": "Saved on this phone",
+  "saveOnPhone": "Add to log",
+  "syncLater": "Kept in the app only until you close it. Not sent to JOGOO.",
+  "entrySavedTitle": "Added on this screen only",
   "notificationsTitle": "Notifications",
   "notificationsSubtitle": "Choose how JOGOO reaches you",
   "channelPush": "Push",
@@ -644,5 +644,136 @@
   "userManuals": "User manuals",
   "illustratedGuides": "Illustrated guides",
   "wifiOnly": "Download on Wi-Fi only",
-  "wifiOnlyHelp": "Saves your mobile data"
+  "wifiOnlyHelp": "Saves your mobile data",
+  "exampleBannerTitle": "Example data.",
+  "exampleBannerBody": "Your own farm will show here once JOGOO sets up your account.",
+  "sendOnWhatsApp": "Send on WhatsApp",
+  "notSentTitle": "The app does not send this to JOGOO yet",
+  "notSentBody": "Send it on WhatsApp or call JOGOO. What you enter here stays on this screen only.",
+  "messagePreview": "Your WhatsApp message",
+  "keepOnScreen": "Keep on this screen only",
+  "requestPriceTitle": "Ask JOGOO for a price",
+  "requestPriceBody": "Ask JOGOO sales for the price of {item} and whether it fits your farm.",
+  "@requestPriceBody": {
+    "placeholders": {
+      "item": {
+        "type": "String"
+      }
+    }
+  },
+  "cartNotSent": "The app does not send orders yet. Your cart opens as a WhatsApp message to JOGOO sales.",
+  "photosOnWhatsApp": "Photos and videos are not sent from this screen: add them in the WhatsApp chat.",
+  "agronomistNote": "Your question opens in WhatsApp to reach the JOGOO agronomists.",
+  "waAddEquipment": "Hello JOGOO, please add this equipment to my farm: {item}",
+  "@waAddEquipment": {
+    "placeholders": {
+      "item": {
+        "type": "String"
+      }
+    }
+  },
+  "waServiceVisit": "Hello JOGOO, I would like a service visit for: {equipment}",
+  "@waServiceVisit": {
+    "placeholders": {
+      "equipment": {
+        "type": "String"
+      }
+    }
+  },
+  "waPriceRequest": "Hello JOGOO, I would like a price for: {item}",
+  "@waPriceRequest": {
+    "placeholders": {
+      "item": {
+        "type": "String"
+      }
+    }
+  },
+  "waOrder": "Hello JOGOO, I would like to order:\n{lines}\nTotal shown in the app: {total} FCFA",
+  "@waOrder": {
+    "placeholders": {
+      "lines": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "waProblem": "Hello JOGOO, I have a problem with {equipment}: {problem}.",
+  "@waProblem": {
+    "placeholders": {
+      "equipment": {
+        "type": "String"
+      },
+      "problem": {
+        "type": "String"
+      }
+    }
+  },
+  "waProblemDetails": "Details: {details}",
+  "@waProblemDetails": {
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "waAgronomist": "Question for the JOGOO agronomists: {question}",
+  "@waAgronomist": {
+    "placeholders": {
+      "question": {
+        "type": "String"
+      }
+    }
+  },
+  "waFieldVisit": "Hello JOGOO, I would like an agronomist to visit my farm.",
+  "waReorder": "Hello JOGOO, I would like to order {quantity} of {item}.",
+  "@waReorder": {
+    "placeholders": {
+      "quantity": {
+        "type": "String"
+      },
+      "item": {
+        "type": "String"
+      }
+    }
+  },
+  "waDropOff": "Hello JOGOO, I would like to change the drop-off point for order {id}.",
+  "@waDropOff": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "waReschedule": "Hello JOGOO, about request {id}: can the visit move to {date}?",
+  "@waReschedule": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "waRequestNote": "Hello JOGOO, about request {id}: {note}",
+  "@waRequestNote": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      },
+      "note": {
+        "type": "String"
+      }
+    }
+  },
+  "resultsCount": "{count, plural, =0{No product found} =1{1 product found} other{{count} products found}}",
+  "@resultsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

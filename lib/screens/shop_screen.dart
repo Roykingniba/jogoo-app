@@ -6,6 +6,7 @@ import '../data/jogoo_store.dart';
 import '../generated/l10n/app_localizations.dart';
 import '../models/models.dart';
 import '../utils/format.dart';
+import '../utils/actions.dart';
 import '../widgets/jogoo_widgets.dart';
 import 'product_screen.dart';
 import 'reorder_inputs_screen.dart';
@@ -56,6 +57,7 @@ class _ShopScreenState extends State<ShopScreen> {
           subtitle: l.shopSubtitle,
           trailing: _CartButton(count: store.cartCount),
         ),
+        const ExampleBanner(),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: SearchBox(
@@ -134,10 +136,11 @@ class _ShopScreenState extends State<ShopScreen> {
                         'Devis : extension goutte-à-goutte parcelle C',
                       ),
                     );
-                    showJogooToast(
+                    contactJogooAbout(
                       context,
-                      l.requestSavedTitle,
-                      l.requestSavedBody(l.upsellTitle),
+                      title: l.requestPriceTitle,
+                      body: l.requestPriceBody(l.upsellTitle),
+                      message: l.waPriceRequest(l.upsellTitle),
                     );
                   },
                   child: Text(l.getQuote),
@@ -358,12 +361,16 @@ class _ProductCard extends StatelessWidget {
 
     void request() {
       store.requestFromSales(
-        Bi('Price request: ${product.name.en}', 'Demande de prix : ${product.name.fr}'),
+        Bi(
+          'Price request: ${product.name.en}',
+          'Demande de prix : ${product.name.fr}',
+        ),
       );
-      showJogooToast(
+      contactJogooAbout(
         context,
-        l.requestSavedTitle,
-        l.requestSavedBody(product.name.of(context)),
+        title: l.requestPriceTitle,
+        body: l.requestPriceBody(product.name.of(context)),
+        message: l.waPriceRequest(product.name.of(context)),
       );
     }
 
@@ -500,12 +507,20 @@ Future<void> showCartSheet(BuildContext context) {
                 const SizedBox(height: 16),
                 FilledButton(
                   onPressed: () {
+                    final message = l.waOrder(
+                      [
+                        for (final line in store.cart)
+                          '- ${line.title.of(context)} × ${line.quantity}',
+                      ].join('\n'),
+                      formatAmount(store.cartTotal),
+                    );
                     store.submitCart();
                     Navigator.pop(sheetContext);
-                    showJogooToast(
+                    contactJogooAbout(
                       context,
-                      l.orderRequestSavedTitle,
-                      l.orderRequestSavedBody,
+                      title: l.orderRequestSavedTitle,
+                      body: l.orderRequestSavedBody,
+                      message: message,
                     );
                   },
                   child: Text(l.sendOrderRequest),

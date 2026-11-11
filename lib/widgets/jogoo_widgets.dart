@@ -328,9 +328,7 @@ class ScreenHeader extends StatelessWidget {
       children: [
         Text(
           title,
-          style: text.headlineSmall?.copyWith(
-            fontSize: centerTitle ? 18 : 22,
-          ),
+          style: text.headlineSmall?.copyWith(fontSize: centerTitle ? 18 : 22),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),
@@ -349,12 +347,58 @@ class ScreenHeader extends StatelessWidget {
           ),
           const SizedBox(width: 14),
           if (leading != null) ...[leading!, const SizedBox(width: 12)],
-          Expanded(
-            child: centerTitle ? Center(child: titleBlock) : titleBlock,
-          ),
-          if (trailing != null) ...[const SizedBox(width: 12), trailing!]
-          else if (centerTitle) const SizedBox(width: 52),
+          Expanded(child: centerTitle ? Center(child: titleBlock) : titleBlock),
+          if (trailing != null) ...[
+            const SizedBox(width: 12),
+            trailing!,
+          ] else if (centerTitle)
+            const SizedBox(width: 52),
         ],
+      ),
+    );
+  }
+}
+
+/// Says the farm, shop and service screens show example data, not the
+/// client's own, until JOGOO sets up their account.
+class ExampleBanner extends StatelessWidget {
+  const ExampleBanner({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+      child: Semantics(
+        container: true,
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: JColors.orangeTint,
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Icon(Icons.info_outline, color: JColors.brown),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: '${l.exampleBannerTitle} ',
+                        style: const TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                      TextSpan(text: l.exampleBannerBody),
+                    ],
+                  ),
+                  style: const TextStyle(color: JColors.ink, fontSize: 14),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -388,9 +432,10 @@ class PageTitle extends StatelessWidget {
                 Text(title, style: text.displaySmall),
                 if (subtitle != null) ...[
                   const SizedBox(height: 4),
-                  Text(subtitle!, style: text.bodyLarge?.copyWith(
-                    color: JColors.muted,
-                  )),
+                  Text(
+                    subtitle!,
+                    style: text.bodyLarge?.copyWith(color: JColors.muted),
+                  ),
                 ],
               ],
             ),
@@ -623,7 +668,8 @@ class Timeline extends StatelessWidget {
                               Text(
                                 items[i].title,
                                 style: text.titleSmall?.copyWith(
-                                  color: items[i].state == TimelineMarker.pending
+                                  color:
+                                      items[i].state == TimelineMarker.pending
                                       ? JColors.muted
                                       : JColors.ink,
                                 ),
@@ -824,10 +870,7 @@ class RoundShortcut extends StatelessWidget {
                   color: tone.background,
                   shape: BoxShape.circle,
                 ),
-                child: Image.asset(
-                  image!,
-                  cacheWidth: _cachePx(context, size),
-                ),
+                child: Image.asset(image!, cacheWidth: _cachePx(context, size)),
               )
             else
               TintIcon(icon!, tone: tone, size: size),

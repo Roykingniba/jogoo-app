@@ -7,6 +7,7 @@ import '../data/jogoo_store.dart';
 import '../generated/l10n/app_localizations.dart';
 import '../models/models.dart';
 import '../utils/format.dart';
+import '../utils/actions.dart';
 import '../widgets/jogoo_widgets.dart';
 import 'documents_screen.dart';
 import 'maintenance_log_screen.dart';
@@ -60,7 +61,9 @@ class EquipmentScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              l.installedOn(fullDate(context, item.installedOn)),
+                              l.installedOn(
+                                fullDate(context, item.installedOn),
+                              ),
                               style: text.bodyMedium,
                             ),
                             const SizedBox(height: 8),
@@ -156,10 +159,8 @@ class EquipmentScreen extends StatelessWidget {
               foregroundColor: JColors.magenta,
               side: const BorderSide(color: JColors.magenta, width: 1.5),
             ),
-            onPressed: () => push(
-              context,
-              ReportProblemScreen(equipmentId: item.id),
-            ),
+            onPressed: () =>
+                push(context, ReportProblemScreen(equipmentId: item.id)),
             child: Text(l.reportProblem, textAlign: TextAlign.center),
           ),
           FilledButton(
@@ -186,9 +187,7 @@ class EquipmentScreen extends StatelessWidget {
       ),
       TimelineState.current => TimelineItem(
         title: step.title.of(context),
-        subtitle: step.note == null
-            ? date
-            : '$date, ${step.note!.of(context)}',
+        subtitle: step.note == null ? date : '$date, ${step.note!.of(context)}',
         state: TimelineMarker.current,
       ),
       TimelineState.due => TimelineItem(
@@ -246,9 +245,17 @@ class EquipmentScreen extends StatelessWidget {
     );
     if (confirmed != true || !context.mounted) return;
     store.requestFromSales(
-      Bi('Service visit: ${item.name.en}', 'Visite d\'entretien : ${item.name.fr}'),
+      Bi(
+        'Service visit: ${item.name.en}',
+        'Visite d\'entretien : ${item.name.fr}',
+      ),
     );
-    showJogooToast(context, l.visitRequestedTitle, l.visitRequestedBody);
+    await contactJogooAbout(
+      context,
+      title: l.visitRequestedTitle,
+      body: l.visitRequestedBody,
+      message: l.waServiceVisit(item.name.of(context)),
+    );
   }
 
   void _copyDetails(BuildContext context, Equipment item) {

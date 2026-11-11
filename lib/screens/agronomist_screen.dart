@@ -7,6 +7,7 @@ import '../generated/l10n/app_localizations.dart';
 import '../models/models.dart';
 import '../utils/format.dart';
 import '../widgets/chat_widgets.dart';
+import '../utils/actions.dart';
 import '../widgets/jogoo_widgets.dart';
 
 /// Screen 15: advice from the JOGOO engineering team.
@@ -32,7 +33,12 @@ class _AgronomistScreenState extends State<AgronomistScreen> {
     if (text.isEmpty) return;
     JogooScope.read(context).sendToAgronomists(text);
     _input.clear();
-    showJogooToast(context, l.messageSavedTitle, l.messageSavedBody);
+    contactJogooAbout(
+      context,
+      title: l.messageSavedTitle,
+      body: l.messageSavedBody,
+      message: l.waAgronomist(text),
+    );
   }
 
   @override
@@ -132,6 +138,11 @@ class _AgronomistScreenState extends State<AgronomistScreen> {
     JogooScope.read(context).requestFromSales(
       const Bi('Agronomist field visit', 'Visite terrain agronome'),
     );
-    showJogooToast(context, l.fieldVisitTitle, l.fieldVisitBody);
+    contactJogooAbout(
+      context,
+      title: l.fieldVisitTitle,
+      body: l.fieldVisitBody,
+      message: l.waFieldVisit,
+    );
   }
 }

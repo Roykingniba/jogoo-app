@@ -90,6 +90,8 @@ export interface Backend {
   signOut(): Promise<void>;
   updateProfile(patch: ProfilePatch): Promise<Profile>;
   changePassword(currentPassword: string, newPassword: string): Promise<void>;
+  /** Deletes the account and everything stored about it. Needs the password. */
+  deleteAccount(password: string): Promise<void>;
   myJourney(): Promise<Journey>;
   admin: {
     listClients(q: { search?: string; stage?: Stage | ''; page?: number; staff?: boolean }): Promise<ClientList>;
@@ -115,3 +117,7 @@ export class BackendError extends Error {
     this.attemptsLeft = attemptsLeft;
   }
 }
+
+/** Fired by a backend when the server says the session is gone (expired or signed out elsewhere). */
+export const sessionEvents = new EventTarget();
+export const SESSION_EXPIRED = 'expired';

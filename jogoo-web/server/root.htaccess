@@ -27,9 +27,10 @@ DirectoryIndex index.html
 </IfModule>
 <IfModule mod_expires.c>
   ExpiresActive On
+  ExpiresByType font/woff2 "access plus 1 year"
   ExpiresByType text/javascript "access plus 1 year"
   ExpiresByType application/javascript "access plus 1 year"
   ExpiresByType text/css "access plus 1 year"
 </IfModule>
 AddType application/manifest+json .webmanifest
-AddType font/ttf .ttf
+AddType font/woff2 .woff2

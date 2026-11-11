@@ -221,3 +221,10 @@ export const pendingLogCount = (log: LogEntry[], equipmentId: string) =>
   logFor(log, equipmentId).filter((e) => !e.synced).length;
 
 export const unreadCount = (ns: AppNotification[]) => ns.filter((n) => n.unread).length;
+
+// Everything except the language, as it was when the app opened.
+const freshState = useStore.getState();
+/** Forgets everything the previous person did in this session (cart, chats, notes...). */
+export function resetSessionState() {
+  useStore.setState({ ...freshState, lang: useStore.getState().lang }, true);
+}

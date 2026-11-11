@@ -44,7 +44,10 @@ class _ReportProblemScreenState extends State<ReportProblemScreen> {
     _Problem.leak => const Bi('Leak', 'Fuite'),
     _Problem.lowPressure => const Bi('Low pressure', 'Pression faible'),
     _Problem.brokenPart => const Bi('Broken part', 'Pièce cassée'),
-    _Problem.leafSymptoms => const Bi('Leaf symptoms', 'Symptômes sur feuilles'),
+    _Problem.leafSymptoms => const Bi(
+      'Leaf symptoms',
+      'Symptômes sur feuilles',
+    ),
   };
 
   Future<void> _addMedia({required bool video}) async {
@@ -54,12 +57,11 @@ class _ReportProblemScreenState extends State<ReportProblemScreen> {
     }
   }
 
-  void _send() {
+  Future<void> _send() async {
     final l = AppLocalizations.of(context);
     if (_equipmentId == null || _problem == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(l.pickProblemFirst)));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l.pickProblemFirst)));
       return;
     }
     final request = JogooScope.read(context).reportProblem(
@@ -68,7 +70,24 @@ class _ReportProblemScreenState extends State<ReportProblemScreen> {
       description: _description.text.trim(),
       mediaPaths: [for (final m in _media) m.path],
     );
-    showJogooToast(context, l.reportSavedTitle(request.id), l.reportSavedBody);
+    final store = JogooScope.read(context);
+    final details = _description.text.trim();
+    final message = [
+      l.waProblem(
+        store.equipmentById(_equipmentId!).name.of(context),
+        _problemText(_problem!).of(context),
+      ),
+      if (details.isNotEmpty) l.waProblemDetails(details),
+    ].join('\n');
+    await contactJogooAbout(
+      context,
+      title: l.reportSavedTitle(request.id),
+      body: _media.isEmpty
+          ? l.reportSavedBody
+          : '${l.reportSavedBody} ${l.photosOnWhatsApp}',
+      message: message,
+    );
+    if (!mounted) return;
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (_) => ServiceRequestScreen(requestId: request.id),
@@ -121,8 +140,7 @@ class _ReportProblemScreenState extends State<ReportProblemScreen> {
                                 label: _problemText(problem).of(context),
                                 selected: _problem == problem,
                                 selectedColor: JColors.magenta,
-                                onTap: () =>
-                                    setState(() => _problem = problem),
+                                onTap: () => setState(() => _problem = problem),
                               ),
                           ],
                         ),
@@ -180,9 +198,7 @@ class _ReportProblemScreenState extends State<ReportProblemScreen> {
         ),
       ),
       bottomNavigationBar: BottomActionBar(
-        children: [
-          FilledButton(onPressed: _send, child: Text(l.sendRequest)),
-        ],
+        children: [FilledButton(onPressed: _send, child: Text(l.sendRequest))],
       ),
     );
   }
@@ -201,7 +217,11 @@ class _MediaThumb extends StatelessWidget {
       clipBehavior: Clip.none,
       children: [
         media.video
-            ? const TintIcon(Icons.play_arrow_rounded, tone: Tone.blue, size: 76)
+            ? const TintIcon(
+                Icons.play_arrow_rounded,
+                tone: Tone.blue,
+                size: 76,
+              )
             : PhotoCircle(file: media.path, size: 76),
         Positioned(
           right: -6,

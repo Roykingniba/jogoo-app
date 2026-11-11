@@ -27,6 +27,7 @@ class ServiceScreen extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 24),
       children: [
         PageTitle(title: l.navService, subtitle: l.serviceHours),
+        const ExampleBanner(),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Column(
@@ -44,8 +45,7 @@ class ServiceScreen extends StatelessWidget {
                         label: l.actionReport,
                         icon: Icons.error_outline,
                         tone: Tone.pink,
-                        onTap: () =>
-                            push(context, const ReportProblemScreen()),
+                        onTap: () => push(context, const ReportProblemScreen()),
                       ),
                     ),
                     Expanded(
@@ -168,7 +168,10 @@ class ServiceScreen extends StatelessWidget {
                     ),
                     title: item.name.of(context),
                     subtitle: item.underWarranty
-                        ? l.monthsOf(item.warrantyMonthsLeft, item.warrantyMonths)
+                        ? l.monthsOf(
+                            item.warrantyMonthsLeft,
+                            item.warrantyMonths,
+                          )
                         : l.warrantyEnded,
                   ),
                 const SizedBox(height: 8),
@@ -221,7 +224,12 @@ Future<void> bookVisit(BuildContext context) async {
       "Visite d'entretien : ${chosen.name.fr}",
     ),
   );
-  showJogooToast(context, l.visitRequestedTitle, l.visitRequestedBody);
+  await contactJogooAbout(
+    context,
+    title: l.visitRequestedTitle,
+    body: l.visitRequestedBody,
+    message: l.waServiceVisit(chosen.name.of(context)),
+  );
 }
 
 class _RequestRow extends StatelessWidget {

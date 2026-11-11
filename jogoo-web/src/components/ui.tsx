@@ -14,9 +14,13 @@ const cx = (...c: (string | false | null | undefined)[]) => c.filter(Boolean).jo
 
 // ---------------------------------------------------------------------------
 
-/** White rounded card used for every content block. Pass onClick to make it tappable. */
+/**
+ * White rounded card used for every content block. Pass onClick to make it tappable.
+ * For tappable cards prefer labelledBy/describedBy (ids of the card's own title and
+ * subtitle) over ariaLabel, so screen readers keep the visible text.
+ */
 export function JCard({
-  children, onClick, className, padding = 'normal', style, ariaLabel,
+  children, onClick, className, padding = 'normal', style, ariaLabel, labelledBy, describedBy,
 }: {
   children: ReactNode;
   onClick?: () => void;
@@ -24,17 +28,34 @@ export function JCard({
   padding?: 'normal' | 'small' | 'none';
   style?: CSSProperties;
   ariaLabel?: string;
+  labelledBy?: string;
+  describedBy?: string;
 }) {
   const cls = cx('card', padding === 'small' && 'pad-s', padding === 'none' && 'pad-0', onClick && 'tap', className);
   if (onClick) {
     return (
-      <div role="button" tabIndex={0} aria-label={ariaLabel} className={cls} style={style} onClick={onClick}
+      <div role="button" tabIndex={0} aria-label={labelledBy ? undefined : ariaLabel} aria-labelledby={labelledBy}
+        aria-describedby={describedBy} className={cls} style={style} onClick={onClick}
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } }}>
         {children}
       </div>
     );
   }
   return <section className={cls} style={style}>{children}</section>;
+}
+
+/**
+ * Compact notice that a screen still shows example data, not the client's own.
+ * Not dismissible: it stays until JOGOO data replaces the demo content.
+ */
+export function ExampleBanner({ className }: { className?: string }) {
+  const { t } = useI18n();
+  return (
+    <p className={cx('example-banner', className)}>
+      <Icon name="error_outline" size={18} />
+      <span><strong>{t('exampleBannerTitle')}</strong> {t('exampleBannerBody')}</span>
+    </p>
+  );
 }
 
 /** Navy card with the lime brand circle in the top-right corner. */
@@ -210,11 +231,11 @@ export interface TimelineItem {
 }
 
 /** Vertical progress list: done (lime check), current (navy dot), due (orange ring), pending (grey ring). */
-export function Timeline({ items }: { items: TimelineItem[] }) {
+export function Timeline({ items, stateLabels }: { items: TimelineItem[]; stateLabels?: Partial<Record<TimelineMarker, string>> }) {
   return (
     <ol className="timeline" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
       {items.map((it, i) => (
-        <li className="tl-item" key={i}>
+        <li className="tl-item" key={i} aria-current={it.state === 'current' ? 'step' : undefined}>
           <div className="tl-rail">
             <span className={`tl-mark ${it.state}`}>
               {it.state === 'done' && <Icon name="check" size={18} />}
@@ -224,7 +245,10 @@ export function Timeline({ items }: { items: TimelineItem[] }) {
           </div>
           <div className="tl-body">
             <div className="grow">
-              <div className="t-title-s" style={{ color: it.state === 'pending' ? 'var(--muted)' : undefined }}>{it.title}</div>
+              <div className="t-title-s" style={{ color: it.state === 'pending' ? 'var(--muted)' : undefined }}>
+                {it.title}
+                {stateLabels?.[it.state] && <span className="sr-only">, {stateLabels[it.state]}</span>}
+              </div>
               {it.subtitle && (
                 <div className="t-body-m" style={{ color: it.subtitleColor, fontWeight: it.subtitleColor ? 700 : undefined }}>{it.subtitle}</div>
               )}

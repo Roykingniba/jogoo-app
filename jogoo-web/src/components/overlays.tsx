@@ -9,32 +9,48 @@ import { useI18n } from '../i18n/i18n';
 // ---------------------------------------------------------------------------
 // Toast: dark floating confirmation with the JOGOO mark.
 
-interface ToastState { toast: { id: number; title: string; body?: string } | null }
+export type ToastTone = 'ok' | 'error';
+interface ToastState { toast: { id: number; title: string; body?: string; tone: ToastTone } | null }
 const useToastStore = create<ToastState>(() => ({ toast: null }));
 let timer: number | undefined;
 
-/** Shows the JOGOO confirmation toast for 4 seconds. Callable from anywhere. */
-export function showToast(title: string, body?: string) {
+const hideToast = () => {
   window.clearTimeout(timer);
-  useToastStore.setState({ toast: { id: Date.now(), title, body } });
-  timer = window.setTimeout(() => useToastStore.setState({ toast: null }), 4000);
+  useToastStore.setState({ toast: null });
+};
+
+/**
+ * Shows the JOGOO toast for 6 seconds (tap to dismiss). Callable from anywhere.
+ * tone 'error' shows a warning icon and an orange accent instead of the green check.
+ */
+export function showToast(title: string, body?: string, tone: ToastTone = 'ok') {
+  window.clearTimeout(timer);
+  useToastStore.setState({ toast: { id: Date.now(), title, body, tone } });
+  timer = window.setTimeout(() => useToastStore.setState({ toast: null }), 6000);
 }
 
+/**
+ * Rendered into document.body (not #root), so the live region is still
+ * announced while a sheet makes #root inert.
+ */
 export function ToastHost() {
   const toast = useToastStore((s) => s.toast);
-  return (
+  const error = toast?.tone === 'error';
+  return createPortal(
     <div className="toast-host" role="status" aria-live="polite">
       {toast && (
-        <div className="toast" key={toast.id}>
+        // Tapping is a shortcut only; the toast also hides itself, so no keyboard handler is needed.
+        <div className={error ? 'toast error' : 'toast'} key={toast.id} onClick={hideToast}>
           <span className="mark"><img src={asset('images/jogoo_mark.png')} alt="" /></span>
           <div className="grow">
             <div className="ttl">{toast.title}</div>
             {toast.body && <div className="bdy">{toast.body}</div>}
           </div>
-          <span className="ok"><Icon name="check" size={16} /></span>
+          <span className={error ? 'ok warn' : 'ok'}><Icon name={error ? 'error_outline' : 'check'} size={error ? 18 : 16} /></span>
         </div>
       )}
-    </div>
+    </div>,
+    document.body,
   );
 }
 

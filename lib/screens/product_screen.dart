@@ -5,6 +5,7 @@ import '../data/jogoo_store.dart';
 import '../generated/l10n/app_localizations.dart';
 import '../models/models.dart';
 import '../utils/format.dart';
+import '../utils/actions.dart';
 import '../widgets/jogoo_widgets.dart';
 
 /// Screen 05: a product page that sells the add-ons too.
@@ -18,9 +19,8 @@ class ProductScreen extends StatefulWidget {
 }
 
 class _ProductScreenState extends State<ProductScreen> {
-  late final Product _product = JogooScope.read(
-    context,
-  ).productById(widget.productId);
+  late final Product _product = JogooScope.read(context)
+      .productById(widget.productId);
   late final Set<String> _selected = {
     for (final addOn in _product.addOns)
       if (addOn.selectedByDefault) addOn.id,
@@ -168,10 +168,7 @@ class _ProductScreenState extends State<ProductScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(l.total, style: text.bodySmall),
-                      Text(
-                        '${formatAmount(_total)} F',
-                        style: text.titleLarge,
-                      ),
+                      Text('${formatAmount(_total)} F', style: text.titleLarge),
                     ],
                   ),
                   const SizedBox(width: 16),
@@ -194,9 +191,15 @@ class _ProductScreenState extends State<ProductScreen> {
     final l = AppLocalizations.of(context);
     final store = JogooScope.read(context);
     store.addToCart(
-      CartLine(id: _product.id, title: _product.name, unitPrice: _product.price),
+      CartLine(
+        id: _product.id,
+        title: _product.name,
+        unitPrice: _product.price,
+      ),
     );
-    for (final addOn in _product.addOns.where((a) => _selected.contains(a.id))) {
+    for (final addOn in _product.addOns.where(
+      (a) => _selected.contains(a.id),
+    )) {
       store.addToCart(
         CartLine(
           id: '${_product.id}/${addOn.id}',
@@ -213,10 +216,11 @@ class _ProductScreenState extends State<ProductScreen> {
     JogooScope.read(context).requestFromSales(
       Bi('Quote: ${_product.name.en}', 'Devis : ${_product.name.fr}'),
     );
-    showJogooToast(
+    contactJogooAbout(
       context,
-      l.requestSavedTitle,
-      l.requestSavedBody(_product.name.of(context)),
+      title: l.requestPriceTitle,
+      body: l.requestPriceBody(_product.name.of(context)),
+      message: l.waPriceRequest(_product.name.of(context)),
     );
   }
 }

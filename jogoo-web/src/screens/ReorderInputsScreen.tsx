@@ -5,6 +5,7 @@ import {
   Button, CircleButton, Divided, JCard, ListRow, Page, ScreenHeader, StatusPill, Switch, TintIcon,
 } from '../components/ui';
 import { showToast } from '../components/overlays';
+import { ContactJogooSheet } from '../components/service/ContactJogoo';
 import { useI18n } from '../i18n/i18n';
 import { bi, type FarmInput } from '../data/models';
 import { otherInputs, recommendedBags, usualInput, useStore } from '../data/store';
@@ -19,6 +20,9 @@ export default function ReorderInputsScreen() {
   const setSeasonReminder = useStore((s) => s.setSeasonReminder);
   const [bags, setBags] = useState(() => recommendedBags(profile));
   const [added, setAdded] = useState<Set<string>>(() => new Set());
+  // 'usual' = the usual order; otherwise the id of another input to ask about.
+  const [asking, setAsking] = useState<string | null>(null);
+  const askingOther = otherInputs.find((o) => o.id === asking);
   const input = usualInput;
   const area = decimalTrim(lang, profile.areaHa);
 
@@ -53,7 +57,7 @@ export default function ReorderInputsScreen() {
                 disabled={bags >= 99} onClick={() => setBags((n) => Math.min(99, n + 1))} />
             </div>
             <p className="reorder-rec">{t('recommendedFor', { area })}</p>
-            <Button block onClick={reorder}>{t('reorderOneTap')}</Button>
+            <Button block variant="wa" icon="chat_bubble_outline" onClick={() => setAsking('usual')}>{t('reorderOneTap')}</Button>
           </div>
         </JCard>
         <div className="stack sticky-side">
@@ -66,7 +70,7 @@ export default function ReorderInputsScreen() {
                   subtitle={o.lastBought ? b(o.note).replace('{date}', dayMonth(lang, o.lastBought)) : b(o.note)}
                   trailing={added.has(o.id)
                     ? <StatusPill label={t('added')} tone="lime" />
-                    : <Button variant="outlined" small onClick={() => addOther(o)}>{t('add')}</Button>} />
+                    : <Button variant="outlined" small onClick={() => setAsking(o.id)}>{t('add')}</Button>} />
               ))}
             </Divided>
           </JCard>
@@ -78,6 +82,12 @@ export default function ReorderInputsScreen() {
           </JCard>
         </div>
       </div>
+      <ContactJogooSheet open={asking != null} onClose={() => setAsking(null)}
+        title={askingOther ? b(askingOther.name) : t('reorderTitle')}
+        message={askingOther
+          ? t('waPriceRequest', { item: b(askingOther.name) })
+          : t('waReorder', { quantity: t('bags', { count: bags }), item: b(input.name) })}
+        onContact={() => (askingOther ? addOther(askingOther) : reorder())} />
     </Page>
   );
 }

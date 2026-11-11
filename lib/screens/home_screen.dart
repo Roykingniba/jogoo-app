@@ -89,8 +89,10 @@ class HomeScreen extends StatelessWidget {
             ),
           ],
         ),
+        const SizedBox(height: 16),
+        const ExampleBanner(),
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -110,7 +112,8 @@ class HomeScreen extends StatelessWidget {
                           initials(visit.technician?.name ?? 'JOGOO'),
                         ),
                         title: l.equipmentCheck(
-                          store.equipmentById(visit.equipmentId)
+                          store
+                              .equipmentById(visit.equipmentId)
                               .shortName
                               .of(context),
                         ),
@@ -147,7 +150,10 @@ class HomeScreen extends StatelessWidget {
                       const SizedBox(height: 14),
                       ListRow(
                         padding: EdgeInsets.zero,
-                        leading: PhotoCircle(asset: picks.first.photo, size: 72),
+                        leading: PhotoCircle(
+                          asset: picks.first.photo,
+                          size: 72,
+                        ),
                         title: picks.first.name.of(context),
                         subtitle: picks.first.fitNote?.of(context),
                         subtitleColor: JColors.olive,
@@ -282,8 +288,7 @@ class _Header extends StatelessWidget {
                     tooltip: l.notificationsTitle,
                     color: Colors.white,
                     background: translucent,
-                    onPressed: () =>
-                        push(context, const NotificationsScreen()),
+                    onPressed: () => push(context, const NotificationsScreen()),
                   ),
                   if (store.unreadCount > 0)
                     Positioned(

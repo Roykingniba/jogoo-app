@@ -120,7 +120,13 @@ class ServiceRequestScreen extends StatelessWidget {
                         Timeline(
                           items: [
                             for (final (i, step) in request.steps.indexed)
-                              _item(context, request, equipment, step, i == current),
+                              _item(
+                                context,
+                                request,
+                                equipment,
+                                step,
+                                i == current,
+                              ),
                           ],
                         ),
                       ],
@@ -174,14 +180,16 @@ class ServiceRequestScreen extends StatelessWidget {
     bool isCurrent,
   ) {
     final l = AppLocalizations.of(context);
-    final title = step.title?.of(context) ??
+    final title =
+        step.title?.of(context) ??
         switch (step.kind) {
           RequestStepKind.received => l.stepReceived,
           RequestStepKind.diagnosed => l.stepDiagnosed,
           RequestStepKind.booked => l.stepBooked,
           RequestStepKind.fixed => l.stepFixed,
         };
-    String? subtitle = step.note?.of(context) ??
+    String? subtitle =
+        step.note?.of(context) ??
         (step.at == null ? null : dayMonthTime(context, step.at!));
     if (step.kind == RequestStepKind.booked && step.at == null) {
       subtitle = equipment.underWarranty ? l.coveredByWarranty : l.notCovered;
@@ -229,7 +237,11 @@ class ServiceRequestScreen extends StatelessWidget {
     controller.dispose();
     if (note == null || note.isEmpty || !context.mounted) return;
     store.addRequestNote(request.id, note);
-    showJogooToast(context, l.noteAdded);
+    await contactJogooAbout(
+      context,
+      title: l.noteAdded,
+      message: l.waRequestNote(request.id, note),
+    );
   }
 
   Future<void> _reschedule(BuildContext context, ServiceRequest request) async {
@@ -246,10 +258,12 @@ class ServiceRequestScreen extends StatelessWidget {
       helpText: l.pickNewDate,
     );
     if (date == null || !context.mounted) return;
-    store.addRequestNote(
-      request.id,
-      l.rescheduleNote(fullDate(context, date)),
+    store.addRequestNote(request.id, l.rescheduleNote(fullDate(context, date)));
+    await contactJogooAbout(
+      context,
+      title: l.rescheduleSentTitle,
+      body: l.rescheduleSentBody,
+      message: l.waReschedule(request.id, fullDate(context, date)),
     );
-    showJogooToast(context, l.rescheduleSentTitle, l.rescheduleSentBody);
   }
 }

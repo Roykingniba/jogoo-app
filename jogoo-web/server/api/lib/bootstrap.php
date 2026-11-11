@@ -124,7 +124,14 @@ function is_https(): bool
 
 function client_ip(): string
 {
-    return substr((string)($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0'), 0, 45);
+    // Behind Cloudflare or another proxy every visitor shares the proxy's
+    // address, which would make rate limits lock everyone out. Set
+    // 'client_ip_header' (e.g. 'HTTP_CF_CONNECTING_IP') only when the site
+    // really sits behind that proxy: the header is trivially forged otherwise.
+    $h = config()['client_ip_header'] ?? '';
+    $ip = $h !== '' ? ($_SERVER[$h] ?? '') : '';
+    if (!is_string($ip) || filter_var($ip, FILTER_VALIDATE_IP) === false) $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+    return substr((string)$ip, 0, 45);
 }
 
 function uuid4(): string
