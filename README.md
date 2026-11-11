@@ -123,6 +123,41 @@ The Android SDK is installed per-user at `%LOCALAPPDATA%\Android\Sdk`, with API
 installer requires administrator access. Android builds use the user-local
 Temurin JDK 21. iOS builds and CocoaPods require macOS with Xcode.
 
+## Android release
+
+Release builds must be signed with JOGOO's own upload key. Without it they
+fall back to the debug key, which the Play Store rejects.
+
+1. Create the key once and keep it, and its passwords, somewhere safe and
+   backed up. Losing it means you cannot update the app.
+
+   ```powershell
+   keytool -genkey -v -keystore jogoo-upload.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+   ```
+
+2. Create `android/key.properties` (git-ignored):
+
+   ```properties
+   storeFile=C:/path/to/jogoo-upload.jks
+   storePassword=...
+   keyAlias=upload
+   keyPassword=...
+   ```
+
+3. Build: `flutter build appbundle --release` for the Play Store, or
+   `flutter build apk --release --split-per-abi` for direct installs.
+
+The app id `com.jogoo.jogoo_app` cannot change after the first Play Store
+release. Raise `version:` in `pubspec.yaml` for every release.
+
+## Honest requests
+
+The app cannot send requests, orders or reports to JOGOO yet. Every request
+point opens `contactJogooAbout()` (`lib/utils/actions.dart`): it says nothing
+was sent and offers a prefilled WhatsApp message or a call. The farm, shop and
+service tabs show an "Example data" banner. Remove both once requests reach
+JOGOO through the backend.
+
 ## Integrations
 
 - `powersync` and `supabase_flutter` provide local-first database sync,
@@ -136,9 +171,10 @@ Temurin JDK 21. iOS builds and CocoaPods require macOS with Xcode.
   future farm tables should reference `farms.id` and reuse
   `private.is_farm_member()` in their policies.
 - The `mia` Edge Function only accepts signed-in users.
-- Firebase Messaging and Crashlytics are included. Create a Firebase project
-  and run `firebase.cmd login` followed by `flutterfire.bat configure` before
-  enabling them in the app.
+- Firebase (Messaging, Crashlytics) was removed because nothing used it and
+  it added background services to the app. To add push notifications later,
+  add `firebase_core` and `firebase_messaging` back, create a Firebase project
+  and run `flutterfire configure`.
 - Deno and the project-local Supabase CLI are ready for Edge Functions. Run
   `npm.cmd exec -- supabase --help` for commands. Starting the full local
   Supabase stack additionally requires Docker Desktop.

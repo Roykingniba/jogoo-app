@@ -187,17 +187,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get addEquipmentBody =>
-      'Tell us about a new installation or a product bought elsewhere. The JOGOO team will add it to your farm.';
+      'Describe a new installation or a product bought elsewhere, then send it to JOGOO on WhatsApp so the team can add it to your farm.';
 
   @override
   String get addEquipmentHint => 'For example: water tank 5,000 L';
 
   @override
-  String get addEquipmentSavedTitle => 'Saved for the JOGOO team';
+  String get addEquipmentSavedTitle => 'Not sent to JOGOO yet';
 
   @override
   String get addEquipmentSavedBody =>
-      'A technician will confirm the details with you.';
+      'Finish sending it on WhatsApp, or call JOGOO, so the team can add it to your farm.';
 
   @override
   String get tabEquipment => 'Equipment';
@@ -286,14 +286,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String bookServiceBody(String equipment) {
-    return 'JOGOO will call you to agree a visit date for your $equipment.';
+    return 'To book a visit for your $equipment, send a WhatsApp message or call JOGOO. The app cannot book visits by itself yet.';
   }
 
   @override
-  String get visitRequestedTitle => 'Visit request saved';
+  String get visitRequestedTitle => 'Visit not booked yet';
 
   @override
-  String get visitRequestedBody => 'JOGOO will call you to confirm the date.';
+  String get visitRequestedBody =>
+      'Only noted on this screen. Agree the date with JOGOO on WhatsApp or by phone.';
 
   @override
   String get detailsCopied => 'Details copied';
@@ -341,11 +342,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get forYourEquipment => 'For your equipment';
 
   @override
-  String get requestSavedTitle => 'Request saved for JOGOO sales';
+  String get requestSavedTitle => 'Request not sent yet';
 
   @override
   String requestSavedBody(String item) {
-    return '$item · a JOGOO adviser will call you back';
+    return '$item · only noted on this screen. Finish on WhatsApp or call JOGOO.';
   }
 
   @override
@@ -358,14 +359,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cartEmpty => 'Your cart is empty.';
 
   @override
-  String get sendOrderRequest => 'Send order request';
+  String get sendOrderRequest => 'Send order on WhatsApp';
 
   @override
-  String get orderRequestSavedTitle => 'Order request saved';
+  String get orderRequestSavedTitle => 'Order not sent by the app';
 
   @override
   String get orderRequestSavedBody =>
-      'JOGOO will call you to confirm price, fitting and delivery.';
+      'Send the WhatsApp message, or call JOGOO, to confirm price, fitting and delivery.';
 
   @override
   String get paymentLater =>
@@ -535,7 +536,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get bookVisitBody =>
-      'Which installation needs a visit? JOGOO will call you to agree a date.';
+      'Which installation needs a visit? You then send the request to JOGOO on WhatsApp or by phone.';
 
   @override
   String requestTitle(String id) {
@@ -585,7 +586,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get detailsHint => 'A note for the technician';
 
   @override
-  String get noteAdded => 'Note added';
+  String get noteAdded => 'Note kept on this screen only';
 
   @override
   String get pickNewDate => 'Pick a new date';
@@ -596,10 +597,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get rescheduleSentTitle => 'New date requested';
+  String get rescheduleSentTitle => 'New date not sent yet';
 
   @override
-  String get rescheduleSentBody => 'The technician will call you to confirm.';
+  String get rescheduleSentBody =>
+      'Only noted on this screen. Agree the new date with JOGOO on WhatsApp or by phone.';
 
   @override
   String clientSince(String date) {
@@ -703,10 +705,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get reorderOneTap => 'Reorder in one tap';
+  String get reorderOneTap => 'Reorder on WhatsApp';
 
   @override
-  String get reorderSavedTitle => 'Reorder saved for JOGOO sales';
+  String get reorderSavedTitle => 'Reorder not sent yet';
 
   @override
   String get remindBeforeSeason => 'Remind me before each season';
@@ -737,11 +739,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get callDriver => 'Call the driver';
 
   @override
-  String get dropOffChangeTitle => 'Change requested';
+  String get dropOffChangeTitle => 'Change not sent yet';
 
   @override
   String get dropOffChangeBody =>
-      'JOGOO will call you to agree the new drop-off point.';
+      'Agree the new drop-off point with JOGOO on WhatsApp or by phone.';
 
   @override
   String get whichEquipment => 'Which equipment?';
@@ -759,18 +761,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get photosAndVideos => 'Photos and videos';
 
   @override
-  String get sendRequest => 'Send request';
+  String get sendRequest => 'Send on WhatsApp';
 
   @override
   String get pickProblemFirst => 'Choose the equipment and the problem first.';
 
   @override
   String reportSavedTitle(String id) {
-    return 'Request $id saved';
+    return 'Request $id noted on this screen';
   }
 
   @override
-  String get reportSavedBody => 'JOGOO will call you today.';
+  String get reportSavedBody =>
+      'The app does not send it to JOGOO. Finish sending it on WhatsApp, or call JOGOO.';
 
   @override
   String get agronomistsTitle => 'JOGOO agronomists';
@@ -793,19 +796,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get askTheAgronomists => 'Ask the agronomists';
 
   @override
-  String get messageSavedTitle => 'Message saved';
+  String get messageSavedTitle => 'Question not sent by the app';
 
   @override
-  String get messageSavedBody => 'The agronomists reply Monday to Friday.';
+  String get messageSavedBody =>
+      'Send it in WhatsApp to reach the agronomists. They reply Monday to Friday.';
 
   @override
-  String get fieldVisitTitle => 'Field visit requested';
+  String get fieldVisitTitle => 'Field visit not booked yet';
 
   @override
-  String get fieldVisitBody => 'An agronomist will call you to agree a date.';
+  String get fieldVisitBody =>
+      'Agree a date with a JOGOO agronomist on WhatsApp or by phone.';
 
   @override
-  String get documentsSubtitle => 'Saved on this phone, readable offline';
+  String get documentsSubtitle => 'Plans, wiring and warranty papers';
 
   @override
   String get filterAll => 'All';
@@ -870,8 +875,9 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count entries waiting to sync',
-      one: '1 entry waiting to sync',
+      other:
+          '$count entries are only on this screen. They are not sent to JOGOO.',
+      one: '1 entry is only on this screen. It is not sent to JOGOO.',
     );
     return '$_temp0';
   }
@@ -885,10 +891,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loggedByLabel => 'Logged by';
 
   @override
-  String get waitingToSync => 'Waiting to sync';
+  String get waitingToSync => 'This screen only';
 
   @override
-  String get synced => 'Synced';
+  String get synced => 'From JOGOO';
 
   @override
   String get exportPdf => 'Export for audit (PDF)';
@@ -976,13 +982,14 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get saveOnPhone => 'Save on this phone';
+  String get saveOnPhone => 'Add to log';
 
   @override
-  String get syncLater => 'It will sync by itself when you are back online';
+  String get syncLater =>
+      'Kept in the app only until you close it. Not sent to JOGOO.';
 
   @override
-  String get entrySavedTitle => 'Saved on this phone';
+  String get entrySavedTitle => 'Added on this screen only';
 
   @override
   String get notificationsTitle => 'Notifications';
@@ -1034,4 +1041,118 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get wifiOnlyHelp => 'Saves your mobile data';
+
+  @override
+  String get exampleBannerTitle => 'Example data.';
+
+  @override
+  String get exampleBannerBody =>
+      'Your own farm will show here once JOGOO sets up your account.';
+
+  @override
+  String get sendOnWhatsApp => 'Send on WhatsApp';
+
+  @override
+  String get notSentTitle => 'The app does not send this to JOGOO yet';
+
+  @override
+  String get notSentBody =>
+      'Send it on WhatsApp or call JOGOO. What you enter here stays on this screen only.';
+
+  @override
+  String get messagePreview => 'Your WhatsApp message';
+
+  @override
+  String get keepOnScreen => 'Keep on this screen only';
+
+  @override
+  String get requestPriceTitle => 'Ask JOGOO for a price';
+
+  @override
+  String requestPriceBody(String item) {
+    return 'Ask JOGOO sales for the price of $item and whether it fits your farm.';
+  }
+
+  @override
+  String get cartNotSent =>
+      'The app does not send orders yet. Your cart opens as a WhatsApp message to JOGOO sales.';
+
+  @override
+  String get photosOnWhatsApp =>
+      'Photos and videos are not sent from this screen: add them in the WhatsApp chat.';
+
+  @override
+  String get agronomistNote =>
+      'Your question opens in WhatsApp to reach the JOGOO agronomists.';
+
+  @override
+  String waAddEquipment(String item) {
+    return 'Hello JOGOO, please add this equipment to my farm: $item';
+  }
+
+  @override
+  String waServiceVisit(String equipment) {
+    return 'Hello JOGOO, I would like a service visit for: $equipment';
+  }
+
+  @override
+  String waPriceRequest(String item) {
+    return 'Hello JOGOO, I would like a price for: $item';
+  }
+
+  @override
+  String waOrder(String lines, String total) {
+    return 'Hello JOGOO, I would like to order:\n$lines\nTotal shown in the app: $total FCFA';
+  }
+
+  @override
+  String waProblem(String equipment, String problem) {
+    return 'Hello JOGOO, I have a problem with $equipment: $problem.';
+  }
+
+  @override
+  String waProblemDetails(String details) {
+    return 'Details: $details';
+  }
+
+  @override
+  String waAgronomist(String question) {
+    return 'Question for the JOGOO agronomists: $question';
+  }
+
+  @override
+  String get waFieldVisit =>
+      'Hello JOGOO, I would like an agronomist to visit my farm.';
+
+  @override
+  String waReorder(String quantity, String item) {
+    return 'Hello JOGOO, I would like to order $quantity of $item.';
+  }
+
+  @override
+  String waDropOff(String id) {
+    return 'Hello JOGOO, I would like to change the drop-off point for order $id.';
+  }
+
+  @override
+  String waReschedule(String id, String date) {
+    return 'Hello JOGOO, about request $id: can the visit move to $date?';
+  }
+
+  @override
+  String waRequestNote(String id, String note) {
+    return 'Hello JOGOO, about request $id: $note';
+  }
+
+  @override
+  String resultsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count products found',
+      one: '1 product found',
+      zero: 'No product found',
+    );
+    return '$_temp0';
+  }
 }

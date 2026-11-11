@@ -36,9 +36,6 @@ dependencies:
   cupertino_icons: ^1.0.8
   powersync: ^1.18.0
   supabase_flutter: ^2.18.0
-  firebase_core: ^4.15.0
-  firebase_messaging: ^16.7.0
-  firebase_crashlytics: ^5.4.0
   path_provider: ^2.1.6
   video_player: ^2.14.1
   intl: ^0.20.3

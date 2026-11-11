@@ -6,6 +6,7 @@ import '../data/jogoo_store.dart';
 import '../generated/l10n/app_localizations.dart';
 import '../models/models.dart';
 import '../utils/format.dart';
+import '../utils/actions.dart';
 import '../widgets/jogoo_widgets.dart';
 import 'delivery_screen.dart';
 import 'documents_screen.dart';
@@ -46,6 +47,7 @@ class _MyFarmScreenState extends State<MyFarmScreen> {
             onPressed: () => _addEquipment(context),
           ),
         ),
+        const ExampleBanner(),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: PillRow(
@@ -114,8 +116,15 @@ class _MyFarmScreenState extends State<MyFarmScreen> {
     );
     controller.dispose();
     if (text == null || text.isEmpty || !context.mounted) return;
-    store.requestFromSales(Bi('New equipment: $text', 'Nouvel équipement : $text'));
-    showJogooToast(context, l.addEquipmentSavedTitle, l.addEquipmentSavedBody);
+    store.requestFromSales(
+      Bi('New equipment: $text', 'Nouvel équipement : $text'),
+    );
+    await contactJogooAbout(
+      context,
+      title: l.addEquipmentSavedTitle,
+      body: l.addEquipmentSavedBody,
+      message: l.waAddEquipment(text),
+    );
   }
 }
 

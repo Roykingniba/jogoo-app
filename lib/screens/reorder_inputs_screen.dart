@@ -6,6 +6,7 @@ import '../data/jogoo_store.dart';
 import '../generated/l10n/app_localizations.dart';
 import '../models/models.dart';
 import '../utils/format.dart';
+import '../utils/actions.dart';
 import '../widgets/jogoo_widgets.dart';
 
 /// Screen 12: fertiliser and inputs reordered in one tap.
@@ -125,10 +126,12 @@ class _ReorderInputsScreenState extends State<ReorderInputsScreen> {
                           title: other.name.of(context),
                           subtitle: other.lastBought == null
                               ? other.note.of(context)
-                              : other.note.of(context).replaceAll(
-                                  '{date}',
-                                  dayMonth(context, other.lastBought!),
-                                ),
+                              : other.note
+                                    .of(context)
+                                    .replaceAll(
+                                      '{date}',
+                                      dayMonth(context, other.lastBought!),
+                                    ),
                           trailing: _added.contains(other.id)
                               ? StatusPill(l.added, tone: Tone.lime)
                               : OutlinedButton(
@@ -164,23 +167,28 @@ class _ReorderInputsScreenState extends State<ReorderInputsScreen> {
         'Réassort : ${input.name.fr} × $_bags',
       ),
     );
-    showJogooToast(
+    contactJogooAbout(
       context,
-      l.reorderSavedTitle,
-      '${l.bags(_bags)} · ${input.name.of(context)}',
+      title: l.reorderSavedTitle,
+      body: '${l.bags(_bags)} · ${input.name.of(context)}',
+      message: l.waReorder(l.bags(_bags), input.name.of(context)),
     );
   }
 
   void _addOther(FarmInput input) {
     final l = AppLocalizations.of(context);
     JogooScope.read(context).requestFromSales(
-      Bi('Input request: ${input.name.en}', "Demande d'intrant : ${input.name.fr}"),
+      Bi(
+        'Input request: ${input.name.en}',
+        "Demande d'intrant : ${input.name.fr}",
+      ),
     );
     setState(() => _added.add(input.id));
-    showJogooToast(
+    contactJogooAbout(
       context,
-      l.requestSavedTitle,
-      l.requestSavedBody(input.name.of(context)),
+      title: l.requestPriceTitle,
+      body: l.requestPriceBody(input.name.of(context)),
+      message: l.waPriceRequest(input.name.of(context)),
     );
   }
 }

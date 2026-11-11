@@ -157,7 +157,7 @@ void main() {
     expect(find.text('Next visit'), findsNothing);
   });
 
-  testWidgets('A new log entry is saved on the phone and waits to sync', (
+  testWidgets('A new log entry is added and marked as not sent to JOGOO', (
     tester,
   ) async {
     _useSmallPhone(tester);
@@ -177,14 +177,19 @@ void main() {
     );
     await tester.tap(find.byTooltip('New entry'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Save on this phone'));
+    await tester.tap(find.text('Add to log'));
     await tester.pumpAndSettle();
 
     expect(store.pendingLogCount('drip-kit'), before + 1);
-    expect(find.text('2 entries waiting to sync'), findsOneWidget);
+    expect(
+      find.text('2 entries are only on this screen. They are not sent to JOGOO.'),
+      findsOneWidget,
+    );
   });
 
-  testWidgets('Reporting a problem opens the new request', (tester) async {
+  testWidgets('Reporting a problem offers WhatsApp, then opens the request', (
+    tester,
+  ) async {
     _useSmallPhone(tester);
     final store = _store(locale: const Locale('en'));
     await tester.pumpWidget(_hostWithStore(store, const ReportProblemScreen()));
@@ -192,7 +197,16 @@ void main() {
     await tester.tap(find.text('Drip kit'));
     await tester.tap(find.text('Leak'));
     await tester.pump();
-    await tester.tap(find.text('Send request'));
+    await tester.tap(find.text('Send on WhatsApp'));
+    await tester.pumpAndSettle();
+
+    // The app says plainly it did not send it, and shows the message.
+    expect(find.text('Your WhatsApp message'), findsOneWidget);
+    expect(
+      find.text('Hello JOGOO, I have a problem with Drip kit, 2 ha: Leak.'),
+      findsOneWidget,
+    );
+    await tester.tapAt(const Offset(10, 10)); // Close the sheet.
     await tester.pumpAndSettle();
 
     expect(store.openRequestCount, 2);

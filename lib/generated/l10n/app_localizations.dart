@@ -413,7 +413,7 @@ abstract class AppLocalizations {
   /// No description provided for @addEquipmentBody.
   ///
   /// In en, this message translates to:
-  /// **'Tell us about a new installation or a product bought elsewhere. The JOGOO team will add it to your farm.'**
+  /// **'Describe a new installation or a product bought elsewhere, then send it to JOGOO on WhatsApp so the team can add it to your farm.'**
   String get addEquipmentBody;
 
   /// No description provided for @addEquipmentHint.
@@ -425,13 +425,13 @@ abstract class AppLocalizations {
   /// No description provided for @addEquipmentSavedTitle.
   ///
   /// In en, this message translates to:
-  /// **'Saved for the JOGOO team'**
+  /// **'Not sent to JOGOO yet'**
   String get addEquipmentSavedTitle;
 
   /// No description provided for @addEquipmentSavedBody.
   ///
   /// In en, this message translates to:
-  /// **'A technician will confirm the details with you.'**
+  /// **'Finish sending it on WhatsApp, or call JOGOO, so the team can add it to your farm.'**
   String get addEquipmentSavedBody;
 
   /// No description provided for @tabEquipment.
@@ -587,19 +587,19 @@ abstract class AppLocalizations {
   /// No description provided for @bookServiceBody.
   ///
   /// In en, this message translates to:
-  /// **'JOGOO will call you to agree a visit date for your {equipment}.'**
+  /// **'To book a visit for your {equipment}, send a WhatsApp message or call JOGOO. The app cannot book visits by itself yet.'**
   String bookServiceBody(String equipment);
 
   /// No description provided for @visitRequestedTitle.
   ///
   /// In en, this message translates to:
-  /// **'Visit request saved'**
+  /// **'Visit not booked yet'**
   String get visitRequestedTitle;
 
   /// No description provided for @visitRequestedBody.
   ///
   /// In en, this message translates to:
-  /// **'JOGOO will call you to confirm the date.'**
+  /// **'Only noted on this screen. Agree the date with JOGOO on WhatsApp or by phone.'**
   String get visitRequestedBody;
 
   /// No description provided for @detailsCopied.
@@ -695,13 +695,13 @@ abstract class AppLocalizations {
   /// No description provided for @requestSavedTitle.
   ///
   /// In en, this message translates to:
-  /// **'Request saved for JOGOO sales'**
+  /// **'Request not sent yet'**
   String get requestSavedTitle;
 
   /// No description provided for @requestSavedBody.
   ///
   /// In en, this message translates to:
-  /// **'{item} · a JOGOO adviser will call you back'**
+  /// **'{item} · only noted on this screen. Finish on WhatsApp or call JOGOO.'**
   String requestSavedBody(String item);
 
   /// No description provided for @cart.
@@ -725,19 +725,19 @@ abstract class AppLocalizations {
   /// No description provided for @sendOrderRequest.
   ///
   /// In en, this message translates to:
-  /// **'Send order request'**
+  /// **'Send order on WhatsApp'**
   String get sendOrderRequest;
 
   /// No description provided for @orderRequestSavedTitle.
   ///
   /// In en, this message translates to:
-  /// **'Order request saved'**
+  /// **'Order not sent by the app'**
   String get orderRequestSavedTitle;
 
   /// No description provided for @orderRequestSavedBody.
   ///
   /// In en, this message translates to:
-  /// **'JOGOO will call you to confirm price, fitting and delivery.'**
+  /// **'Send the WhatsApp message, or call JOGOO, to confirm price, fitting and delivery.'**
   String get orderRequestSavedBody;
 
   /// No description provided for @paymentLater.
@@ -1013,7 +1013,7 @@ abstract class AppLocalizations {
   /// No description provided for @bookVisitBody.
   ///
   /// In en, this message translates to:
-  /// **'Which installation needs a visit? JOGOO will call you to agree a date.'**
+  /// **'Which installation needs a visit? You then send the request to JOGOO on WhatsApp or by phone.'**
   String get bookVisitBody;
 
   /// No description provided for @requestTitle.
@@ -1109,7 +1109,7 @@ abstract class AppLocalizations {
   /// No description provided for @noteAdded.
   ///
   /// In en, this message translates to:
-  /// **'Note added'**
+  /// **'Note kept on this screen only'**
   String get noteAdded;
 
   /// No description provided for @pickNewDate.
@@ -1127,13 +1127,13 @@ abstract class AppLocalizations {
   /// No description provided for @rescheduleSentTitle.
   ///
   /// In en, this message translates to:
-  /// **'New date requested'**
+  /// **'New date not sent yet'**
   String get rescheduleSentTitle;
 
   /// No description provided for @rescheduleSentBody.
   ///
   /// In en, this message translates to:
-  /// **'The technician will call you to confirm.'**
+  /// **'Only noted on this screen. Agree the new date with JOGOO on WhatsApp or by phone.'**
   String get rescheduleSentBody;
 
   /// No description provided for @clientSince.
@@ -1295,13 +1295,13 @@ abstract class AppLocalizations {
   /// No description provided for @reorderOneTap.
   ///
   /// In en, this message translates to:
-  /// **'Reorder in one tap'**
+  /// **'Reorder on WhatsApp'**
   String get reorderOneTap;
 
   /// No description provided for @reorderSavedTitle.
   ///
   /// In en, this message translates to:
-  /// **'Reorder saved for JOGOO sales'**
+  /// **'Reorder not sent yet'**
   String get reorderSavedTitle;
 
   /// No description provided for @remindBeforeSeason.
@@ -1355,13 +1355,13 @@ abstract class AppLocalizations {
   /// No description provided for @dropOffChangeTitle.
   ///
   /// In en, this message translates to:
-  /// **'Change requested'**
+  /// **'Change not sent yet'**
   String get dropOffChangeTitle;
 
   /// No description provided for @dropOffChangeBody.
   ///
   /// In en, this message translates to:
-  /// **'JOGOO will call you to agree the new drop-off point.'**
+  /// **'Agree the new drop-off point with JOGOO on WhatsApp or by phone.'**
   String get dropOffChangeBody;
 
   /// No description provided for @whichEquipment.
@@ -1397,7 +1397,7 @@ abstract class AppLocalizations {
   /// No description provided for @sendRequest.
   ///
   /// In en, this message translates to:
-  /// **'Send request'**
+  /// **'Send on WhatsApp'**
   String get sendRequest;
 
   /// No description provided for @pickProblemFirst.
@@ -1409,13 +1409,13 @@ abstract class AppLocalizations {
   /// No description provided for @reportSavedTitle.
   ///
   /// In en, this message translates to:
-  /// **'Request {id} saved'**
+  /// **'Request {id} noted on this screen'**
   String reportSavedTitle(String id);
 
   /// No description provided for @reportSavedBody.
   ///
   /// In en, this message translates to:
-  /// **'JOGOO will call you today.'**
+  /// **'The app does not send it to JOGOO. Finish sending it on WhatsApp, or call JOGOO.'**
   String get reportSavedBody;
 
   /// No description provided for @agronomistsTitle.
@@ -1457,31 +1457,31 @@ abstract class AppLocalizations {
   /// No description provided for @messageSavedTitle.
   ///
   /// In en, this message translates to:
-  /// **'Message saved'**
+  /// **'Question not sent by the app'**
   String get messageSavedTitle;
 
   /// No description provided for @messageSavedBody.
   ///
   /// In en, this message translates to:
-  /// **'The agronomists reply Monday to Friday.'**
+  /// **'Send it in WhatsApp to reach the agronomists. They reply Monday to Friday.'**
   String get messageSavedBody;
 
   /// No description provided for @fieldVisitTitle.
   ///
   /// In en, this message translates to:
-  /// **'Field visit requested'**
+  /// **'Field visit not booked yet'**
   String get fieldVisitTitle;
 
   /// No description provided for @fieldVisitBody.
   ///
   /// In en, this message translates to:
-  /// **'An agronomist will call you to agree a date.'**
+  /// **'Agree a date with a JOGOO agronomist on WhatsApp or by phone.'**
   String get fieldVisitBody;
 
   /// No description provided for @documentsSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Saved on this phone, readable offline'**
+  /// **'Plans, wiring and warranty papers'**
   String get documentsSubtitle;
 
   /// No description provided for @filterAll.
@@ -1571,7 +1571,7 @@ abstract class AppLocalizations {
   /// No description provided for @pendingSync.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 entry waiting to sync} other{{count} entries waiting to sync}}'**
+  /// **'{count, plural, =1{1 entry is only on this screen. It is not sent to JOGOO.} other{{count} entries are only on this screen. They are not sent to JOGOO.}}'**
   String pendingSync(int count);
 
   /// No description provided for @loggedBy.
@@ -1589,13 +1589,13 @@ abstract class AppLocalizations {
   /// No description provided for @waitingToSync.
   ///
   /// In en, this message translates to:
-  /// **'Waiting to sync'**
+  /// **'This screen only'**
   String get waitingToSync;
 
   /// No description provided for @synced.
   ///
   /// In en, this message translates to:
-  /// **'Synced'**
+  /// **'From JOGOO'**
   String get synced;
 
   /// No description provided for @exportPdf.
@@ -1763,19 +1763,19 @@ abstract class AppLocalizations {
   /// No description provided for @saveOnPhone.
   ///
   /// In en, this message translates to:
-  /// **'Save on this phone'**
+  /// **'Add to log'**
   String get saveOnPhone;
 
   /// No description provided for @syncLater.
   ///
   /// In en, this message translates to:
-  /// **'It will sync by itself when you are back online'**
+  /// **'Kept in the app only until you close it. Not sent to JOGOO.'**
   String get syncLater;
 
   /// No description provided for @entrySavedTitle.
   ///
   /// In en, this message translates to:
-  /// **'Saved on this phone'**
+  /// **'Added on this screen only'**
   String get entrySavedTitle;
 
   /// No description provided for @notificationsTitle.
@@ -1843,6 +1843,156 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Saves your mobile data'**
   String get wifiOnlyHelp;
+
+  /// No description provided for @exampleBannerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Example data.'**
+  String get exampleBannerTitle;
+
+  /// No description provided for @exampleBannerBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your own farm will show here once JOGOO sets up your account.'**
+  String get exampleBannerBody;
+
+  /// No description provided for @sendOnWhatsApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Send on WhatsApp'**
+  String get sendOnWhatsApp;
+
+  /// No description provided for @notSentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The app does not send this to JOGOO yet'**
+  String get notSentTitle;
+
+  /// No description provided for @notSentBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Send it on WhatsApp or call JOGOO. What you enter here stays on this screen only.'**
+  String get notSentBody;
+
+  /// No description provided for @messagePreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Your WhatsApp message'**
+  String get messagePreview;
+
+  /// No description provided for @keepOnScreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep on this screen only'**
+  String get keepOnScreen;
+
+  /// No description provided for @requestPriceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask JOGOO for a price'**
+  String get requestPriceTitle;
+
+  /// No description provided for @requestPriceBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask JOGOO sales for the price of {item} and whether it fits your farm.'**
+  String requestPriceBody(String item);
+
+  /// No description provided for @cartNotSent.
+  ///
+  /// In en, this message translates to:
+  /// **'The app does not send orders yet. Your cart opens as a WhatsApp message to JOGOO sales.'**
+  String get cartNotSent;
+
+  /// No description provided for @photosOnWhatsApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos and videos are not sent from this screen: add them in the WhatsApp chat.'**
+  String get photosOnWhatsApp;
+
+  /// No description provided for @agronomistNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Your question opens in WhatsApp to reach the JOGOO agronomists.'**
+  String get agronomistNote;
+
+  /// No description provided for @waAddEquipment.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello JOGOO, please add this equipment to my farm: {item}'**
+  String waAddEquipment(String item);
+
+  /// No description provided for @waServiceVisit.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello JOGOO, I would like a service visit for: {equipment}'**
+  String waServiceVisit(String equipment);
+
+  /// No description provided for @waPriceRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello JOGOO, I would like a price for: {item}'**
+  String waPriceRequest(String item);
+
+  /// No description provided for @waOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello JOGOO, I would like to order:\n{lines}\nTotal shown in the app: {total} FCFA'**
+  String waOrder(String lines, String total);
+
+  /// No description provided for @waProblem.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello JOGOO, I have a problem with {equipment}: {problem}.'**
+  String waProblem(String equipment, String problem);
+
+  /// No description provided for @waProblemDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Details: {details}'**
+  String waProblemDetails(String details);
+
+  /// No description provided for @waAgronomist.
+  ///
+  /// In en, this message translates to:
+  /// **'Question for the JOGOO agronomists: {question}'**
+  String waAgronomist(String question);
+
+  /// No description provided for @waFieldVisit.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello JOGOO, I would like an agronomist to visit my farm.'**
+  String get waFieldVisit;
+
+  /// No description provided for @waReorder.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello JOGOO, I would like to order {quantity} of {item}.'**
+  String waReorder(String quantity, String item);
+
+  /// No description provided for @waDropOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello JOGOO, I would like to change the drop-off point for order {id}.'**
+  String waDropOff(String id);
+
+  /// No description provided for @waReschedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello JOGOO, about request {id}: can the visit move to {date}?'**
+  String waReschedule(String id, String date);
+
+  /// No description provided for @waRequestNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello JOGOO, about request {id}: {note}'**
+  String waRequestNote(String id, String note);
+
+  /// No description provided for @resultsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No product found} =1{1 product found} other{{count} products found}}'**
+  String resultsCount(int count);
 }
 
 class _AppLocalizationsDelegate
