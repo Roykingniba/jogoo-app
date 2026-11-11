@@ -1,0 +1,16 @@
+# JOGOO API: send every request to index.php; hide internals.
+Options -Indexes
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  # Never serve the API over plain HTTP (this file's rules replace the parent's).
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+  RewriteRule ^lib/ - [F,L]
+  RewriteRule ^config\.local\.php$ - [F,L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteRule ^ index.php [QSA,L]
+</IfModule>
+<FilesMatch "^(config\.local\.php|.*\.sql)$">
+  Require all denied
+</FilesMatch>

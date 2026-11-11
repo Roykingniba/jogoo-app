@@ -1,0 +1,35 @@
+# meha.jogoo.africa — JOGOO web app (static files) + PHP API in /api
+Options -Indexes
+DirectoryIndex index.html
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  # Always HTTPS (except certificate validation files)
+  RewriteCond %{REQUEST_URI} !^/\.well-known/
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+  # Hide dotfiles (except .well-known for SSL validation)
+  RewriteRule (^|/)\.(?!well-known/) - [F,L]
+</IfModule>
+
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "DENY"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "camera=(self), microphone=(), geolocation=()"
+  Header always set Strict-Transport-Security "max-age=31536000"
+  Header always set Content-Security-Policy "default-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; style-src 'self' 'unsafe-inline'; font-src 'self'; connect-src 'self' https://*.supabase.co; worker-src 'self' blob:; frame-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+  # App shell and service workers must revalidate; hashed assets cache for a year.
+  <FilesMatch "^(index\.html|sw\.js|flutter_service_worker\.js|manifest\.webmanifest)$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+</IfModule>
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/javascript "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
+  ExpiresByType text/css "access plus 1 year"
+</IfModule>
+AddType application/manifest+json .webmanifest
+AddType font/ttf .ttf
