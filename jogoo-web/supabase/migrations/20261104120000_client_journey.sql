@@ -2,7 +2,7 @@
 -- Apply when moving client accounts from the cPanel PHP API to Supabase.
 -- Users live in auth.users (Supabase Auth); this adds profiles + journey.
 
-create type public.user_role as enum ('client', 'admin');
+create type public.user_role as enum ('client', 'admin', 'super_admin');
 create type public.journey_stage as enum (
   'signed_up', 'contacted', 'site_visit', 'quote_sent',
   'payment_made', 'installation_scheduled', 'installed'
@@ -39,7 +39,11 @@ create view public.client_stage with (security_invoker = true) as
 create schema if not exists private;
 create or replace function private.is_admin() returns boolean
   language sql stable security definer set search_path = '' as $$
-  select exists (select 1 from public.profiles where id = auth.uid() and role = 'admin');
+  select exists (select 1 from public.profiles where id = auth.uid() and role in ('admin', 'super_admin'));
+$$;
+create or replace function private.is_super_admin() returns boolean
+  language sql stable security definer set search_path = '' as $$
+  select exists (select 1 from public.profiles where id = auth.uid() and role = 'super_admin');
 $$;
 
 -- New sign-ups: create the profile (from sign-up metadata) and the first step.
@@ -61,12 +65,22 @@ end $$;
 create trigger on_auth_user_created after insert on auth.users
   for each row execute function private.handle_new_user();
 
--- Clients may not promote themselves.
+-- Same rules as the PHP API: only the super admin changes roles, never to or
+-- from super_admin and never their own (super admins are set in SQL). Ids
+-- and creation dates never change.
 create or replace function private.protect_role() returns trigger
   language plpgsql security definer set search_path = '' as $$
 begin
-  if new.role <> old.role and not private.is_admin() then
-    raise exception 'only staff can change roles';
+  if new.id <> old.id or new.created_at <> old.created_at then
+    raise exception 'id and created_at cannot change';
+  end if;
+  -- auth.uid() is null for the SQL editor / service role: allowed.
+  if new.role <> old.role and auth.uid() is not null and (
+       not private.is_super_admin()
+       or old.id = auth.uid()
+       or 'super_admin' in (old.role, new.role)
+     ) then
+    raise exception 'only the super admin can change staff roles';
   end if;
   new.updated_at := now();
   return new;
@@ -89,3 +103,4 @@ create policy "staff add steps" on public.journey_events for insert
   with check (private.is_admin() and created_by = auth.uid());
 
 grant execute on function private.is_admin() to authenticated;
+grant execute on function private.is_super_admin() to authenticated;

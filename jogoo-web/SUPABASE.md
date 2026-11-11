@@ -32,5 +32,7 @@ The web app only talks to the `Backend` interface in
 4. Rebuild, deploy, and remove `/api` from the cPanel site.
 
 Row-level security in the migration gives the same rules as the PHP API:
-clients see only their own profile and journey; staff (`role = 'admin'`) see
-everyone and are the only ones who can add steps or change roles.
+clients see only their own profile and journey; staff (`admin` and
+`super_admin`) see everyone and are the only ones who can add steps; only the
+super admin can give or remove staff access (super admins themselves are set
+in the SQL editor).
