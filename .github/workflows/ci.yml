@@ -1,0 +1,61 @@
+# Checks every push and pull request: web app (types, lint, build), the
+# PHP API end to end against a throwaway MariaDB (Docker), and the Flutter app.
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: jogoo-web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: jogoo-web/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+      # Every message must exist in both languages.
+      - run: |
+          node -e '
+            const read = (f) => Object.keys(require("./src/i18n/" + f));
+            for (const [a, b] of [["en.json", "fr.json"], ["web_en.json", "web_fr.json"]]) {
+              const A = new Set(read(a)), B = new Set(read(b));
+              const miss = [...A].filter((k) => !B.has(k)).map((k) => b + ": " + k)
+                .concat([...B].filter((k) => !A.has(k)).map((k) => a + ": " + k));
+              if (miss.length) { console.error("Missing translations:\n" + miss.join("\n")); process.exit(1); }
+            }'
+  api:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: jogoo-web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: bash server/tests/run.sh
+      # The cPanel host may run PHP 7.4: the API must still parse there.
+      - run: docker run --rm -v "$PWD/server:/s:ro" php:7.4-cli sh -c 'for f in /s/api/*.php /s/api/lib/*.php /s/tools/*.php; do php -l "$f" >/dev/null || exit 1; done'
+  flutter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      # The committed generated translations must match the .arb files.
+      - run: flutter gen-l10n && git diff --exit-code -- lib/generated
+      - run: flutter analyze --no-fatal-infos
+      - run: flutter test
