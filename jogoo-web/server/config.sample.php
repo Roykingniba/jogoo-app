@@ -12,7 +12,8 @@ return [
     // database and create the tables.
     'setup_key' => 'CHANGE-ME-to-a-long-random-string',
 
-    // Secret for hashing email codes. Long random string; never share it.
+    // Secret for hashing email codes. Required: long random string (at least
+    // 16 characters, e.g. `openssl rand -hex 32`); never share it.
     'app_secret' => 'CHANGE-ME-another-long-random-string',
 
     // These emails become super admins (can manage staff) once they sign up
@@ -29,4 +30,9 @@ return [
 
     // Only these origins may call the API from a browser (same origin is always OK).
     'allowed_origins' => ['https://meha.jogoo.africa'],
+
+    // Only if the site sits behind Cloudflare or another proxy: the request
+    // header holding the visitor's real IP, so rate limits work per visitor.
+    // Leave empty otherwise (anyone can forge the header).
+    // 'client_ip_header' => 'HTTP_CF_CONNECTING_IP',
 ];

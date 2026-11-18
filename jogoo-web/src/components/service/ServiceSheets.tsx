@@ -4,7 +4,9 @@ import { Icon } from '../Icon';
 import { ListRow, TintIcon } from '../ui';
 import { Sheet, SheetOption, pickMediaFile, showToast } from '../overlays';
 import { useI18n } from '../../i18n/i18n';
+import { ContactJogooSheet } from './ContactJogoo';
 import { useEquipmentList, useStore } from '../../data/store';
+import { wholeFarmEquipment } from '../../data/farm';
 import { bi, underWarranty, type Equipment } from '../../data/models';
 import '../../styles/service.css';
 
@@ -33,7 +35,7 @@ export function useMediaPicker(): { pick: (video?: boolean) => Promise<Picked>; 
     // Must run inside the click handler so the browser allows the file chooser.
     pickMediaFile({ video: isVideo, camera })
       .then((r) => done?.(r))
-      .catch(() => { showToast(t('cannotOpenCamera')); done?.(null); });
+      .catch(() => { showToast(t('cannotOpenCamera'), undefined, 'error'); done?.(null); });
   };
 
   const pick = (v = false) =>
@@ -53,28 +55,34 @@ export function useMediaPicker(): { pick: (video?: boolean) => Promise<Picked>; 
   return { pick, sheet };
 }
 
-/** Port of bookVisit(): asks which installation needs a visit, then passes it to JOGOO. */
+/**
+ * Port of bookVisit(): asks which installation needs a visit, then hands the
+ * request to JOGOO on WhatsApp or by phone (the app cannot book visits itself).
+ */
 export function BookVisitSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { t, b } = useI18n();
   const equipmentList = useEquipmentList();
   const requestFromSales = useStore((s) => s.requestFromSales);
-  const chooseItem = (item: Equipment | null) => {
-    onClose();
-    requestFromSales(item
-      ? bi(`Service visit: ${item.name.en}`, `Visite d'entretien : ${item.name.fr}`)
-      : bi('Service visit: whole farm', "Visite d'entretien : toute l'exploitation"));
-    showToast(t('visitRequestedTitle'), t('visitRequestedBody'));
-  };
+  const [item, setItem] = useState<Equipment | null>(null);
+  const close = () => { setItem(null); onClose(); };
   return (
-    <Sheet open={open} onClose={onClose} title={t('bookVisitTitle')}>
-      <p className="t-body-m" style={{ margin: '0 0 8px' }}>{t('bookVisitBody')}</p>
-      {equipmentList.map((item) => (
-        <ListRow key={item.id} leading={<TintIcon icon={item.icon} tone={item.tone} size={44} />} title={b(item.name)}
-          trailing={<Icon name="chevron_right" color="var(--muted)" />} onClick={() => chooseItem(item)} />
-      ))}
-      <ListRow leading={<TintIcon icon="spa_outlined" tone="lime" size={44} />} title={t('wholeFarm')}
-        trailing={<Icon name="chevron_right" color="var(--muted)" />} onClick={() => chooseItem(null)} />
-    </Sheet>
+    <>
+      <Sheet open={open && !item} onClose={close} title={t('bookVisitTitle')}>
+        <p className="t-body-m" style={{ margin: '0 0 8px' }}>{t('bookVisitBody')}</p>
+        {[...equipmentList, wholeFarmEquipment()].map((it) => (
+          <ListRow key={it.id} leading={<TintIcon icon={it.icon} tone={it.tone} size={44} />} title={b(it.name)}
+            trailing={<Icon name="chevron_right" color="var(--muted)" />} onClick={() => setItem(it)} />
+        ))}
+      </Sheet>
+      <ContactJogooSheet open={open && !!item} onClose={close} title={t('bookVisitTitle')}
+        body={item ? t('bookServiceBody', { equipment: b(item.name) }) : undefined}
+        message={item ? t('waServiceVisit', { equipment: b(item.name) }) : ''}
+        onContact={() => {
+          if (!item) return;
+          requestFromSales(bi(`Service visit: ${item.name.en}`, `Visite d'entretien : ${item.name.fr}`));
+          showToast(t('visitRequestedTitle'), t('visitRequestedBody'));
+        }} />
+    </>
   );
 }
 

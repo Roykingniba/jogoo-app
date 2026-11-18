@@ -1,5 +1,5 @@
 // Screen 08: after-sales support hub. Ported from lib/screens/service_screen.dart.
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Button, Divided, InitialsAvatar, JCard, ListRow, Page, PageTitle, RoundShortcut, SectionTitle, StatusPill, TintIcon,
@@ -29,6 +29,7 @@ export default function ServiceScreen() {
   useEffect(() => { void loadVisits(); }, [loadVisits]);
   const upcoming = activeVisits(visits);
   const past = visits.filter((v) => v.status === 'done' || v.status === 'cancelled').slice(0, 3);
+  const id = useId();
 
   return (
     <Page>
@@ -67,14 +68,17 @@ export default function ServiceScreen() {
         </JCard>
         </div>
 
-        <JCard padding="small" className="a-agro" onClick={() => navigate(paths.agronomist)} ariaLabel={t('agronomistsTitle')}>
-          <ListRow leading={<TintIcon icon="spa_outlined" tone="lime" size={52} />} title={t('agronomistsTitle')}
-            subtitle={t('repliesWeekdays')} trailing={<Icon name="chevron_right" color="var(--muted)" />} />
+        <JCard padding="small" className="a-agro" onClick={() => navigate(paths.agronomist)}
+          labelledBy={`${id}-agro`} describedBy={`${id}-agro-d`}>
+          <ListRow leading={<TintIcon icon="spa_outlined" tone="lime" size={52} />} title={<span id={`${id}-agro`}>{t('agronomistsTitle')}</span>}
+            subtitle={<span id={`${id}-agro-d`}>{t('repliesWeekdays')}</span>} trailing={<Icon name="chevron_right" color="var(--muted)" />} />
         </JCard>
 
-        <JCard padding="small" className="a-call" onClick={callJogoo} ariaLabel={t('callJogooCameroon')}>
+        <JCard padding="small" className="a-call" onClick={callJogoo}
+          labelledBy={`${id}-call`} describedBy={`${id}-call-d`}>
           <ListRow leading={<span className="service-call-disc"><Icon name="call_outlined" /></span>}
-            title={t('callJogooCameroon')} subtitle={DemoData.jogooPhoneDisplay} />
+            title={<span id={`${id}-call`}>{t('callJogooCameroon')}</span>}
+            subtitle={<span id={`${id}-call-d`}>{DemoData.jogooPhoneDisplay}</span>} />
         </JCard>
       </div>
 

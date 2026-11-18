@@ -4,7 +4,7 @@
 // to sessions that passed the code step (see supabase/migrations/*_client_accounts.sql).
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import {
-  BackendError, type Backend, type Journey, type MyFarm, type Pending, type Visit, type Profile,
+  BackendError, sessionEvents, SESSION_EXPIRED, type Backend, type Journey, type MyFarm, type Pending, type Visit, type Profile,
 } from './types';
 
 const url = import.meta.env.VITE_SUPABASE_URL as string;
@@ -69,7 +69,9 @@ async function rpc<T>(name: string, args?: Record<string, unknown>): Promise<T> 
   const { data, error, status } = await sb().rpc(name, args ?? {});
   if (error) {
     if (!status || error.message?.includes('Failed to fetch')) throw new BackendError('offline');
-    const known = /\b(invalid_name|invalid_area|invalid_date|invalid_photo|too_many)\b/.exec(error.message)?.[1];
+    // The server no longer accepts this session (expired, revoked, or the code step was lost).
+    if (status === 401 || /JWT expired|not_verified/.test(error.message)) sessionEvents.dispatchEvent(new Event(SESSION_EXPIRED));
+    const known = /\b(invalid_name|invalid_area|invalid_date|invalid_photo|invalid_credentials|too_many_attempts|too_many)\b/.exec(error.message)?.[1];
     const code = known ?? (/not_verified|forbidden/.test(error.message) ? 'forbidden' : /not_found/.test(error.message) ? 'not_found' : 'server_error');
     throw new BackendError(code, status);
   }
@@ -197,5 +199,10 @@ export const supabaseBackend: Backend = {
   saveEquipment: (equipment) => rpc<MyFarm>('save_my_equipment', { e: equipment }),
   removeEquipment: (id) => rpc<MyFarm>('remove_my_equipment', { eid: id }),
   myVisits: () => rpc<Visit[]>('my_visits'),
+
+  async deleteAccount(password) {
+    await rpc('delete_my_account', { password });
+    await sb().auth.signOut({ scope: 'local' }).catch(() => {});
+  },
 
 };

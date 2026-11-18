@@ -53,4 +53,11 @@ jobs:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-        run: bash scripts/upload-ftp.sh
+          FTP_WEB_DIR: ${{ vars.FTP_WEB_DIR }}
+          FTP_UPDATES_DIR: ${{ vars.FTP_UPDATES_DIR }}
+        run: |
+          if [ -z "$FTP_SERVER" ] || [ -z "$FTP_USERNAME" ] || [ -z "$FTP_PASSWORD" ]; then
+            echo "::warning title=Not published::Add the FTP_SERVER, FTP_USERNAME and FTP_PASSWORD repository secrets (see jogoo-web/DEPLOY.md) to publish the website and the app update."
+            exit 0
+          fi
+          bash scripts/upload-ftp.sh

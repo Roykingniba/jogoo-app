@@ -9,7 +9,7 @@ new version by itself:
    - the website to `meha.jogoo.africa/`
    - the app update to `jogoo.africa/meha-updates/` (`bundle-<build>.zip`, then `latest.json`)
 3. The Android app (version 1.5 and later) checks `latest.json` when it opens
-   and every 6 hours, downloads the new bundle in the background, checks its
+   and each time it comes back to the screen (at most every 30 minutes), downloads the new bundle in the background, checks its
    SHA-256, and switches to it the next time it is closed or put in the
    background. If a new bundle fails to start, the app goes back to the
    previous one by itself.

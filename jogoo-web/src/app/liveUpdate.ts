@@ -17,7 +17,7 @@ import { App as CapApp } from '@capacitor/app';
 const UPDATES_URL = 'https://jogoo.africa/meha-updates';
 /** Set by the build (YYYYMMDDHHmm); 0 in local builds. */
 const BUILT_IN = Number(import.meta.env.VITE_BUILD ?? 0);
-const CHECK_EVERY_MS = 6 * 60 * 60 * 1000;
+const CHECK_EVERY_MS = 30 * 60 * 1000;
 
 interface Latest {
   build: number;

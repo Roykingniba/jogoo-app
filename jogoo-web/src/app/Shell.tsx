@@ -11,6 +11,8 @@ import { useStore, unreadCount } from '../data/store';
 import { paths, tabForPath, type AppTab } from '../routes';
 import { InstallBanner, InstallNavItem } from './install';
 import { useAuth } from '../data/auth';
+import { askSignOut, SignOutConfirm } from '../components/account/SignOut';
+import { useUpdate } from './update';
 
 const baseTabs: { tab: AppTab; to: string; icon: IconName; label: MsgKey }[] = [
   { tab: 'home', to: paths.home, icon: 'home_outlined', label: 'navHome' },
@@ -28,7 +30,7 @@ export function Shell() {
   const setLang = useStore((s) => s.setLang);
   const account = useAuth((s) => s.profile);
   const offline = useAuth((s) => s.offline);
-  const signOut = useAuth((s) => s.signOut);
+  const update = useUpdate();
   // Clients get a Status tab; JOGOO staff get the client tracking page instead.
   const tabs = [
     ...baseTabs,
@@ -43,7 +45,9 @@ export function Shell() {
 
   return (
     <div className="app">
-      <a href="#main" className="sr-only">{t('appTitle')}</a>
+      <a href="#main" className="skip-link" onClick={(e) => { e.preventDefault(); document.getElementById('main')?.focus(); }}>
+        {t('skipToContent')}
+      </a>
       <nav className="side-nav" aria-label={t('appTitle')}>
         <NavLink to={paths.home} className="brand" aria-label="JOGOO">
           <Logo className="logo-full" height={52} />
@@ -76,7 +80,7 @@ export function Shell() {
               </span>
             </div>
           )}
-          <button type="button" className="nav-item" onClick={() => void signOut()}>
+          <button type="button" className="nav-item" onClick={askSignOut}>
             <span className="ind"><Icon name="logout" /></span>
             <span>{t('signOut')}</span>
           </button>
@@ -92,8 +96,14 @@ export function Shell() {
         </div>
       </nav>
 
-      <main id="main" className="app-main">
+      <main id="main" className="app-main" tabIndex={-1}>
         {offline && <div className="offline-bar" role="status">{t('offlineAccount')}</div>}
+        {update.ready && (
+          <div className="offline-bar update-bar" role="status">
+            <span>{t('updateAvailable')}</span>
+            <button type="button" className="btn small filled" onClick={update.apply}>{t('reload')}</button>
+          </div>
+        )}
         {current === 'home' && <InstallBanner />}
         <Outlet />
       </main>
@@ -107,6 +117,7 @@ export function Shell() {
         ))}
       </nav>
       <ToastHost />
+      <SignOutConfirm />
     </div>
   );
 }
