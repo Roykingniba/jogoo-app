@@ -349,3 +349,9 @@ export const unreadCount = (ns: AppNotification[]) => ns.filter((n) => n.unread)
 export const activeVisits = (vs: Visit[]) =>
   vs.filter((v) => v.status !== 'done' && v.status !== 'cancelled')
     .sort((a, b) => a.startsAt.localeCompare(b.startsAt));
+// Everything except the language, as it was when the app opened.
+const freshState = useStore.getState();
+/** Forgets everything the previous person did in this session (cart, chats, notes...). */
+export function resetSessionState() {
+  useStore.setState({ ...freshState, lang: useStore.getState().lang }, true);
+}

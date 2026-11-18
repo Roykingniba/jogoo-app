@@ -30,10 +30,10 @@ $h = fn($s) => htmlspecialchars((string)$s, ENT_QUOTES);
 
 $cfg = config();
 $cfgFile = $cfg['_file'];
-$supers = implode(', ', $cfg['super_admin_emails'] ?? []);
 $done = '<p class=ok>Setup is complete. The database is ready.</p>
-<p>Next: <a href="../#/signup">create your account</a>' . ($supers ? ' with <b>' . $h($supers) . '</b>' : '') . '. After you confirm the email code it becomes the super admin account.</p>
+<p>Next: <a href="../#/signup">create your account</a> with one of the <code>super_admin_emails</code> from <code>app.php</code>. After you confirm the email code it becomes the super admin account.</p>
 <p><small>For safety, delete <code>api/install.php</code> from the server.</small></p>';
+$installed = '<p class=ok>JOGOO is already installed.</p><p><small>Delete <code>api/install.php</code> from the server.</small></p>';
 
 function connect(array $c): PDO
 {
@@ -55,6 +55,8 @@ $needsDb = ($cfg['db_user'] ?? '') === '' || ($cfg['db_pass'] ?? '') === '';
 if (!$needsDb) {
     try {
         $pdo = connect($cfg);
+        // Once the tables exist this page does nothing, whoever opens it.
+        if ($pdo->query("SHOW TABLES LIKE 'users'")->fetchColumn()) page($installed);
         install_schema($pdo);
         page($done);
     } catch (PDOException $e) {

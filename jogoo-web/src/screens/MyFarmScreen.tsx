@@ -1,6 +1,6 @@
 // Screen 02: the client's farm, their equipment, and orders and invoices after purchase.
 // Ported from lib/screens/my_farm_screen.dart.
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Button, ChoicePill, CircleButton, Divided, JCard, ListRow, Page, PageTitle, PhotoCircle, PillRow,
@@ -117,23 +117,7 @@ function EquipmentTab({ onAdd }: { onAdd: () => void }) {
       </JCard>
       {/* Tablet and desktop: a grid of equipment cards. */}
       <div className="grid g3 farm-wide-only">
-        {equipmentList.map((item) => (
-          <JCard key={item.id} onClick={() => navigate(paths.equipment(item.id))} ariaLabel={b(item.name)}>
-            <div className="farm-eq-card">
-              <div className="farm-eq-top">
-                <EquipmentVisual item={item} size={72} />
-                <div className="grow">
-                  <h2 className="t-title-m">{b(item.name)}</h2>
-                  <p className="t-body-m" style={{ marginTop: 4 }}>{equipmentSubtitle(item, lang, b)}</p>
-                </div>
-              </div>
-              <div className="farm-eq-foot">
-                <HealthPill health={item.health} />
-                <Icon name="chevron_right" />
-              </div>
-            </div>
-          </JCard>
-        ))}
+        {equipmentList.map((item) => <EquipmentCard key={item.id} item={item} onOpen={() => navigate(paths.equipment(item.id))} />)}
       </div>
 
       <div className="grid g2" style={{ alignItems: 'start' }}>
@@ -159,6 +143,28 @@ function EquipmentTab({ onAdd }: { onAdd: () => void }) {
         </JCard>
       </div>
     </Stack>
+  );
+}
+
+function EquipmentCard({ item, onOpen }: { item: Equipment; onOpen: () => void }) {
+  const { b, lang } = useI18n();
+  const id = useId();
+  return (
+    <JCard onClick={onOpen} labelledBy={`${id}-t`} describedBy={`${id}-d`}>
+      <div className="farm-eq-card">
+        <div className="farm-eq-top">
+          <EquipmentVisual item={item} size={72} />
+          <div className="grow">
+            <h2 className="t-title-m" id={`${id}-t`}>{b(item.name)}</h2>
+            <p className="t-body-m" id={`${id}-d`} style={{ marginTop: 4 }}>{equipmentSubtitle(item, lang, b)}</p>
+          </div>
+        </div>
+        <div className="farm-eq-foot">
+          <HealthPill health={item.health} />
+          <Icon name="chevron_right" />
+        </div>
+      </div>
+    </JCard>
   );
 }
 

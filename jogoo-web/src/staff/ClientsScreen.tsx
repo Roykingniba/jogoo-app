@@ -1,6 +1,6 @@
 // JOGOO staff page: every client who signed up, their current stage, and a
 // form to move them to the next stage with a note the client will see.
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button, ChoicePill, InitialsAvatar, JCard, Page, PageTitle, PillRow, SearchBox, StatusPill, Timeline, type TimelineItem } from '../components/ui';
 import { Sheet, showToast } from '../components/overlays';
 import { errorKey } from '../components/account/errors';
@@ -40,24 +40,30 @@ function AdminClients() {
     return () => window.clearTimeout(id);
   }, [search]);
 
+  // On a slow connection answers can arrive out of order: only the answer to
+  // the latest request (search, filter or page) is shown.
+  const requestId = useRef(0);
   const load = useCallback(async () => {
+    const mine = ++requestId.current;
     setError('');
     try {
-      setList(await adminApi.listClients({ search: debounced, stage: staffView ? '' : stage, page: 1, staff: staffView }));
+      const next = await adminApi.listClients({ search: debounced, stage: staffView ? '' : stage, page: 1, staff: staffView });
+      if (mine === requestId.current) setList(next);
     } catch (e) {
-      setError(t(errorKey(e)));
+      if (mine === requestId.current) setError(t(errorKey(e)));
     }
   }, [debounced, stage, staffView, t]);
   useEffect(() => { void load(); }, [load]);
 
   const loadMore = async () => {
     if (!list) return;
+    const mine = ++requestId.current;
     setLoadingMore(true);
     try {
       const next = await adminApi.listClients({ search: debounced, stage: staffView ? '' : stage, page: list.page + 1, staff: staffView });
-      setList({ ...next, clients: [...list.clients, ...next.clients] });
+      if (mine === requestId.current) setList({ ...next, clients: [...list.clients, ...next.clients] });
     } catch (e) {
-      showToast(t(errorKey(e)));
+      if (mine === requestId.current) showToast(t(errorKey(e)), undefined, 'error');
     }
     setLoadingMore(false);
   };
@@ -70,7 +76,7 @@ function AdminClients() {
   return (
     <Page>
       <PageTitle title={t('adminTitle')} subtitle={list ? t('adminSubtitle', { count: totalClients }) : undefined}
-        trailing={<Button variant="outlined" small icon="refresh" onClick={load}>{lang === 'fr' ? 'Actualiser' : 'Refresh'}</Button>} />
+        trailing={<Button variant="outlined" small icon="refresh" onClick={() => void load()}>{t('refresh')}</Button>} />
       <div className="stack">
         <SearchBox hint={t('adminSearch')} value={search} onChange={setSearch} />
         <PillRow wrap>
@@ -102,13 +108,15 @@ function AdminClients() {
                 </thead>
                 <tbody>
                   {list.clients.map((c) => (
-                    <tr key={c.id} tabIndex={0} onClick={() => setOpenId(c.id)}
-                      onKeyDown={(e) => { if (e.key === 'Enter') setOpenId(c.id); }}>
+                    <tr key={c.id} onClick={() => setOpenId(c.id)}>
                       <td>
                         <div className="row" style={{ gap: 12 }}>
                           <InitialsAvatar initials={initials(c.fullName)} size={40} />
                           <div className="grow">
-                            <div className="t-title-s">{c.fullName}</div>
+                            {/* The real control for keyboards and screen readers; the whole row is clickable too. */}
+                            <button type="button" className="acct-row-btn t-title-s" onClick={(e) => { e.stopPropagation(); setOpenId(c.id); }}>
+                              {c.fullName}
+                            </button>
                             <div className="t-body-s">{c.location || '—'}{c.farmSizeHa != null ? ` · ${decimalTrim(lang, c.farmSizeHa)} ha` : ''}</div>
                             <div className="t-body-s show-s">{c.email}</div>
                           </div>
@@ -151,6 +159,8 @@ function ClientSheet({ id, summary, onClose, onSaved, canManageRoles }: { id: st
   const [note, setNote] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  // Second tap needed for actions the client sees or that open everyone's data.
+  const [confirming, setConfirming] = useState<null | 'stage' | 'client' | 'admin'>(null);
 
   useEffect(() => {
     let alive = true;
@@ -164,6 +174,7 @@ function ClientSheet({ id, summary, onClose, onSaved, canManageRoles }: { id: st
   }, [id, t]);
 
   const save = async () => {
+    setConfirming(null);
     setBusy(true);
     setError('');
     try {
@@ -180,6 +191,7 @@ function ClientSheet({ id, summary, onClose, onSaved, canManageRoles }: { id: st
 
   const p = data?.profile ?? summary;
   const changeRole = async (role: 'client' | 'admin') => {
+    setConfirming(null);
     setBusy(true);
     setError('');
     try {
@@ -198,7 +210,7 @@ function ClientSheet({ id, summary, onClose, onSaved, canManageRoles }: { id: st
       .filter(Boolean).join(' · '),
     state: i === 0 ? 'current' : 'done',
   }));
-  const waNumber = p?.phone?.replace(/[^0-9]/g, '');
+  const waNumber = p?.phone ? whatsAppNumber(p.phone) : null;
 
   return (
     <Sheet open onClose={onClose} title={p?.fullName ?? '…'} wide>
@@ -213,7 +225,7 @@ function ClientSheet({ id, summary, onClose, onSaved, canManageRoles }: { id: st
             <div><span className="t-body-s">{t('adminColUpdated')}</span><span>{summary?.stageAt ? fullDate(lang, new Date(summary.stageAt)) : '—'}</span></div>
             <div><span className="t-body-s">{t('languageTitle')}</span><span>{p.lang === 'fr' ? 'Français' : 'English'}</span></div>
           </div>
-          {waNumber && waNumber.length >= 8 && (
+          {waNumber && (
             <div className="row wrap">
               <Button small icon="call_outlined" href={`tel:${p.phone}`}>{t('call')}</Button>
               <Button small variant="wa" icon="chat_bubble_outline" href={`https://wa.me/${waNumber}`}>{t('adminOpenWhatsApp')}</Button>
@@ -231,9 +243,13 @@ function ClientSheet({ id, summary, onClose, onSaved, canManageRoles }: { id: st
                 <div className="t-body-s">{t('staffHelp')}</div>
               </div>
               {p.role === 'admin'
-                ? <Button small variant="outlined" disabled={busy || !data} onClick={() => changeRole('client')}>{t('removeStaff')}</Button>
-                : <Button small variant="lime" disabled={busy || !data} onClick={() => changeRole('admin')}>{t('makeStaff')}</Button>}
+                ? <Button small variant="outlined" disabled={busy || !data} onClick={() => setConfirming('client')}>{t('removeStaff')}</Button>
+                : <Button small variant="lime" disabled={busy || !data} onClick={() => setConfirming('admin')}>{t('makeStaff')}</Button>}
             </div>
+          )}
+          {(confirming === 'admin' || confirming === 'client') && (
+            <ConfirmBar text={t(confirming === 'admin' ? 'makeStaffConfirm' : 'removeStaffConfirm', { name: p.fullName })}
+              onConfirm={() => void changeRole(confirming)} onCancel={() => setConfirming(null)} />
           )}
 
           {p.role === 'client' && <div className="acct-stage-form">
@@ -249,9 +265,14 @@ function ClientSheet({ id, summary, onClose, onSaved, canManageRoles }: { id: st
                 placeholder={t('adminNoteHint')} style={{ minHeight: 80 }} />
             </div>
             {error && <p className="acct-error" role="alert">{error}</p>}
-            <div className="row" style={{ justifyContent: 'flex-end' }}>
-              <Button onClick={save} disabled={busy || !data}>{t('adminSave')}</Button>
-            </div>
+            {confirming === 'stage' ? (
+              <ConfirmBar text={t('stageConfirm', { name: p.fullName, stage: t(stageKey(stage)) })}
+                onConfirm={() => void save()} onCancel={() => setConfirming(null)} />
+            ) : (
+              <div className="row" style={{ justifyContent: 'flex-end' }}>
+                <Button onClick={() => setConfirming('stage')} disabled={busy || !data}>{t('adminSave')}</Button>
+              </div>
+            )}
           </div>}
 
           {p.role === 'client' && <h3 className="t-title-m">{t('adminHistory')}</h3>}
@@ -261,6 +282,32 @@ function ClientSheet({ id, summary, onClose, onSaved, canManageRoles }: { id: st
       {!p && error && <p className="acct-error">{error}</p>}
     </Sheet>
   );
+}
+
+function ConfirmBar({ text, onConfirm, onCancel }: { text: string; onConfirm: () => void; onCancel: () => void }) {
+  const { t } = useI18n();
+  return (
+    <div className="acct-confirm" role="alertdialog" aria-label={text}>
+      <p className="t-body-m" style={{ color: 'var(--ink)', fontWeight: 600 }}>{text}</p>
+      <div className="row wrap" style={{ justifyContent: 'flex-end', gap: 8 }}>
+        <Button small variant="text" onClick={onCancel}>{t('cancel')}</Button>
+        <Button small onClick={onConfirm}>{t('confirm')}</Button>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * wa.me needs the full international number without "+". Clients often type
+ * local Cameroon numbers ("677 00 01 01"), so add 237 to 9-digit numbers.
+ */
+function whatsAppNumber(phone: string): string | null {
+  let d = phone.replace(/[^0-9+]/g, '');
+  if (d.startsWith('+')) d = d.slice(1);
+  else if (d.startsWith('00')) d = d.slice(2);
+  else if (/^[26]\d{8}$/.test(d)) d = '237' + d;
+  d = d.replace(/\D/g, '');
+  return d.length >= 10 && d.length <= 15 ? d : null;
 }
 
 /** What the client typed about their farm, read-only for staff. */

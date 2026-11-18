@@ -135,3 +135,6 @@ button.home-season:hover { filter: brightness(.98); }
   .profile-band { border-radius: var(--radius-card); }
   .profile-top { left: 20px; top: 16px; }
 }
+
+/* Example-data banner below the header and shortcuts. */
+.home-banner { margin: 16px 0 0; }

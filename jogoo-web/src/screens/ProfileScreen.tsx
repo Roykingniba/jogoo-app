@@ -7,6 +7,8 @@ import {
 import { Sheet, showToast } from '../components/overlays';
 import { PasswordInput } from '../components/account/PasswordInput';
 import { errorKey } from '../components/account/errors';
+import { askSignOut } from '../components/account/SignOut';
+import { ConfirmSheet } from '../components/account/ConfirmSheet';
 import { useAuth } from '../data/auth';
 import { backend } from '../data/backend';
 import { useI18n, type MsgKey } from '../i18n/i18n';
@@ -97,8 +99,7 @@ function LanguageToggle() {
 function AccountCard() {
   const { t } = useI18n();
   const account = useAuth((s) => s.profile);
-  const signOut = useAuth((s) => s.signOut);
-  const [sheet, setSheet] = useState<'details' | 'password' | null>(null);
+  const [sheet, setSheet] = useState<'details' | 'password' | 'delete' | null>(null);
   if (!account) return null;
   return (
     <JCard className="acct-account" style={{ marginTop: 16 }}>
@@ -111,10 +112,15 @@ function AccountCard() {
       </div>
       <div className="row wrap" style={{ marginTop: 16 }}>
         <Button variant="outlined" icon="key" onClick={() => setSheet('password')}>{t('changePassword')}</Button>
-        <Button variant="text" icon="logout" onClick={() => void signOut()}>{t('signOut')}</Button>
+        <Button variant="text" icon="logout" onClick={askSignOut}>{t('signOut')}</Button>
+      </div>
+      <div className="row wrap" style={{ marginTop: 8, justifyContent: 'space-between' }}>
+        <a className="btn text" href={`${import.meta.env.BASE_URL}privacy.html`} target="_blank" rel="noopener">{t('privacyLink')}</a>
+        <Button variant="text" icon="delete_outline" className="acct-danger" onClick={() => setSheet('delete')}>{t('deleteAccount')}</Button>
       </div>
       {sheet === 'details' && <AccountDetailsSheet onClose={() => setSheet(null)} />}
       {sheet === 'password' && <PasswordSheet onClose={() => setSheet(null)} />}
+      {sheet === 'delete' && <DeleteAccountSheet onClose={() => setSheet(null)} />}
     </JCard>
   );
 }
@@ -167,6 +173,7 @@ function PasswordSheet({ onClose }: { onClose: () => void }) {
   const [error, setError] = useState('');
   const save = async () => {
     if (next.length < 8) { setError(t('errWeakPassword')); return; }
+    if (new TextEncoder().encode(next).length > 72) { setError(t('errPasswordTooLong')); return; }
     setBusy(true);
     setError('');
     try {
@@ -197,5 +204,35 @@ function PasswordSheet({ onClose }: { onClose: () => void }) {
         </div>
       </form>
     </Sheet>
+  );
+}
+
+/** Permanently deletes the account (required by app stores, and the client's right). */
+function DeleteAccountSheet({ onClose }: { onClose: () => void }) {
+  const { t } = useI18n();
+  const [password, setPassword] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const confirm = async () => {
+    if (!password) { setError(t('errMissing')); return; }
+    setBusy(true);
+    setError('');
+    try {
+      await useAuth.getState().deleteAccount(password);
+    } catch (e) {
+      setError(t(errorKey(e)));
+      setBusy(false);
+    }
+  };
+  return (
+    <ConfirmSheet open title={t('deleteAccount')} confirmLabel={busy ? t('deleting') : t('deleteAccountConfirm')}
+      busy={busy} danger onClose={onClose} onConfirm={() => void confirm()}>
+      <p className="t-body-l">{t('deleteAccountBody')}</p>
+      {error && <p className="acct-error" role="alert">{error}</p>}
+      <div className="field">
+        <label htmlFor="del-pass">{t('password')}</label>
+        <PasswordInput id="del-pass" value={password} onChange={setPassword} autoComplete="current-password" />
+      </div>
+    </ConfirmSheet>
   );
 }

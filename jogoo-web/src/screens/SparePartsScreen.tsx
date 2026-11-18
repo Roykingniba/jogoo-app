@@ -40,7 +40,7 @@ export default function SparePartsScreen() {
     (document.activeElement as HTMLElement | null)?.blur();
     const match = findPart(value);
     if (!match) {
-      showToast(t('partNotFound', { code: value }));
+      showToast(t('partNotFound', { code: value }), undefined, 'error');
       return;
     }
     setHighlight(match.code);

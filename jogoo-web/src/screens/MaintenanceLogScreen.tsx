@@ -34,7 +34,7 @@ function LogView({ equipment }: { equipment: Equipment }) {
       <Stack>
         {pending > 0 && (
           <div className="farm-pending" role="status">
-            <span className="dot"><Icon name="cloud_off_outlined" size={20} /></span>
+            <span className="dot"><Icon name="error_outline" size={20} /></span>
             <span className="grow">{t('pendingSync', { count: pending })}</span>
           </div>
         )}
