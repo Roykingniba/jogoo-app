@@ -1,12 +1,14 @@
 // Lazy wrappers around utils/pdf.ts: jsPDF (~400 kB) is only downloaded the
 // first time someone previews, downloads or shares a PDF.
 import type { Equipment, FarmDocument, Lang, LogEntry } from '../data/models';
+import { isNative } from './native';
 
 const load = () => import('./pdf');
 
 export function previewFarmDocument(lang: Lang, doc: FarmDocument, equipment: Equipment) {
   // Open the tab synchronously (inside the click) so pop-up blockers allow it.
-  const win = window.open('', '_blank');
+  // (Not in the Android app: there is no second window; the PDF goes to the share sheet.)
+  const win = isNative() ? null : window.open('', '_blank');
   void load().then((m) => m.previewFarmDocument(lang, doc, equipment, win));
 }
 

@@ -3,10 +3,9 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import {
-  BottomActionBar, BrandCard, Button, CircleButton, ExampleBanner, JCard, Page, ScreenHeader, Timeline, type TimelineItem,
+  BottomActionBar, BrandCard, Button, CircleButton, JCard, Page, ScreenHeader, Timeline, type TimelineItem,
 } from '../components/ui';
 import { Sheet, showToast } from '../components/overlays';
-import { ContactJogooSheet } from '../components/service/ContactJogoo';
 import { useI18n } from '../i18n/i18n';
 import { bi, type Order } from '../data/models';
 import { orderById, useStore } from '../data/store';
@@ -33,7 +32,6 @@ function DeliveryView({ order }: { order: Order }) {
   const { t, b, lang } = useI18n();
   const requestFromSales = useStore((s) => s.requestFromSales);
   const current = order.steps.findIndex((s) => !s.done);
-  const [changing, setChanging] = useState(false);
 
   const items: TimelineItem[] = order.steps.map((step, i) => ({
     title: b(step.title),
@@ -50,7 +48,6 @@ function DeliveryView({ order }: { order: Order }) {
   return (
     <Page narrow>
       <ScreenHeader title={t('orderTitle', { id: order.id })} subtitle={b(order.item)} />
-      <ExampleBanner />
       <div className="split even">
         <BrandCard blobSize={190}>
           <p className="dl-kicker">{t('arriving')}</p>
@@ -61,12 +58,9 @@ function DeliveryView({ order }: { order: Order }) {
         <JCard><Timeline items={items} /></JCard>
       </div>
       <BottomActionBar>
-        <Button variant="outlined" onClick={() => setChanging(true)}>{t('changeDropOff')}</Button>
+        <Button variant="outlined" onClick={changeDropOff}>{t('changeDropOff')}</Button>
         <Button disabled={!order.driver} onClick={() => order.driver && callNumber(order.driver.phone)}>{t('callDriver')}</Button>
       </BottomActionBar>
-      <ContactJogooSheet open={changing} onClose={() => setChanging(false)} title={t('changeDropOff')}
-        body={order.dropOff ? t('dropOffPoint', { place: order.dropOff }) : undefined}
-        message={t('waDropOff', { id: order.id })} onContact={changeDropOff} />
     </Page>
   );
 }

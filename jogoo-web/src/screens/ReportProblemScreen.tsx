@@ -8,12 +8,11 @@ import {
 import { Icon } from '../components/Icon';
 import { showToast } from '../components/overlays';
 import { useMediaPicker } from '../components/service/ServiceSheets';
-import { NotSentNote } from '../components/service/ContactJogoo';
 import { useI18n } from '../i18n/i18n';
-import { equipmentById, equipmentList, useStore } from '../data/store';
+import { useEquipmentList, useStore } from '../data/store';
+import { WHOLE_FARM_ID, wholeFarmEquipment } from '../data/farm';
 import { bi, type Bi } from '../data/models';
 import { paths } from '../routes';
-import { callJogoo, openWhatsApp } from '../utils/actions';
 import '../styles/service.css';
 
 type Problem = 'leak' | 'lowPressure' | 'brokenPart' | 'leafSymptoms';
@@ -31,9 +30,11 @@ export default function ReportProblemScreen() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const reportProblem = useStore((s) => s.reportProblem);
+  const equipmentList = [...useEquipmentList(), wholeFarmEquipment()];
   const preselected = params.get('equipment');
   const [equipmentId, setEquipmentId] = useState<string | null>(
-    preselected && equipmentById(preselected) ? preselected : null,
+    preselected && equipmentList.some((e) => e.id === preselected) ? preselected
+      : equipmentList.length === 1 ? WHOLE_FARM_ID : null,
   );
   const [problem, setProblem] = useState<Problem | null>(null);
   const [description, setDescription] = useState('');
@@ -47,22 +48,15 @@ export default function ReportProblemScreen() {
 
   const send = () => {
     if (!equipmentId || !problem) {
-      showToast(t('pickProblemFirst'), undefined, 'error');
+      showToast(t('pickProblemFirst'));
       return;
     }
-    const equipment = equipmentById(equipmentId);
     const request = reportProblem({
       equipmentId,
       problem: problems[problem],
       description: description.trim(),
       mediaPaths: media.map((m) => m.url),
     });
-    // The app cannot deliver the report: keep it on this screen and hand it to WhatsApp.
-    const text = [
-      t('waProblem', { equipment: equipment ? `${b(equipment.name)} (${equipment.serial})` : equipmentId, problem: b(problems[problem]) }),
-      ...(description.trim() !== '' ? [t('waProblemDetails', { details: description.trim() })] : []),
-    ].join('\n');
-    openWhatsApp(text);
     showToast(t('reportSavedTitle', { id: request.id }), t('reportSavedBody'));
     navigate(paths.serviceRequest(request.id), { replace: true });
   };
@@ -120,11 +114,8 @@ export default function ReportProblemScreen() {
         </div>
       </div>
 
-      <div style={{ marginTop: 16 }}><NotSentNote extra={t('photosOnWhatsApp')} /></div>
-
       <BottomActionBar>
-        <Button variant="outlined" icon="call_outlined" onClick={callJogoo}>{t('callJogoo')}</Button>
-        <Button variant="wa" icon="chat_bubble_outline" onClick={send}>{t('sendRequest')}</Button>
+        <Button onClick={send}>{t('sendRequest')}</Button>
       </BottomActionBar>
       {picker.sheet}
     </Page>

@@ -1,14 +1,14 @@
 // Screen 06: the website chatbot, now in the app, with photos and handover.
 // Ported from lib/screens/mia_screen.dart.
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, CircleButton, Page, ScreenHeader, TintIcon, asset } from '../components/ui';
 import { Icon } from '../components/Icon';
 import { ChatBubble, ChatInputBar, ChatList } from '../components/service/Chat';
-import { useMediaPicker } from '../components/service/ServiceSheets';
 import { useI18n } from '../i18n/i18n';
 import { guideById, useStore } from '../data/store';
 import { DemoData } from '../data/demoData';
+import { same } from '../data/models';
 import { callJogoo, openWhatsApp } from '../utils/actions';
 import { paths } from '../routes';
 import '../styles/service.css';
@@ -17,23 +17,21 @@ export default function MiaScreen() {
   const { t } = useI18n();
   const navigate = useNavigate();
   const chat = useStore((s) => s.miaChat);
+  const firstName = useStore((s) => s.profile.firstName);
   const busy = useStore((s) => s.miaBusy);
   const sendToMia = useStore((s) => s.sendToMia);
   const [input, setInput] = useState('');
   const [unavailable, setUnavailable] = useState(false);
-  const media = useMediaPicker();
 
-  const send = async (photo?: string) => {
+  const loadMiaHistory = useStore((s) => s.loadMiaHistory);
+  useEffect(() => { void loadMiaHistory(); }, [loadMiaHistory]);
+
+  const send = async () => {
     const text = input.trim();
-    if (text === '' && !photo) return;
+    if (text === '') return;
     setInput('');
-    const reached = await sendToMia({ text, photoFile: photo });
+    const reached = await sendToMia({ text });
     setUnavailable(!reached);
-  };
-
-  const sendPhoto = async () => {
-    const picked = await media.pick(false);
-    if (picked) await send(picked.url);
   };
 
   return (
@@ -46,6 +44,7 @@ export default function MiaScreen() {
       />
 
       <ChatList scrollKey={`${chat.length}-${busy}-${unavailable}`}>
+        {chat.length === 0 && <ChatBubble message={{ author: 'mia', text: same(t('miaWelcome', { name: firstName })) }} />}
         {chat.map((message, i) => (
           <ChatBubble key={i} message={message}
             footer={message.guideId ? <GuideLink guideId={message.guideId} /> : undefined} />
@@ -68,12 +67,9 @@ export default function MiaScreen() {
         onChange={setInput}
         hint={t('messageMia')}
         onSend={() => void send()}
-        onCamera={() => void sendPhoto()}
-        showCamera
         disabled={busy}
         below={<button type="button" onClick={callJogoo}>{t('urgentCall', { phone: DemoData.jogooPhoneDisplay })}</button>}
       />
-      {media.sheet}
     </Page>
   );
 }
@@ -100,7 +96,7 @@ function GuideLink({ guideId }: { guideId: string }) {
   );
 }
 
-/** Mia has no backend in this build: hand the farmer to a person instead. */
+/** Mia could not be reached (offline or server down): hand the farmer to a person instead. */
 function UnavailableCard() {
   const { t } = useI18n();
   return (

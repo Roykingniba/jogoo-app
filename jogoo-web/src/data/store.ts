@@ -1,19 +1,24 @@
 // App state for the client app, ported from lib/data/jogoo_store.dart.
-// Phase 1 is backed by DemoData in memory: the client's actions are kept for
-// this session and labelled "saved", never "sent". Only the language choice
-// is stored on the device.
+// Every account starts from a clean slate: the farm and its equipment are what
+// the client types in (saved in Supabase, cached on the device); requests,
+// logs and chats start empty. Only JOGOO's own content (shop catalogue, spare
+// parts, guides) comes from the bundled catalogue in demoData.ts.
 import { create } from 'zustand';
 import { DemoData } from './demoData';
+import { backend, type Farm, type FarmEquipment, type MyFarm, type Visit } from './backend';
+import { CROPS, choiceBi, toEquipment } from './farm';
+import { CATALOGUE } from './catalogue';
 import {
   bi, same, isOpen,
   type AppNotification, type Bi, type CartLine, type ChatMessage, type Equipment,
-  type FarmProfile, type Lang, type LogEntry, type NotificationChannel, type Order,
+  type FarmInput, type FarmProfile, type Lang, type LogEntry, type NotificationChannel, type Order,
   type Product, type SalesRequest, type SeasonGoal, type ServiceRequest, type SparePart,
-  type Guide,
+  type Guide, type Invoice, type FarmDocument,
 } from './models';
-import { miaReply } from './miaClient';
+import { forgetMiaSession, miaHistory, miaSend } from './miaClient';
 
 const LANG_KEY = 'jogoo.lang';
+const FARM_KEY = 'jogoo.farm';
 
 function initialLang(): Lang {
   try {
@@ -24,6 +29,26 @@ function initialLang(): Lang {
   return nav.startsWith('fr') ? 'fr' : 'en';
 }
 
+export const emptyProfile = (): FarmProfile => ({
+  clientName: '', firstName: '', clientSince: new Date(), location: '', areaHa: 0, crops: [],
+});
+
+/** The farm cached on this device, so the installed app opens offline. */
+function readFarmCache(owner: string): MyFarm | null {
+  try {
+    const raw = JSON.parse(localStorage.getItem(FARM_KEY) ?? 'null');
+    return raw && raw.owner === owner ? (raw.data as MyFarm) : null;
+  } catch { return null; }
+}
+function writeFarmCache(owner: string | null, data: MyFarm | null) {
+  try {
+    if (owner && data) localStorage.setItem(FARM_KEY, JSON.stringify({ owner, data }));
+    else localStorage.removeItem(FARM_KEY);
+  } catch { /* storage blocked */ }
+}
+
+export type FarmStatus = 'idle' | 'loading' | 'ready' | 'error';
+
 export interface JogooState {
   // Language
   lang: Lang;
@@ -31,9 +56,26 @@ export interface JogooState {
 
   // Farm and profile
   profile: FarmProfile;
-  updateFarm: (location: string, areaHa: number) => void;
+  /** Account whose farm is loaded (for the device cache). */
+  owner: string | null;
+  farm: Farm | null;
+  farmStatus: FarmStatus;
+  /** The client's own equipment, as the screens show it. */
+  equipment: Equipment[];
+  rawEquipment: FarmEquipment[];
+  loadFarm: (owner: string) => Promise<void>;
+  saveFarm: (farm: Farm) => Promise<void>;
+  saveEquipment: (equipment: FarmEquipment) => Promise<void>;
+  removeEquipment: (id: string) => Promise<void>;
+  /** Back to a blank app (sign-out). */
+  reset: () => void;
   goals: SeasonGoal[];
   toggleGoal: (goal: SeasonGoal) => void;
+
+  // Visits JOGOO planned at the farm (Service tab)
+  visits: Visit[];
+  visitsStatus: FarmStatus;
+  loadVisits: () => Promise<void>;
 
   // Shop
   cart: CartLine[];
@@ -70,7 +112,10 @@ export interface JogooState {
   miaChat: ChatMessage[];
   miaBusy: boolean;
   /** Returns false when Mia cannot be reached, so the screen can offer a call. */
-  sendToMia: (a: { text: string; photoFile?: string }) => Promise<boolean>;
+  sendToMia: (a: { text: string }) => Promise<boolean>;
+  miaLoaded: boolean;
+  /** Brings back the conversation started earlier on this device. */
+  loadMiaHistory: () => Promise<void>;
   agronomistChat: ChatMessage[];
   sendToAgronomists: (text: string) => void;
 }
@@ -83,9 +128,48 @@ export const useStore = create<JogooState>((set, get) => ({
     set({ lang });
   },
 
-  profile: DemoData.profile,
-  updateFarm: (location, areaHa) => set((s) => ({ profile: { ...s.profile, location, areaHa } })),
-  goals: ['higherYields', 'moreLandWatered'],
+  profile: emptyProfile(),
+  owner: null,
+  farm: null,
+  farmStatus: 'idle',
+  equipment: [],
+  rawEquipment: [],
+  loadFarm: async (owner) => {
+    const cached = readFarmCache(owner);
+    if (cached) set(farmState(cached, owner));
+    else set({ owner, farmStatus: 'loading' });
+    try {
+      const data = await backend.myFarm();
+      writeFarmCache(owner, data);
+      if (get().owner === owner) set(farmState(data, owner));
+    } catch {
+      if (get().owner === owner && !cached) set({ farmStatus: 'error' });
+    }
+  },
+  saveFarm: async (farm) => apply(await backend.saveFarm(farm)),
+  saveEquipment: async (equipment) => apply(await backend.saveEquipment(equipment)),
+  removeEquipment: async (id) => apply(await backend.removeEquipment(id)),
+  reset: () => {
+    writeFarmCache(null, null);
+    forgetMiaSession();
+    set({
+      profile: emptyProfile(), owner: null, farm: null, farmStatus: 'idle', equipment: [], rawEquipment: [],
+      visits: [], visitsStatus: 'idle',
+      goals: [], cart: [], salesRequests: [], serviceRequests: [], log: [], notifications: [],
+      miaChat: [], miaLoaded: false, agronomistChat: [],
+    });
+  },
+  visits: [],
+  visitsStatus: 'idle',
+  loadVisits: async () => {
+    if (get().visitsStatus === 'idle') set({ visitsStatus: 'loading' });
+    try {
+      set({ visits: await backend.myVisits(), visitsStatus: 'ready' });
+    } catch {
+      if (get().visitsStatus !== 'ready') set({ visitsStatus: 'error' });
+    }
+  },
+  goals: [],
   toggleGoal: (goal) =>
     set((s) => ({ goals: s.goals.includes(goal) ? s.goals.filter((g) => g !== goal) : [...s.goals, goal] })),
 
@@ -111,12 +195,12 @@ export const useStore = create<JogooState>((set, get) => ({
   seasonReminder: true,
   setSeasonReminder: (seasonReminder) => set({ seasonReminder }),
 
-  serviceRequests: [...DemoData.serviceRequests],
+  serviceRequests: [],
   reportProblem: ({ equipmentId, problem, description, mediaPaths }) => {
     const now = new Date();
     const s = get();
     const request: ServiceRequest = {
-      id: `SR-${1043 + s.serviceRequests.length - DemoData.serviceRequests.length}`,
+      id: `SR-${1001 + s.serviceRequests.length}`,
       equipmentId,
       title: problem,
       createdAt: now,
@@ -141,10 +225,10 @@ export const useStore = create<JogooState>((set, get) => ({
   wifiOnly: true,
   setWifiOnly: (wifiOnly) => set({ wifiOnly }),
 
-  log: [...DemoData.logEntries],
+  log: [],
   addLogEntry: (entry) => set((s) => ({ log: [...s.log, entry] })),
 
-  notifications: [...DemoData.notifications],
+  notifications: [],
   markNotificationsRead: () =>
     set((s) => (s.notifications.some((n) => n.unread)
       ? { notifications: s.notifications.map((n) => ({ ...n, unread: false })) }
@@ -152,49 +236,88 @@ export const useStore = create<JogooState>((set, get) => ({
   channels: { push: true, sms: true, whatsApp: false },
   setChannel: (c, enabled) => set((s) => ({ channels: { ...s.channels, [c]: enabled } })),
 
-  miaChat: [...DemoData.miaChat],
+  miaChat: [],
   miaBusy: false,
-  sendToMia: async ({ text, photoFile }) => {
-    set((s) => ({ miaChat: [...s.miaChat, { author: 'client', text: same(text), photoFile }], miaBusy: true }));
-    const reply = await miaReply(get().miaChat, get().lang);
-    set((s) => ({
-      miaBusy: false,
-      miaChat: reply == null ? s.miaChat : [...s.miaChat, { author: 'mia', text: same(reply) }],
-    }));
-    return reply != null;
+  miaLoaded: false,
+  loadMiaHistory: async () => {
+    if (get().miaLoaded) return;
+    const history = await miaHistory();
+    // Keep anything typed while the history was loading.
+    set((s) => ({ miaLoaded: true, miaChat: history.length && s.miaChat.length === 0 ? history : s.miaChat }));
   },
-  agronomistChat: [...DemoData.agronomistChat],
+  sendToMia: async ({ text }) => {
+    set((s) => ({ miaChat: [...s.miaChat, { author: 'client', text: same(text) }], miaBusy: true }));
+    const bubbles = await miaSend(text);
+    if (bubbles == null) { set({ miaBusy: false }); return false; }
+    // Short messages arrive one after the other, like someone typing on WhatsApp.
+    for (let i = 0; i < bubbles.length; i++) {
+      if (i > 0) await new Promise((r) => setTimeout(r, Math.min(1800, Math.max(600, bubbles[i].length * 18))));
+      set((s) => ({ miaChat: [...s.miaChat, { author: 'mia', text: same(bubbles[i]) }], miaBusy: i < bubbles.length - 1 }));
+    }
+    if (bubbles.length === 0) set({ miaBusy: false });
+    return true;
+  },
+  agronomistChat: [],
   sendToAgronomists: (text) =>
     set((s) => ({ agronomistChat: [...s.agronomistChat, { author: 'client', text: same(text) }] })),
 }));
 
+/** Applies what the server returned after a change, and caches it. */
+function apply(data: MyFarm) {
+  const owner = useStore.getState().owner;
+  writeFarmCache(owner, data);
+  useStore.setState(farmState(data, owner));
+}
+
+function farmState(data: MyFarm, owner: string | null): Partial<JogooState> {
+  const farm = data.farm;
+  const profile = useStore.getState().profile;
+  return {
+    owner,
+    farm,
+    farmStatus: 'ready',
+    rawEquipment: data.equipment,
+    equipment: data.equipment.map(toEquipment),
+    profile: {
+      ...profile,
+      location: farm?.location ?? profile.location,
+      areaHa: farm?.areaHa ?? profile.areaHa,
+      crops: (farm?.crops ?? []).map((c) => choiceBi(CROPS, c)),
+    },
+  };
+}
+
 // ---------------------------------------------------------------------------
-// Read-only lookups over the demo catalogue (these lists never change in v1).
+// The client's equipment (from the store) and JOGOO's catalogue (bundled).
 
-export const equipmentList: Equipment[] = DemoData.equipment;
-export const equipmentById = (id: string) => equipmentList.find((e) => e.id === id);
-export const equipmentBySerial = (serial: string) => {
-  const wanted = serial.trim().toUpperCase();
-  return equipmentList.find((e) => e.serial === wanted);
-};
+export const useEquipmentList = () => useStore((s) => s.equipment);
+export const useEquipmentById = (id: string | null | undefined) =>
+  useStore((s) => (id ? s.equipment.find((e) => e.id === id) : undefined));
+export const equipmentById = (id: string) => useStore.getState().equipment.find((e) => e.id === id);
 
-export const products: Product[] = DemoData.products;
+// JOGOO's catalogue (Irrigation section of the 2026 catalogue), price on request.
+export const products: Product[] = CATALOGUE;
 export const productById = (id: string) => products.find((p) => p.id === id);
 
-export const partsFor = (equipmentId: string): SparePart[] =>
-  DemoData.spareParts.filter((p) => p.equipmentId === equipmentId);
-export const partByCode = (code: string) => DemoData.spareParts.find((p) => p.code === code);
+export const spareParts: SparePart[] = DemoData.spareParts.map((p) => ({ ...p, dueOn: undefined }));
+export const partByCode = (code: string) => spareParts.find((p) => p.code === code);
 
-export const orders: Order[] = DemoData.orders;
+// Orders, invoices and project documents come from JOGOO once the client buys;
+// a new account has none.
+export const orders: Order[] = [];
 export const orderById = (id: string) => orders.find((o) => o.id === id);
-export const invoices = DemoData.invoices;
+export const invoices: Invoice[] = [];
 
 export const guides: Guide[] = DemoData.guides;
 export const guideById = (id: string) => guides.find((g) => g.id === id);
-export const documents = DemoData.documents;
+export const documents: FarmDocument[] = [];
 
-export const usualInput = DemoData.usualInput;
-export const otherInputs = DemoData.otherInputs;
+export const otherInputs: FarmInput[] = DemoData.otherInputs.map((i) => ({
+  ...i,
+  lastBought: undefined,
+  note: i.note.en.includes('{date}') ? bi('For fertigation', 'Pour la fertigation') : i.note,
+}));
+export const usualInput: FarmInput = { ...DemoData.usualInput, lastBought: undefined };
 
 // ---------------------------------------------------------------------------
 // Derived values. Call them with state from useStore, e.g.
@@ -222,9 +345,7 @@ export const pendingLogCount = (log: LogEntry[], equipmentId: string) =>
 
 export const unreadCount = (ns: AppNotification[]) => ns.filter((n) => n.unread).length;
 
-// Everything except the language, as it was when the app opened.
-const freshState = useStore.getState();
-/** Forgets everything the previous person did in this session (cart, chats, notes...). */
-export function resetSessionState() {
-  useStore.setState({ ...freshState, lang: useStore.getState().lang }, true);
-}
+/** Visits still to come or under way, soonest first. */
+export const activeVisits = (vs: Visit[]) =>
+  vs.filter((v) => v.status !== 'done' && v.status !== 'cancelled')
+    .sort((a, b) => a.startsAt.localeCompare(b.startsAt));

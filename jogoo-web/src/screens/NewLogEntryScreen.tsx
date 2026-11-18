@@ -1,5 +1,4 @@
-// Screen 18: log a fertigation or a repair in seconds.
-// Entries only live in this screen's memory for now: they are not sent to JOGOO.
+// Screen 18: log a fertigation or a repair in seconds, even offline.
 // Ported from lib/screens/new_log_entry_screen.dart.
 import { useState, type ReactNode } from 'react';
 import { useParams } from 'react-router-dom';
@@ -7,7 +6,7 @@ import { BottomActionBar, Button, ChoicePill, Divided, JCard, Page, PillRow, Scr
 import { showToast } from '../components/overlays';
 import { NotFound } from '../components/farm/farmParts';
 import { same, type LogEntryType } from '../data/models';
-import { equipmentById, equipmentList, useStore } from '../data/store';
+import { useEquipmentById, useEquipmentList, useStore } from '../data/store';
 import { useI18n, type T } from '../i18n/i18n';
 import { fullDate } from '../utils/format';
 import '../styles/farm.css';
@@ -29,7 +28,7 @@ const fromInput = (s: string) => {
 
 export default function NewLogEntryScreen() {
   const { equipmentId = '' } = useParams();
-  if (!equipmentById(equipmentId)) return <NotFound />;
+  if (!useEquipmentById(equipmentId)) return <NotFound />;
   return <NewEntryForm initialEquipmentId={equipmentId} />;
 }
 
@@ -37,6 +36,7 @@ function NewEntryForm({ initialEquipmentId }: { initialEquipmentId: string }) {
   const { t, b, lang } = useI18n();
   const back = useBack();
   const profile = useStore((s) => s.profile);
+  const equipmentList = useEquipmentList();
   const addLogEntry = useStore((s) => s.addLogEntry);
 
   const [type, setType] = useState<LogEntryType>('fertigation');
@@ -52,15 +52,13 @@ function NewEntryForm({ initialEquipmentId }: { initialEquipmentId: string }) {
   const today = new Date();
   const yearAgo = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 365);
 
-  const missing = (field: string) => showToast(t('fillIn', { field }), undefined, 'error');
+  const missing = (field: string) => showToast(t('fillIn', { field }));
 
   const save = () => {
     let title: string;
     switch (type) {
       case 'fertigation':
         if (product.trim() === '') return missing(t('product'));
-        if (quantity.trim() === '') return missing(t('quantity'));
-        if (water.trim() === '') return missing(t('waterVolume'));
         title = t('fertigationEntry', { product: product.trim(), quantity: quantity.trim(), water: water.trim() });
         break;
       case 'service':
@@ -124,13 +122,13 @@ function NewEntryForm({ initialEquipmentId }: { initialEquipmentId: string }) {
               {type === 'fertigation' ? (
                 <>
                   <FieldRow label={t('product')} htmlFor="farm-product">
-                    <input id="farm-product" className="farm-inline" value={product} placeholder="NPK 20-20-20" onChange={(e) => setProduct(e.target.value)} />
+                    <input id="farm-product" className="farm-inline" value={product} onChange={(e) => setProduct(e.target.value)} />
                   </FieldRow>
                   <FieldRow label={t('quantity')} htmlFor="farm-qty">
-                    <input id="farm-qty" className="farm-inline" value={quantity} placeholder="2 kg" onChange={(e) => setQuantity(e.target.value)} />
+                    <input id="farm-qty" className="farm-inline" value={quantity} onChange={(e) => setQuantity(e.target.value)} />
                   </FieldRow>
                   <FieldRow label={t('waterVolume')} htmlFor="farm-water">
-                    <input id="farm-water" className="farm-inline" value={water} placeholder="200 L" onChange={(e) => setWater(e.target.value)} />
+                    <input id="farm-water" className="farm-inline" value={water} onChange={(e) => setWater(e.target.value)} />
                   </FieldRow>
                 </>
               ) : (

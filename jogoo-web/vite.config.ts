@@ -11,10 +11,8 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      // 'prompt': a new version waits for the person to tap Reload (src/app/update.ts),
-      // so an update never wipes a form, the cart or the email-code step.
-      registerType: 'prompt',
-      includeAssets: ['favicon.png', 'apple-touch-icon.png', 'fonts/*.woff2', 'images/*'],
+      registerType: 'autoUpdate',
+      includeAssets: ['favicon.png', 'apple-touch-icon.png', 'fonts/*.ttf', 'images/*'],
       manifest: {
         id: base,
         name: 'Jogoo · JOGOO Agriculture',
@@ -35,18 +33,10 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,png,jpg,svg,woff2}'],
-        // Don't make phones download these on the first visit: jsPDF's unused
-        // HTML helpers, and jsPDF itself (only needed when exporting a PDF;
-        // cached at runtime the first time it's used).
-        globIgnores: ['**/html2canvas*', '**/purify*', '**/index.es-*', '**/assets/pdf-*', '**/pwa-512*', '**/pwa-maskable*'],
-        runtimeCaching: [
-          {
-            urlPattern: ({ url, sameOrigin }) => sameOrigin && /\/assets\/pdf-.*\.js$/.test(url.pathname),
-            handler: 'CacheFirst',
-            options: { cacheName: 'jogoo-pdf', expiration: { maxEntries: 4 } },
-          },
-        ],
+        globPatterns: ['**/*.{js,css,html,png,jpg,svg,ttf,woff2}'],
+        // jsPDF's optional HTML-rendering helpers are never used; don't make
+        // phones download them up front.
+        globIgnores: ['**/html2canvas*', '**/purify*', '**/index.es-*'],
         navigateFallback: 'index.html',
         // The PHP API and installer must always hit the server.
         navigateFallbackDenylist: [/\/api\//],

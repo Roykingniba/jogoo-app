@@ -1,5 +1,5 @@
 // Port of lib/screens/learn_screen.dart (screen 07): knowledge base written by JOGOO agronomists.
-import { useId, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Divided, JCard, ListRow, Page, PageTitle, PhotoCircle, SearchBox, TintIcon } from '../components/ui';
 import { Icon } from '../components/Icon';
@@ -14,7 +14,6 @@ export default function LearnScreen() {
   const { t, b } = useI18n();
   const navigate = useNavigate();
   const [rawQuery, setQuery] = useState('');
-  const libId = useId();
   const query = rawQuery.trim().toLowerCase();
 
   const guides = allGuides.filter(
@@ -54,12 +53,11 @@ export default function LearnScreen() {
         </div>
         <aside className="learn-side">
           {query === '' && <div className="learn-desk-only"><SeasonAlert /></div>}
-          <JCard className="learn-offline" onClick={() => navigate(paths.offlineLibrary)}
-            labelledBy={libId} describedBy={`${libId}-d`}>
+          <JCard className="learn-offline" onClick={() => navigate(paths.offlineLibrary)} ariaLabel={t('offlineLibrary')}>
             <ListRow
               leading={<TintIcon icon="download_done" tone="lime" size={52} />}
-              title={<span id={libId}>{t('offlineLibrary')}</span>}
-              subtitle={<span id={`${libId}-d`}>{t('librarySubtitle')}</span>}
+              title={t('offlineLibrary')}
+              subtitle={t('librarySubtitle')}
               trailing={<span className="chev"><Icon name="chevron_right" /></span>}
             />
           </JCard>

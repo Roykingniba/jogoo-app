@@ -1,33 +1,86 @@
 // Screen 01: everything that matters today, in one glance.
-// Ported from lib/screens/home_screen.dart. Phones keep the Flutter layout
-// (navy header, shortcuts card, next visit, picks); tablets and desktops turn
-// it into a dashboard with equipment health, season alert, watering plan and Mia.
-import { useId } from 'react';
+// A new client starts on a blank dashboard that invites them to create their
+// farm; once it exists, Home shows the farm, its equipment and what is coming.
 import { useNavigate } from 'react-router-dom';
 import {
-  BrandCard, Button, CircleButton, ExampleBanner, InitialsAvatar, JCard, ListRow, Page, PhotoCircle,
-  RoundShortcut, SectionTitle, StatusPill, TintIcon, Divided, asset,
+  BrandCard, Button, CircleButton, Divided, InitialsAvatar, JCard, ListRow, Page, PhotoCircle,
+  RoundShortcut, SectionTitle, StatusPill, TintIcon, asset,
 } from '../components/ui';
-import { Icon } from '../components/Icon';
-import { useI18n, type T } from '../i18n/i18n';
-import {
-  useStore, nextVisit, products, equipmentById, equipmentList, unreadCount, guideById,
-} from '../data/store';
-import { DemoData } from '../data/demoData';
-import type { EquipmentHealth } from '../data/models';
-import { dayMonth, initials, longDayHeader, shortDate, timeOfDay } from '../utils/format';
+import { CreateFarmCard, FarmSummary } from '../components/farm/FarmSummary';
+import { EquipmentSheet } from '../components/farm/EquipmentSheet';
+import { useI18n } from '../i18n/i18n';
+import { useStore, nextVisit, unreadCount, activeVisits } from '../data/store';
+import { NextVisitCard } from '../components/service/VisitParts';
+import { EQUIPMENT_KINDS, choiceLabel } from '../data/farm';
+import { initials, longDayHeader, shortDate, timeOfDay } from '../utils/format';
 import { paths } from '../routes';
+import { useEffect, useState } from 'react';
 import '../styles/home.css';
 
 export default function HomeScreen() {
   const { t, b, lang } = useI18n();
   const navigate = useNavigate();
   const requests = useStore((s) => s.serviceRequests);
+  const visits = useStore((s) => s.visits);
+  const loadVisits = useStore((s) => s.loadVisits);
+  useEffect(() => { void loadVisits(); }, [loadVisits]);
+  const nextJogooVisit = activeVisits(visits)[0];
+  const farm = useStore((s) => s.farm);
+  const status = useStore((s) => s.farmStatus);
+  const owner = useStore((s) => s.owner);
+  const equipment = useStore((s) => s.equipment);
   const visit = nextVisit(requests);
-  const picks = products.filter((p) => p.recommended);
-  const pick = picks[0];
-  const visitEquipment = visit ? equipmentById(visit.equipmentId) : undefined;
-  const planId = useId();
+  const visitEquipment = visit ? equipment.find((e) => e.id === visit.equipmentId) : undefined;
+  const [adding, setAdding] = useState(false);
+
+  let main;
+  if (!farm && (status === 'loading' || status === 'idle')) {
+    main = <JCard className="home-cell"><p className="t-body-l" role="status" style={{ margin: 0 }}>{t('loadingFarm')}</p></JCard>;
+  } else if (!farm && status === 'error') {
+    main = (
+      <JCard className="home-cell">
+        <p className="t-body-l" style={{ marginTop: 0 }}>{t('farmLoadFailed')}</p>
+        <Button variant="outlined" onClick={() => owner && void useStore.getState().loadFarm(owner)}>{t('tryAgain')}</Button>
+      </JCard>
+    );
+  } else if (!farm) {
+    main = <CreateFarmCard className="home-cell" />;
+  } else {
+    main = (
+      <>
+        <FarmSummary farm={farm} full={false} className="home-cell" />
+        <JCard className="home-cell">
+          <SectionTitle trailing={<Button variant="text" small icon="add" onClick={() => setAdding(true)}>{t('add')}</Button>}>
+            {t('equipmentTitle')}
+          </SectionTitle>
+          {equipment.length === 0 ? (
+            <div className="farm-empty" style={{ marginTop: 10 }}>
+              <p className="t-body-m">{t('noEquipmentYet')}</p>
+              <Button variant="outlined" icon="add" onClick={() => setAdding(true)}>{t('addEquipment')}</Button>
+            </div>
+          ) : (
+            <>
+              <div style={{ height: 6 }} />
+              <Divided>
+                {equipment.slice(0, 4).map((e) => (
+                  <ListRow
+                    key={e.id}
+                    onClick={() => navigate(paths.equipment(e.id))}
+                    leading={e.photo ? <PhotoCircle src={e.photo} size={48} alt="" /> : <TintIcon icon={e.icon} tone={e.tone} size={48} />}
+                    title={b(e.name)}
+                    subtitle={[e.kind ? choiceLabel(EQUIPMENT_KINDS, e.kind, lang) : '', e.serial].filter(Boolean).join(' · ') || undefined}
+                  />
+                ))}
+              </Divided>
+              {equipment.length > 4 && (
+                <Button variant="text" small onClick={() => navigate(paths.farm)}>{t('seeAll', { count: equipment.length })}</Button>
+              )}
+            </>
+          )}
+        </JCard>
+      </>
+    );
+  }
 
   return (
     <Page className="home-page">
@@ -35,17 +88,20 @@ export default function HomeScreen() {
         <Header />
         <JCard className="home-shortcuts" style={{ padding: '16px 8px' }}>
           <nav className="shortcuts" aria-label={t('quickAccess')}>
-            <RoundShortcut label={t('navMyFarm')} icon="spa_outlined" tone="blue" onClick={() => navigate(paths.farm)} />
+            <RoundShortcut label={t('navMyFarm')} icon="spa_outlined" tone="blue" onClick={() => navigate(farm ? paths.farm : paths.farmSetup)} />
             <RoundShortcut label={t('navService')} icon="build_outlined" tone="lime" onClick={() => navigate(paths.service)} />
             <RoundShortcut label={t('navShop')} icon="shopping_bag_outlined" tone="orange" onClick={() => navigate(paths.shop)} />
             <RoundShortcut label={t('askMia')} image="images/jogoo_mark.png" tone="pink" onClick={() => navigate(paths.mia)} />
           </nav>
         </JCard>
       </div>
-      <ExampleBanner className="home-banner" />
 
       <div className="home-dash">
-        {visit && visit.visitAt && (
+        {main}
+
+        {nextJogooVisit && <NextVisitCard visit={nextJogooVisit} className="home-cell" />}
+
+        {!nextJogooVisit && visit && visit.visitAt && (
           <JCard className="home-cell">
             <SectionTitle trailing={<StatusPill label={t('confirmed')} tone="cyan" />}>{t('nextVisit')}</SectionTitle>
             <div style={{ height: 14 }} />
@@ -60,45 +116,6 @@ export default function HomeScreen() {
           </JCard>
         )}
 
-        {pick && (
-          <JCard className="home-cell">
-            <SectionTitle trailing={<StatusPill label={t('newCount', { count: picks.length })} tone="pink" />}>
-              {t('pickedForYourFarm')}
-            </SectionTitle>
-            <div style={{ height: 14 }} />
-            <ListRow
-              className="home-row-flush"
-              leading={<PhotoCircle src={pick.photo} size={72} alt={b(pick.name)} />}
-              title={b(pick.name)}
-              subtitle={pick.fitNote ? b(pick.fitNote) : undefined}
-              subtitleColor="var(--olive)"
-              trailing={<Button variant="outlined" onClick={() => navigate(paths.product(pick.id))}>{t('view')}</Button>}
-            />
-          </JCard>
-        )}
-
-        {/* Dashboard extras (tablet and desktop only). */}
-        <JCard className="home-cell home-extra">
-          <SectionTitle trailing={<Button variant="text" small onClick={() => navigate(paths.farm)}>{t('navMyFarm')}</Button>}>
-            {t('equipmentTitle')}
-          </SectionTitle>
-          <div style={{ height: 6 }} />
-          <Divided>
-            {equipmentList.map((e) => (
-              <ListRow
-                key={e.id}
-                onClick={() => navigate(paths.equipment(e.id))}
-                leading={e.photo ? <PhotoCircle src={e.photo} size={48} alt="" /> : <TintIcon icon={e.icon} tone={e.tone} size={48} />}
-                title={b(e.name)}
-                subtitle={b(e.healthNote)}
-                trailing={<HealthPill health={e.health} t={t} />}
-              />
-            ))}
-          </Divided>
-        </JCard>
-
-        <SeasonAlertCard />
-
         <BrandCard className="home-cell home-extra home-mia" blobSize={150}>
           <div className="row" style={{ ['--gap' as string]: '14px' }}>
             <span className="home-mia-mark"><img src={asset('images/jogoo_mark.png')} alt="" /></span>
@@ -111,58 +128,9 @@ export default function HomeScreen() {
             <Button variant="lime" icon="chat_bubble_outline" onClick={() => navigate(paths.mia)}>{t('askMia')}</Button>
           </div>
         </BrandCard>
-
-        <JCard className="home-cell home-extra" onClick={() => navigate(paths.agronomist)} labelledBy={planId}>
-          <SectionTitle trailing={<StatusPill label={t('updatedOn', { date: dayMonth(lang, DemoData.wateringPlanUpdated) })} tone="cyan" />}>
-            <span id={planId}>{t('wateringPlanThisWeek')}</span>
-          </SectionTitle>
-          <div style={{ height: 6 }} />
-          {DemoData.wateringPlan.map((plot) => (
-            <div className="list-row" key={plot.badge} style={{ padding: '8px 0' }}>
-              <span className={`tint-icon tone-${plot.tone} t-title-s`} style={{ width: 48, height: 48, color: 'var(--tone-fg)' }}>
-                {plot.badge}
-              </span>
-              <div className="txt">
-                <div className="t-title-s">{b(plot.name)}</div>
-                <div className="t-body-m" style={{ marginTop: 2 }}>{b(plot.schedule)}</div>
-              </div>
-            </div>
-          ))}
-        </JCard>
       </div>
+      <EquipmentSheet open={adding} onClose={() => setAdding(false)} />
     </Page>
-  );
-}
-
-function HealthPill({ health, t }: { health: EquipmentHealth; t: T }) {
-  switch (health) {
-    case 'good': return <StatusPill label={t('statusGood')} tone="lime" />;
-    case 'open': return <StatusPill label={t('statusOpen')} tone="pink" />;
-    case 'dueSoon': return <StatusPill label={t('statusDueSoon')} tone="orange" />;
-  }
-}
-
-/** Orange seasonal banner (same design as on Learn). Opens the related guide. */
-function SeasonAlertCard() {
-  const { b } = useI18n();
-  const navigate = useNavigate();
-  const alert = DemoData.seasonAlert;
-  const guide = guideById('late-blight');
-  const content = (
-    <>
-      <span className="home-season-icon"><Icon name="thunderstorm_outlined" /></span>
-      <span className="grow">
-        <span className="t-title-s" style={{ display: 'block' }}>{b(alert.title)}</span>
-        <span style={{ color: 'var(--brown)', display: 'block' }}>{b(alert.body)}</span>
-      </span>
-      {guide && <Icon name="chevron_right" color="var(--brown)" />}
-    </>
-  );
-  if (!guide) return <section className="home-cell home-extra home-season">{content}</section>;
-  return (
-    <button type="button" className="home-cell home-extra home-season" onClick={() => navigate(paths.guide(guide.id))}>
-      {content}
-    </button>
   );
 }
 

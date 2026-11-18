@@ -17,11 +17,9 @@ export function errorKey(e: unknown): MsgKey {
     case 'code_expired': return 'errCodeExpired';
     case 'email_failed': return 'errEmailFailed';
     case 'wait_before_resend': return 'errWaitResend';
-    case 'not_signed_in': return 'errSessionExpired';
-    case 'forbidden': return 'errForbidden';
-    case 'invalid_field':
-      return e instanceof BackendError && e.field === 'farmSizeHa' ? 'errFarmSize' : 'errMissing';
-    case 'missing_field': case 'field_too_long': return 'errMissing';
+    case 'missing_field': case 'invalid_field': case 'field_too_long': return 'errMissing';
+    case 'invalid_name': case 'invalid_area': case 'invalid_date': case 'invalid_photo': return 'errFarmInvalid';
+    case 'too_many': return 'errTooManyEquipment';
     default: return 'errServer';
   }
 }

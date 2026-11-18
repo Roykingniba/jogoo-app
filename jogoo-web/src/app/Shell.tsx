@@ -10,9 +10,7 @@ import { useI18n, type MsgKey } from '../i18n/i18n';
 import { useStore, unreadCount } from '../data/store';
 import { paths, tabForPath, type AppTab } from '../routes';
 import { InstallBanner, InstallNavItem } from './install';
-import { useAuth, isAdmin } from '../data/auth';
-import { askSignOut, SignOutConfirm } from '../components/account/SignOut';
-import { useUpdate } from './update';
+import { useAuth } from '../data/auth';
 
 const baseTabs: { tab: AppTab; to: string; icon: IconName; label: MsgKey }[] = [
   { tab: 'home', to: paths.home, icon: 'home_outlined', label: 'navHome' },
@@ -30,13 +28,11 @@ export function Shell() {
   const setLang = useStore((s) => s.setLang);
   const account = useAuth((s) => s.profile);
   const offline = useAuth((s) => s.offline);
-  const update = useUpdate();
+  const signOut = useAuth((s) => s.signOut);
   // Clients get a Status tab; JOGOO staff get the client tracking page instead.
   const tabs = [
     ...baseTabs,
-    isAdmin(account)
-      ? { tab: 'admin' as AppTab, to: paths.admin, icon: 'clients' as IconName, label: 'adminNav' as MsgKey }
-      : { tab: 'status' as AppTab, to: paths.status, icon: 'track' as IconName, label: 'navStatus' as MsgKey },
+    { tab: 'status' as AppTab, to: paths.status, icon: 'track' as IconName, label: 'navStatus' as MsgKey },
   ];
 
   const quick: { to: string; icon: IconName; label: string; badge?: number }[] = [
@@ -47,9 +43,7 @@ export function Shell() {
 
   return (
     <div className="app">
-      <a href="#main" className="skip-link" onClick={(e) => { e.preventDefault(); document.getElementById('main')?.focus(); }}>
-        {t('skipToContent')}
-      </a>
+      <a href="#main" className="sr-only">{t('appTitle')}</a>
       <nav className="side-nav" aria-label={t('appTitle')}>
         <NavLink to={paths.home} className="brand" aria-label="JOGOO">
           <Logo className="logo-full" height={52} />
@@ -78,11 +72,11 @@ export function Shell() {
               </span>
               <span className="nav-account-txt">
                 <span className="t-title-s">{account.fullName}</span>
-                <span className="t-body-s">{account.role === 'super_admin' ? t('superAdmin') : isAdmin(account) ? t('staffBadge') : account.email}</span>
+                <span className="t-body-s">{account.email}</span>
               </span>
             </div>
           )}
-          <button type="button" className="nav-item" onClick={askSignOut}>
+          <button type="button" className="nav-item" onClick={() => void signOut()}>
             <span className="ind"><Icon name="logout" /></span>
             <span>{t('signOut')}</span>
           </button>
@@ -98,14 +92,8 @@ export function Shell() {
         </div>
       </nav>
 
-      <main id="main" className="app-main" tabIndex={-1}>
+      <main id="main" className="app-main">
         {offline && <div className="offline-bar" role="status">{t('offlineAccount')}</div>}
-        {update.ready && (
-          <div className="offline-bar update-bar" role="status">
-            <span>{t('updateAvailable')}</span>
-            <button type="button" className="btn small filled" onClick={update.apply}>{t('reload')}</button>
-          </div>
-        )}
         {current === 'home' && <InstallBanner />}
         <Outlet />
       </main>
@@ -119,7 +107,6 @@ export function Shell() {
         ))}
       </nav>
       <ToastHost />
-      <SignOutConfirm />
     </div>
   );
 }

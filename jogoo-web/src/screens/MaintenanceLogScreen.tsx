@@ -1,12 +1,12 @@
 // Screen 17: a shared logbook between client and JOGOO.
 // Ported from lib/screens/maintenance_log_screen.dart.
 import { useNavigate, useParams } from 'react-router-dom';
-import { Button, Divided, ExampleBanner, JCard, Page, ScreenHeader, Stack, StatusPill } from '../components/ui';
+import { Button, Divided, JCard, Page, ScreenHeader, Stack, StatusPill } from '../components/ui';
 import { Icon } from '../components/Icon';
 import DateBadge from '../components/farm/DateBadge';
 import { NotFound } from '../components/farm/farmParts';
 import type { Equipment, LogEntry, Tone } from '../data/models';
-import { equipmentById, logFor, useStore } from '../data/store';
+import { logFor, useEquipmentById, useStore } from '../data/store';
 import { useI18n } from '../i18n/i18n';
 import { shareMaintenanceLog } from '../utils/pdfActions';
 import { paths } from '../routes';
@@ -14,7 +14,7 @@ import '../styles/farm.css';
 
 export default function MaintenanceLogScreen() {
   const { equipmentId = '' } = useParams();
-  const equipment = equipmentById(equipmentId);
+  const equipment = useEquipmentById(equipmentId);
   if (!equipment) return <NotFound />;
   return <LogView equipment={equipment} />;
 }
@@ -31,11 +31,10 @@ function LogView({ equipment }: { equipment: Equipment }) {
     <Page narrow>
       <ScreenHeader title={t('maintenanceLog')} subtitle={b(equipment.name)}
         trailing={<span className="farm-wide-only"><Button icon="add" onClick={newEntry}>{t('newEntry')}</Button></span>} />
-      <ExampleBanner />
       <Stack>
         {pending > 0 && (
           <div className="farm-pending" role="status">
-            <span className="dot"><Icon name="error_outline" size={20} /></span>
+            <span className="dot"><Icon name="cloud_off_outlined" size={20} /></span>
             <span className="grow">{t('pendingSync', { count: pending })}</span>
           </div>
         )}

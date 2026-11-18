@@ -10,7 +10,7 @@ import {
   Search, Send, Share2, Shield, ShoppingBag, ShoppingCart, SkipForward, SkipBack,
   Sprout, Gauge, Star, CloudLightning, ShieldCheck, Video, Droplet, Sun, Receipt,
   Languages, LogOut, User, Sparkles, Menu, Settings, Download as InstallIcon, Smartphone,
-  ListChecks, Users, Eye, EyeOff, Mail, Lock, KeyRound, RefreshCw,
+  ListChecks, Users, Eye, EyeOff, Mail, Lock, KeyRound, RefreshCw, BedDouble, Route, Upload, Pencil,
 } from 'lucide-react';
 
 const map = {
@@ -98,6 +98,10 @@ const map = {
   lock: Lock,
   key: KeyRound,
   refresh: RefreshCw,
+  hotel: BedDouble,
+  route: Route,
+  upload: Upload,
+  edit: Pencil,
 } satisfies Record<string, LucideIcon>;
 
 export type IconName = keyof typeof map;

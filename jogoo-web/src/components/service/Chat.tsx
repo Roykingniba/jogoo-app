@@ -26,10 +26,25 @@ export function ChatBubble({ message, footer }: { message: ChatMessage; footer?:
     <div className={mine ? 'bubble-row mine' : 'bubble-row'}>
       <div className="bubble">
         {message.sender && <div className="sender">{b(message.sender)}</div>}
-        {text}
+        <Linkified text={text} />
         {footer && <div className="footer">{footer}</div>}
       </div>
     </div>
+  );
+}
+
+/** Text with web links made clickable (Mia sends quote PDFs as links). */
+function Linkified({ text }: { text: string }) {
+  const parts = text.split(/(https?:\/\/[^\s<>"']+)/g);
+  return (
+    <>
+      {parts.map((p, i) => {
+        if (i % 2 === 0) return p;
+        const href = p.replace(/[.,;:!?)]+$/, '');
+        const rest = p.slice(href.length);
+        return <span key={i}><a href={href} target="_blank" rel="noopener noreferrer">{href}</a>{rest}</span>;
+      })}
+    </>
   );
 }
 
@@ -38,8 +53,7 @@ export function ChatList({ children, scrollKey }: { children: ReactNode; scrollK
   const first = useRef(true);
   useEffect(() => {
     // The page wrapper scrolls to the top on mount, so wait a frame first.
-    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-    const smooth = !first.current && !reduce;
+    const smooth = !first.current;
     first.current = false;
     const id = window.requestAnimationFrame(() => {
       window.scrollTo({ top: document.documentElement.scrollHeight, behavior: smooth ? 'smooth' : 'auto' });
@@ -51,11 +65,9 @@ export function ChatList({ children, scrollKey }: { children: ReactNode; scrollK
 
 /** Message field with an optional camera button and the lime send button. */
 export function ChatInputBar({
-  value, onChange, hint, onSend, onCamera, showCamera = false, disabled = false, above, below, sendLabel,
+  value, onChange, hint, onSend, onCamera, showCamera = false, disabled = false, above, below,
 }: {
   value: string;
-  /** Accessible name of the send button (defaults to "Send"). */
-  sendLabel?: string;
   onChange: (v: string) => void;
   hint: string;
   onSend: () => void;
@@ -84,7 +96,7 @@ export function ChatInputBar({
           onChange={(e) => onChange(e.target.value)} />
       </label>
       {/* A submit button, so it can't reuse CircleButton. */}
-      <button type="submit" className="circle-btn send" aria-label={sendLabel ?? t('send')} title={sendLabel ?? t('send')} disabled={disabled}
+      <button type="submit" className="circle-btn send" aria-label={t('send')} title={t('send')} disabled={disabled}
         style={{ width: 56, height: 56, ['--cb-bg' as string]: 'var(--lime-soft)', ['--cb-fg' as string]: 'var(--ink)' }}>
         <Icon name="send_outlined" size={24} />
       </button>

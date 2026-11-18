@@ -1,6 +1,6 @@
 // "Status" tab: where the client's JOGOO project stands, from sign-up to
 // installation. JOGOO staff move clients between stages on the admin page.
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { BrandCard, Button, JCard, Page, PageTitle, SectionTitle, StatusPill, Timeline, TintIcon, type TimelineItem } from '../components/ui';
 import { errorKey } from '../components/account/errors';
 import { backend, STAGES, type Journey } from '../data/backend';
@@ -14,30 +14,20 @@ export default function StatusScreen() {
   const { t, lang } = useI18n();
   const [journey, setJourney] = useState<Journey | null>(null);
   const [error, setError] = useState('');
-  const [loadedAt, setLoadedAt] = useState<Date | null>(null);
-  const inFlight = useRef(false);
-  const lastLoad = useRef(0);
 
-  const load = useCallback(async (force = true) => {
-    // Coming back to the app fires both visibilitychange and focus: one fetch is enough.
-    if (inFlight.current || (!force && Date.now() - lastLoad.current < 10000)) return;
-    inFlight.current = true;
-    lastLoad.current = Date.now();
+  const load = useCallback(async () => {
     setError('');
     try {
       setJourney(await backend.myJourney());
-      setLoadedAt(new Date());
     } catch (e) {
       setError(t(errorKey(e)));
-    } finally {
-      inFlight.current = false;
     }
   }, [t]);
 
   useEffect(() => { void load(); }, [load]);
   // Pick up stage changes made by JOGOO while the app was in the background.
   useEffect(() => {
-    const onVisible = () => { if (document.visibilityState === 'visible') void load(false); };
+    const onVisible = () => { if (document.visibilityState === 'visible') void load(); };
     document.addEventListener('visibilitychange', onVisible);
     window.addEventListener('focus', onVisible);
     return () => { document.removeEventListener('visibilitychange', onVisible); window.removeEventListener('focus', onVisible); };
@@ -50,7 +40,7 @@ export default function StatusScreen() {
         {error ? (
           <JCard>
             <p className="t-body-l">{error}</p>
-            <div style={{ marginTop: 12 }}><Button variant="outlined" icon="refresh" onClick={() => void load()}>{t('tryAgain')}</Button></div>
+            <div style={{ marginTop: 12 }}><Button variant="outlined" icon="refresh" onClick={load}>{lang === 'fr' ? 'Réessayer' : 'Try again'}</Button></div>
           </JCard>
         ) : <JCard><div className="acct-skeleton" aria-busy="true" /></JCard>}
       </Page>
@@ -77,12 +67,6 @@ export default function StatusScreen() {
   return (
     <Page>
       <PageTitle title={t('statusTitle')} subtitle={t('statusSubtitle')} />
-      {error && loadedAt && (
-        <p className="acct-error" role="status" style={{ marginBottom: 16, alignItems: 'center' }}>
-          <span className="grow">{t('refreshFailed', { time: loadedAt.toLocaleTimeString(lang === 'fr' ? 'fr-FR' : 'en-GB', { hour: '2-digit', minute: '2-digit' }) })}</span>
-          <Button variant="text" small icon="refresh" onClick={() => void load()}>{t('tryAgain')}</Button>
-        </p>
-      )}
       <div className="split">
         <div className="stack">
           <BrandCard>
@@ -99,7 +83,7 @@ export default function StatusScreen() {
 
           <JCard>
             <SectionTitle>{t('statusSubtitle')}</SectionTitle>
-            <div style={{ marginTop: 18 }}><Timeline items={items} stateLabels={{ done: t('stepDone'), current: t('stepCurrent'), pending: t('stepTodo') }} /></div>
+            <div style={{ marginTop: 18 }}><Timeline items={items} /></div>
           </JCard>
         </div>
 

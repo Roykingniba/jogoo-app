@@ -7,11 +7,11 @@ import {
   BottomActionBar, Button, CircleButton, Divided, JCard, Page, PhotoCircle, ScreenHeader, StatusPill, TintIcon, useBack,
 } from '../components/ui';
 import { showToast } from '../components/overlays';
-import { ContactJogooSheet } from '../components/service/ContactJogoo';
 import { useDesktop } from '../components/shop/useMedia';
 import { useI18n } from '../i18n/i18n';
 import { bi, same, type AddOn, type Product } from '../data/models';
 import { productById, useStore } from '../data/store';
+import { CATALOGUE, categoryById } from '../data/catalogue';
 import { dayMonth, formatAmount } from '../utils/format';
 import '../styles/shop.css';
 
@@ -40,7 +40,6 @@ function ProductView({ product }: { product: Product }) {
     () => new Set(product.addOns.filter((a) => a.selectedByDefault).map((a) => a.id)),
   );
   const [saved, setSaved] = useState(false);
-  const [quoting, setQuoting] = useState(false);
   const onQuote = product.price === 0;
 
   const total = product.price + product.addOns.filter((a) => selected.has(a.id)).reduce((n, a) => n + a.price, 0);
@@ -71,7 +70,43 @@ function ProductView({ product }: { product: Product }) {
   };
 
   const action = (
-    <Button block={desktop} onClick={onQuote ? () => setQuoting(true) : addAll}>{onQuote ? t('getQuote') : t('addToCart')}</Button>
+    <Button block={desktop} onClick={onQuote ? requestQuote : addAll}>{onQuote ? t('getQuote') : t('addToCart')}</Button>
+  );
+
+  const details = CATALOGUE.find((c) => c.id === product.id)?.details;
+  const info = details && (
+    <>
+      <JCard>
+        <p className="t-body-l" style={{ margin: 0 }}>{b(details.description)}</p>
+        {details.uses && details.uses.length > 0 && (
+          <>
+            <h2 className="t-title-s prod-h">{t('productUses')}</h2>
+            <div className="pill-wrap" style={{ gap: 8 }}>
+              {details.uses.map((u, i) => <StatusPill key={i} label={b(u)} tone="lime" />)}
+            </div>
+          </>
+        )}
+        {details.features && details.features.length > 0 && (
+          <>
+            <h2 className="t-title-s prod-h">{t('productFeatures')}</h2>
+            <ul className="prod-features">{details.features.map((f, i) => <li key={i}>{b(f)}</li>)}</ul>
+          </>
+        )}
+      </JCard>
+      {details.specs && details.specs.length > 0 && (
+        <JCard>
+          <h2 className="t-title-s" style={{ margin: '0 0 6px' }}>{t('productSpecs')}</h2>
+          <dl className="prod-specs">
+            {details.specs.map(([k, v], i) => (
+              <div key={i}><dt>{b(k)}</dt><dd>{lang === 'fr' ? v.replace(/(\d)\.(\d)/g, '$1,$2') : v}</dd></div>
+            ))}
+          </dl>
+        </JCard>
+      )}
+      <p className="t-body-s muted" style={{ margin: '0 4px' }}>
+        {t('cataloguePage', { category: b(categoryById(details.category).name), page: details.page })}
+      </p>
+    </>
   );
 
   const hero = (
@@ -102,12 +137,6 @@ function ProductView({ product }: { product: Product }) {
     </JCard>
   );
 
-  const quoteSheet = (
-    <ContactJogooSheet open={quoting} onClose={() => setQuoting(false)} title={t('getQuote')}
-      body={t('requestPriceBody', { item: b(product.name) })}
-      message={t('waPriceRequest', { item: b(product.name) })} onContact={requestQuote} />
-  );
-
   const header = (
     <div className="screen-header">
       <CircleButton icon="chevron_left" label={t('back')} onClick={back} />
@@ -122,7 +151,10 @@ function ProductView({ product }: { product: Product }) {
       <Page>
         {header}
         <div className="split">
-          <JCard>{hero}</JCard>
+          <div className="stack">
+            <JCard>{hero}</JCard>
+            {info}
+          </div>
           <aside className="sticky-side stack">
             {addOns}
             <JCard>
@@ -132,11 +164,11 @@ function ProductView({ product }: { product: Product }) {
                   <span className="t-title-l">{formatAmount(total)} FCFA</span>
                 </div>
               )}
+              {onQuote && <p className="t-body-m" style={{ margin: '0 0 14px' }}>{t('quoteHelp')}</p>}
               {action}
             </JCard>
           </aside>
         </div>
-        {quoteSheet}
       </Page>
     );
   }
@@ -147,6 +179,7 @@ function ProductView({ product }: { product: Product }) {
       <div className="stack">
         {hero}
         {addOns}
+        {info}
       </div>
       <BottomActionBar>
         {!onQuote && (
@@ -157,7 +190,6 @@ function ProductView({ product }: { product: Product }) {
         )}
         {action}
       </BottomActionBar>
-      {quoteSheet}
     </Page>
   );
 }

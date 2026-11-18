@@ -1,0 +1,6 @@
+# Supabase CLI settings for the Jogoo client accounts.
+project_id = "kyrajnbcrtxwdnwcgbzz"
+
+[functions.auth-codes]
+# The function checks the user's token itself (some actions work signed out).
+verify_jwt = false

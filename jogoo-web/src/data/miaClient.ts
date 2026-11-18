@@ -1,39 +1,76 @@
-// Talks to Mia. The Claude API is only ever called by the `mia` Supabase Edge
-// Function; the web app never holds an API key.
+// Talks to Mia, JOGOO's AI sales and agronomy assistant (repo "jogoo-agent",
+// running on agent.jogoo.fr). The app only uses the agent's public chat API;
+// the Claude and Kommo keys stay on that server.
 //
-// Mia answers only when Supabase is configured (VITE_SUPABASE_URL and
-// VITE_SUPABASE_PUBLISHABLE_KEY) AND the user is signed in. Sign-in is not part
-// of this stakeholder build, so Mia returns null and the chat offers a phone
-// call or WhatsApp instead, exactly like the Flutter app without a backend.
-import type { ChatMessage, Lang } from './models';
+//   POST /api/public/chat    {message, session_id?} → {session_id, bubbles[], buffered?}
+//   GET  /api/public/history?session_id=…           → {messages: [{role, content}]}
+//
+// One conversation per device and account: the session id is kept on the
+// device and forgotten when the person signs out.
+import { same, type ChatMessage } from './models';
 
-const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
-const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined;
+export const MIA_API = 'https://agent.jogoo.fr/api/public';
+const SESSION_KEY = 'jogoo.mia';
+/** Mia waits ~3 s for follow-up messages, then thinks: allow a generous minute. */
+const TIMEOUT_MS = 90_000;
 
-/** Access token of the signed-in Supabase user. Wire this to supabase-js auth later. */
-let accessToken: string | null = null;
-export const setMiaAccessToken = (token: string | null) => { accessToken = token; };
-
-export async function miaReply(history: ChatMessage[], lang: Lang): Promise<string | null> {
-  if (!url || !key || !accessToken) {
-    await new Promise((r) => setTimeout(r, 700)); // feels like a real round-trip
-    return null;
-  }
+function readSession(): string {
+  try { return localStorage.getItem(SESSION_KEY) ?? ''; } catch { return ''; }
+}
+function writeSession(id: string | null) {
   try {
-    const res = await fetch(`${url}/functions/v1/mia`, {
+    if (id) localStorage.setItem(SESSION_KEY, id); else localStorage.removeItem(SESSION_KEY);
+  } catch { /* storage blocked: the chat still works, it just won't resume */ }
+}
+/** Sign-out: the next person on this device starts a new conversation. */
+export const forgetMiaSession = () => writeSession(null);
+
+async function call(path: string, init?: RequestInit): Promise<Response> {
+  const ctl = new AbortController();
+  const timer = window.setTimeout(() => ctl.abort(), TIMEOUT_MS);
+  try {
+    return await fetch(`${MIA_API}${path}`, { ...init, signal: ctl.signal });
+  } finally {
+    window.clearTimeout(timer);
+  }
+}
+
+/**
+ * Sends one message. Returns Mia's reply as one or more short bubbles, or null
+ * when Mia cannot be reached (the screen then offers a call or WhatsApp).
+ */
+export async function miaSend(message: string): Promise<string[] | null> {
+  try {
+    const res = await call('/chat', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', apikey: key, Authorization: `Bearer ${accessToken}` },
-      body: JSON.stringify({
-        language: lang,
-        messages: history
-          .filter((m) => m.text.en !== '')
-          .map((m) => ({ role: m.author === 'client' ? 'user' : 'assistant', content: lang === 'fr' ? m.text.fr : m.text.en })),
-      }),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message, session_id: readSession() || undefined }),
     });
     if (!res.ok) return null;
-    const data = await res.json();
-    return typeof data?.reply === 'string' ? data.reply : null;
+    const data = await res.json() as { session_id?: string; bubbles?: string[]; reply?: string; buffered?: boolean };
+    if (data.session_id) writeSession(data.session_id);
+    // "buffered": the server merged this message into a newer one still being answered.
+    if (data.buffered) return [];
+    const bubbles = (data.bubbles ?? []).filter((b) => typeof b === 'string' && b.trim() !== '');
+    if (bubbles.length) return bubbles;
+    return data.reply ? [data.reply] : null;
   } catch {
     return null;
+  }
+}
+
+/** The conversation so far on this device (empty when there is none or Mia is offline). */
+export async function miaHistory(): Promise<ChatMessage[]> {
+  const sid = readSession();
+  if (!sid) return [];
+  try {
+    const res = await call(`/history?session_id=${encodeURIComponent(sid)}`);
+    if (!res.ok) return [];
+    const data = await res.json() as { messages?: { role: string; content: string }[] };
+    return (data.messages ?? [])
+      .filter((m) => (m.role === 'user' || m.role === 'assistant') && m.content)
+      .map((m) => ({ author: m.role === 'user' ? 'client' : 'mia', text: same(m.content) }));
+  } catch {
+    return [];
   }
 }
