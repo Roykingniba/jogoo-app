@@ -12,6 +12,8 @@ import { Logo } from '../components/Logo';
 const s = {
   Home: lazy(() => import('../screens/HomeScreen')),
   MyFarm: lazy(() => import('../screens/MyFarmScreen')),
+  FarmSetup: lazy(() => import('../screens/FarmSetupScreen')),
+  Visit: lazy(() => import('../screens/VisitScreen')),
   Equipment: lazy(() => import('../screens/EquipmentScreen')),
   Shop: lazy(() => import('../screens/ShopScreen')),
   Product: lazy(() => import('../screens/ProductScreen')),
@@ -33,7 +35,6 @@ const s = {
   Notifications: lazy(() => import('../screens/NotificationsScreen')),
   OfflineLibrary: lazy(() => import('../screens/OfflineLibraryScreen')),
   Status: lazy(() => import('../screens/StatusScreen')),
-  Admin: lazy(() => import('../screens/AdminScreen')),
 };
 const AuthScreen = lazy(() => import('../screens/AuthScreen'));
 
@@ -64,6 +65,7 @@ const router = createHashRouter([
     children: [
       { path: '/', element: el(s.Home) },
       { path: '/farm', element: el(s.MyFarm) },
+      { path: '/farm/setup', element: el(s.FarmSetup) },
       { path: '/farm/equipment/:id', element: el(s.Equipment) },
       { path: '/farm/documents', element: el(s.Documents) },
       { path: '/farm/log/:equipmentId', element: el(s.MaintenanceLog) },
@@ -81,11 +83,11 @@ const router = createHashRouter([
       { path: '/service/requests/:id', element: el(s.ServiceRequest) },
       { path: '/service/report', element: el(s.ReportProblem) },
       { path: '/service/agronomist', element: el(s.Agronomist) },
+      { path: '/service/visits/:id', element: el(s.Visit) },
       { path: '/mia', element: el(s.Mia) },
       { path: '/profile', element: el(s.Profile) },
       { path: '/notifications', element: el(s.Notifications) },
       { path: '/status', element: el(s.Status) },
-      { path: '/admin', element: el(s.Admin) },
       { path: '/signup', element: <Navigate to="/status" replace /> },
       { path: '/signin', element: <Navigate to="/" replace /> },
       { path: '*', element: <NotFound /> },

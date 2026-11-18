@@ -6,6 +6,7 @@ import { Icon } from '../components/Icon';
 import { Button, JCard, TintIcon } from '../components/ui';
 import { Sheet } from '../components/overlays';
 import { useI18n } from '../i18n/i18n';
+import { isNative } from '../utils/native';
 
 interface BIPEvent extends Event { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> }
 
@@ -20,10 +21,11 @@ const isIos = () => /iphone|ipad|ipod/i.test(navigator.userAgent) ||
 const useInstall = create<{ event: BIPEvent | null; installed: boolean; dismissed: boolean; help: boolean }>(() => {
   let dismissed = false;
   try { dismissed = localStorage.getItem(DISMISS_KEY) === '1'; } catch { /* ignore */ }
-  return { event: null, installed: typeof window !== 'undefined' && isStandalone(), dismissed, help: false };
+  // The Android app (Capacitor) is already installed: never offer the PWA.
+  return { event: null, installed: typeof window !== 'undefined' && (isNative() || isStandalone()), dismissed, help: false };
 });
 
-if (typeof window !== 'undefined') {
+if (typeof window !== 'undefined' && !isNative()) {
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     useInstall.setState({ event: e as BIPEvent });

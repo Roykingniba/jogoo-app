@@ -1,17 +1,18 @@
-// Screen 02: all installations, orders and invoices after purchase.
+// Screen 02: the client's farm, their equipment, and orders and invoices after purchase.
 // Ported from lib/screens/my_farm_screen.dart.
-import { useId, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  ChoicePill, CircleButton, Divided, ExampleBanner, JCard, ListRow, Page, PageTitle, PhotoCircle, PillRow,
+  Button, ChoicePill, CircleButton, Divided, JCard, ListRow, Page, PageTitle, PhotoCircle, PillRow,
   SectionTitle, Stack, StatusPill, TintIcon,
 } from '../components/ui';
 import { Icon } from '../components/Icon';
-import { showToast } from '../components/overlays';
-import { ContactJogooSheet } from '../components/service/ContactJogoo';
 import { HealthPill } from '../components/farm/farmParts';
-import { bi, type Equipment } from '../data/models';
-import { equipmentList, invoices, orders, useStore } from '../data/store';
+import { CreateFarmCard, FarmSummary } from '../components/farm/FarmSummary';
+import { EquipmentSheet } from '../components/farm/EquipmentSheet';
+import type { Equipment } from '../data/models';
+import { invoices, orders, useStore } from '../data/store';
+import { EQUIPMENT_KINDS, choiceLabel } from '../data/farm';
 import { useI18n } from '../i18n/i18n';
 import { formatAmount, fullDate } from '../utils/format';
 import { paths } from '../routes';
@@ -21,10 +22,24 @@ type FarmTab = 'equipment' | 'orders' | 'invoices';
 
 export default function MyFarmScreen() {
   const { t } = useI18n();
-  const profile = useStore((s) => s.profile);
+  const farm = useStore((s) => s.farm);
+  const status = useStore((s) => s.farmStatus);
+  const equipment = useStore((s) => s.equipment);
   const [tab, setTab] = useState<FarmTab>('equipment');
   const [adding, setAdding] = useState(false);
-  const town = profile.location.split(',')[0];
+
+  if (!farm) {
+    return (
+      <Page>
+        <PageTitle title={t('navMyFarm')} />
+        {status === 'loading' || status === 'idle'
+          ? <JCard><p className="t-body-l" role="status" style={{ margin: 0 }}>{t('loadingFarm')}</p></JCard>
+          : status === 'error'
+            ? <JCard><p className="t-body-l" style={{ margin: 0 }}>{t('farmLoadFailed')}</p></JCard>
+            : <CreateFarmCard />}
+      </Page>
+    );
+  }
 
   const tabs: [FarmTab, string][] = [
     ['equipment', t('tabEquipment')],
@@ -36,11 +51,11 @@ export default function MyFarmScreen() {
     <Page>
       <PageTitle
         title={t('navMyFarm')}
-        subtitle={t('installationsAt', { count: equipmentList.length, place: town })}
+        subtitle={t('equipmentCount', { count: equipment.length })}
         trailing={<CircleButton icon="add" label={t('addEquipment')} color="#fff" background="var(--navy)" size={60} onClick={() => setAdding(true)} />}
       />
-      <ExampleBanner />
-      <div className="farm-tabs">
+      <FarmSummary farm={farm} />
+      <div className="farm-tabs" style={{ marginTop: 16 }}>
         <PillRow>
           {tabs.map(([key, label]) => (
             <ChoicePill key={key} label={label} selected={tab === key} onClick={() => setTab(key)} />
@@ -48,35 +63,18 @@ export default function MyFarmScreen() {
         </PillRow>
       </div>
       <div style={{ marginTop: 16 }}>
-        {tab === 'equipment' && <EquipmentTab />}
+        {tab === 'equipment' && <EquipmentTab onAdd={() => setAdding(true)} />}
         {tab === 'orders' && <OrdersTab />}
         {tab === 'invoices' && <InvoicesTab />}
       </div>
-      <AddEquipmentSheet open={adding} onClose={() => setAdding(false)} />
+      <EquipmentSheet open={adding} onClose={() => setAdding(false)} />
     </Page>
   );
 }
 
-function AddEquipmentSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { t } = useI18n();
-  const requestFromSales = useStore((s) => s.requestFromSales);
-  const [text, setText] = useState('');
-  const value = text.trim();
-  const close = () => { setText(''); onClose(); };
-  const record = () => {
-    if (value === '') return;
-    requestFromSales(bi(`New equipment: ${value}`, `Nouvel équipement : ${value}`));
-    showToast(t('addEquipmentSavedTitle'), t('addEquipmentSavedBody'));
-  };
-  return (
-    <ContactJogooSheet open={open} onClose={close} title={t('addEquipment')} body={t('addEquipmentBody')}
-      message={t('waAddEquipment', { item: value })} canSend={value !== ''} onContact={record}>
-      <label className="field">
-        <span className="lbl">{t('addEquipment')}</span>
-        <input className="input" autoFocus value={text} placeholder={t('addEquipmentHint')} onChange={(e) => setText(e.target.value)} />
-      </label>
-    </ContactJogooSheet>
-  );
+function equipmentSubtitle(item: Equipment, lang: 'en' | 'fr', b: (v: Equipment['name']) => string) {
+  if (item.healthNote) return b(item.healthNote);
+  return [item.kind ? choiceLabel(EQUIPMENT_KINDS, item.kind, lang) : '', item.serial].filter(Boolean).join(' · ') || undefined;
 }
 
 function EquipmentVisual({ item, size }: { item: Equipment; size: number }) {
@@ -85,10 +83,25 @@ function EquipmentVisual({ item, size }: { item: Equipment; size: number }) {
 
 const barColors = ['var(--olive)', 'var(--navy)', 'var(--magenta)'];
 
-function EquipmentTab() {
-  const { t, b } = useI18n();
+function EquipmentTab({ onAdd }: { onAdd: () => void }) {
+  const { t, b, lang } = useI18n();
   const navigate = useNavigate();
+  const equipmentList = useStore((s) => s.equipment);
+  const withWarranty = equipmentList.filter((e) => e.warrantyMonths != null);
   const first = equipmentList[0];
+
+  if (equipmentList.length === 0) {
+    return (
+      <JCard>
+        <div className="farm-empty">
+          <TintIcon icon="build_outlined" tone="blue" size={56} />
+          <h2 className="t-title-m">{t('noEquipmentTitle')}</h2>
+          <p className="t-body-m">{t('noEquipmentYet')}</p>
+          <Button icon="add" onClick={onAdd}>{t('addEquipment')}</Button>
+        </div>
+      </JCard>
+    );
+  }
 
   return (
     <Stack>
@@ -97,23 +110,41 @@ function EquipmentTab() {
         <Divided>
           {equipmentList.map((item) => (
             <ListRow key={item.id} leading={<EquipmentVisual item={item} size={60} />}
-              title={b(item.name)} subtitle={b(item.healthNote)} trailing={<HealthPill health={item.health} />}
+              title={b(item.name)} subtitle={equipmentSubtitle(item, lang, b)} trailing={<HealthPill health={item.health} />}
               onClick={() => navigate(paths.equipment(item.id))} />
           ))}
         </Divided>
       </JCard>
       {/* Tablet and desktop: a grid of equipment cards. */}
       <div className="grid g3 farm-wide-only">
-        {equipmentList.map((item) => <EquipmentCard key={item.id} item={item} onOpen={() => navigate(paths.equipment(item.id))} />)}
+        {equipmentList.map((item) => (
+          <JCard key={item.id} onClick={() => navigate(paths.equipment(item.id))} ariaLabel={b(item.name)}>
+            <div className="farm-eq-card">
+              <div className="farm-eq-top">
+                <EquipmentVisual item={item} size={72} />
+                <div className="grow">
+                  <h2 className="t-title-m">{b(item.name)}</h2>
+                  <p className="t-body-m" style={{ marginTop: 4 }}>{equipmentSubtitle(item, lang, b)}</p>
+                </div>
+              </div>
+              <div className="farm-eq-foot">
+                <HealthPill health={item.health} />
+                <Icon name="chevron_right" />
+              </div>
+            </div>
+          </JCard>
+        ))}
       </div>
 
       <div className="grid g2" style={{ alignItems: 'start' }}>
-        <JCard>
-          <SectionTitle>{t('warrantyLeft')}</SectionTitle>
-          {equipmentList.map((item, i) => (
-            <WarrantyBar key={item.id} equipment={item} color={barColors[i % barColors.length]} />
-          ))}
-        </JCard>
+        {withWarranty.length > 0 && (
+          <JCard>
+            <SectionTitle>{t('warrantyLeft')}</SectionTitle>
+            {withWarranty.map((item, i) => (
+              <WarrantyBar key={item.id} equipment={item} color={barColors[i % barColors.length]} />
+            ))}
+          </JCard>
+        )}
         <JCard style={{ padding: '4px 20px' }}>
           <Divided>
             <ListRow leading={<TintIcon icon="folder_outlined" tone="blue" size={48} />}
@@ -131,32 +162,12 @@ function EquipmentTab() {
   );
 }
 
-function EquipmentCard({ item, onOpen }: { item: Equipment; onOpen: () => void }) {
-  const { b } = useI18n();
-  const id = useId();
-  return (
-    <JCard onClick={onOpen} labelledBy={`${id}-t`} describedBy={`${id}-d`}>
-      <div className="farm-eq-card">
-        <div className="farm-eq-top">
-          <EquipmentVisual item={item} size={72} />
-          <div className="grow">
-            <h2 className="t-title-m" id={`${id}-t`}>{b(item.name)}</h2>
-            <p className="t-body-m" id={`${id}-d`} style={{ marginTop: 4 }}>{b(item.healthNote)}</p>
-          </div>
-        </div>
-        <div className="farm-eq-foot">
-          <HealthPill health={item.health} />
-          <Icon name="chevron_right" />
-        </div>
-      </div>
-    </JCard>
-  );
-}
-
 function WarrantyBar({ equipment, color }: { equipment: Equipment; color: string }) {
   const { t, b } = useI18n();
-  const share = Math.min(1, Math.max(0, equipment.warrantyMonthsLeft / equipment.warrantyMonths));
-  const label = t('monthsOf', { left: equipment.warrantyMonthsLeft, total: equipment.warrantyMonths });
+  const left = equipment.warrantyMonthsLeft ?? 0;
+  const total = equipment.warrantyMonths ?? 1;
+  const share = Math.min(1, Math.max(0, left / total));
+  const label = t('monthsOf', { left, total });
   return (
     <div style={{ marginTop: 14 }}>
       <div className="row">
@@ -164,7 +175,7 @@ function WarrantyBar({ equipment, color }: { equipment: Equipment; color: string
         <span className="t-body-m" style={{ color: 'var(--ink)' }}>{label}</span>
       </div>
       <div className="farm-bar" role="progressbar" aria-label={`${b(equipment.shortName)}: ${label}`}
-        aria-valuemin={0} aria-valuemax={equipment.warrantyMonths} aria-valuenow={equipment.warrantyMonthsLeft}>
+        aria-valuemin={0} aria-valuemax={total} aria-valuenow={left}>
         <span style={{ width: `${share * 100}%`, background: color }} />
       </div>
     </div>
@@ -180,6 +191,7 @@ function OrdersTab() {
   const icon = (delivered?: boolean) => (
     <TintIcon icon={delivered ? 'inventory_2_outlined' : 'local_shipping_outlined'} tone={delivered ? 'lime' : 'cyan'} size={52} />
   );
+  if (orders.length === 0) return <JCard><p className="t-body-l" style={{ margin: 0 }}>{t('noOrdersYet')}</p></JCard>;
   return (
     <>
       <JCard className="farm-phone-only" style={{ padding: '8px 20px' }}>
@@ -240,6 +252,7 @@ function InvoicesTab() {
   const status = (paid: boolean) => paid
     ? <StatusPill label={t('invoicePaid')} tone="lime" />
     : <StatusPill label={t('invoiceDue')} tone="orange" />;
+  if (invoices.length === 0) return <JCard><p className="t-body-l" style={{ margin: 0 }}>{t('noInvoicesYet')}</p></JCard>;
   return (
     <>
       <JCard className="farm-phone-only" style={{ padding: '8px 20px' }}>

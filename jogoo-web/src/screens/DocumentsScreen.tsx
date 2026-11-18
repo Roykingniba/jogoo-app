@@ -1,11 +1,11 @@
 // Screen 16: the as-built project vault, offline.
 // Ported from lib/screens/documents_screen.dart.
 import { useState } from 'react';
-import { ChoicePill, Divided, ExampleBanner, JCard, ListRow, Page, PillRow, ScreenHeader, Stack, TintIcon } from '../components/ui';
+import { ChoicePill, Divided, JCard, ListRow, Page, PillRow, ScreenHeader, Stack, TintIcon } from '../components/ui';
 import { Icon } from '../components/Icon';
 import { DocumentRow } from '../components/farm/farmParts';
 import type { Equipment, FarmDocument } from '../data/models';
-import { documents, equipmentList } from '../data/store';
+import { documents, useEquipmentList } from '../data/store';
 import { useI18n } from '../i18n/i18n';
 import '../styles/farm.css';
 
@@ -22,6 +22,7 @@ const matches = (filter: Filter, doc: FarmDocument) => {
 
 export default function DocumentsScreen() {
   const { t } = useI18n();
+  const equipmentList = useEquipmentList();
   const [filter, setFilter] = useState<Filter>('all');
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set(equipmentList[0] ? [equipmentList[0].id] : []));
   // Manuals live in the offline library; this vault is the project file.
@@ -43,7 +44,6 @@ export default function DocumentsScreen() {
   return (
     <Page>
       <ScreenHeader title={t('myDocuments')} subtitle={t('documentsSubtitle')} />
-      <ExampleBanner />
       <Stack>
         <div className="farm-tabs">
           <PillRow>

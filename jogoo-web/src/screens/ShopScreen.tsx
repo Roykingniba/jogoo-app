@@ -4,58 +4,47 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  asset, BrandCard, Button, CircleButton, Divided, ExampleBanner, JCard, ListRow, Page, PageTitle, PhotoCircle,
+  asset, BrandCard, Button, CircleButton, Divided, JCard, ListRow, Page, PageTitle, PhotoCircle,
   SearchBox, SectionTitle, TintIcon,
 } from '../components/ui';
 import { Sheet, showToast } from '../components/overlays';
-import { ContactJogooButtons, ContactJogooSheet } from '../components/service/ContactJogoo';
 import { Icon, type IconName } from '../components/Icon';
 import { useDesktop } from '../components/shop/useMedia';
-import { useI18n, type T } from '../i18n/i18n';
+import { useI18n } from '../i18n/i18n';
+import { CATEGORIES, categoryById, type CategoryInfo } from '../data/catalogue';
 import { bi, type Product, type ProductCategory, type Tone } from '../data/models';
 import { cartCount, cartTotal, products, useStore } from '../data/store';
 import { formatAmount } from '../utils/format';
 import { paths } from '../routes';
 import '../styles/shop.css';
 
-/** Lower case without accents, so "ecran" finds "écran" and "vanne" finds "Vanne". */
-const fold = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-
-const shownCategories: ProductCategory[] = ['filters', 'valves', 'sprinklers', 'pivots'];
-
-function categoryLabel(t: T, c: ProductCategory): string {
-  switch (c) {
-    case 'filters': return t('catFilters');
-    case 'valves': return t('catValves');
-    case 'sprinklers': return t('catSprinklers');
-    case 'pivots': return t('catPivots');
-    case 'kits': return t('catKits');
-  }
-}
+const matches = (p: Product, q: string) =>
+  [p.name.en, p.name.fr, p.fitNote?.en ?? '', p.fitNote?.fr ?? '', categoryById(p.category).name.en, categoryById(p.category).name.fr]
+    .some((x) => x.toLowerCase().includes(q));
 
 export default function ShopScreen() {
-  const { t } = useI18n();
+  const { t, b } = useI18n();
   const navigate = useNavigate();
   const desktop = useDesktop();
   const cart = useStore((s) => s.cart);
   const requestFromSales = useStore((s) => s.requestFromSales);
-  const [category, setCategory] = useState<ProductCategory | null>(null); // null = "For you"
+  const [category, setCategory] = useState<ProductCategory | null>(null); // null = everything
   const [query, setQuery] = useState('');
   const [cartOpen, setCartOpen] = useState(false);
-  const [quoteOpen, setQuoteOpen] = useState(false);
 
-  const q = fold(query.trim());
+  const q = query.trim().toLowerCase();
+  const info = category ? categoryById(category) : null;
   let shown: Product[];
   let heading: string;
   if (q !== '') {
-    shown = products.filter((p) => fold(p.name.en).includes(q) || fold(p.name.fr).includes(q));
+    shown = products.filter((p) => matches(p, q));
     heading = t('searchResults');
-  } else if (category == null) {
-    shown = products.filter((p) => p.recommended);
-    heading = t('forYourEquipment');
+  } else if (info) {
+    shown = products.filter((p) => p.category === info.id);
+    heading = b(info.name);
   } else {
-    shown = products.filter((p) => p.category === category);
-    heading = categoryLabel(t, category);
+    shown = products;
+    heading = t('allProducts');
   }
 
   const upsell = (
@@ -65,14 +54,13 @@ export default function ShopScreen() {
           <h2 className="ttl">{t('upsellTitle')}</h2>
           <p className="bdy">{t('upsellBody')}</p>
         </div>
-        <Button onDark onClick={() => setQuoteOpen(true)}>{t('getQuote')}</Button>
-      </div>
-      <ContactJogooSheet open={quoteOpen} onClose={() => setQuoteOpen(false)} title={t('getQuote')}
-        body={t('upsellBody')} message={t('waPriceRequest', { item: t('upsellBody') })}
-        onContact={() => {
-          requestFromSales(bi('Quote: extend drip system to plot C', 'Devis : extension goutte-à-goutte parcelle C'));
+        <Button onDark onClick={() => {
+          requestFromSales(bi('Quote: irrigation project', "Devis : projet d'irrigation"));
           showToast(t('requestSavedTitle'), t('requestSavedBody', { item: t('upsellTitle') }));
-        }} />
+        }}>
+          {t('getQuote')}
+        </Button>
+      </div>
     </BrandCard>
   );
 
@@ -87,23 +75,24 @@ export default function ShopScreen() {
     <>
       <SearchBox hint={t('searchProducts')} value={query} onChange={setQuery} />
       <div className="shop-cats" role="group" aria-label={t('navShop')}>
-        <CategoryBubble label={t('catForYou')} selected={category == null} onClick={() => setCategory(null)} />
-        {shownCategories.map((c) => (
-          <CategoryBubble key={c} label={categoryLabel(t, c)} photo={products.find((p) => p.category === c)?.photo}
-            selected={category === c} onClick={() => setCategory(c)} />
+        <CategoryBubble label={t('filterAll')} selected={category == null} onClick={() => setCategory(null)} />
+        {CATEGORIES.map((c) => (
+          <CategoryBubble key={c.id} label={b(c.name)} photo={products.find((p) => p.category === c.id)?.photo}
+            icon={c.icon} selected={category === c.id} onClick={() => setCategory(c.id)} />
         ))}
       </div>
     </>
   );
 
   const results = (
-    <section className="stack" style={{ ['--gap' as string]: '12px', marginTop: 6 }}>
-      <SectionTitle>{heading}</SectionTitle>
-      {/* Only the count is announced, not the whole grid. */}
-      <p className="sr-only" role="status" aria-live="polite">{q !== '' ? t('resultsCount', { count: shown.length }) : ''}</p>
-      {shown.length === 0
-        ? <JCard><p className="t-body-l">{t('noProducts')}</p></JCard>
-        : <div className="shop-grid">{shown.map((p) => <ProductCard key={p.id} product={p} />)}</div>}
+    <section aria-live="polite" className="stack" style={{ ['--gap' as string]: '12px', marginTop: 6 }}>
+      <SectionTitle trailing={shown.length > 0 ? <span className="chip">{shown.length}</span> : undefined}>{heading}</SectionTitle>
+      {q === '' && info?.comingSoon
+        ? <ComingSoonCard info={info} />
+        : shown.length === 0
+          ? <JCard><p className="t-body-l">{t('noProducts')}</p></JCard>
+          : <div className="shop-grid">{shown.map((p) => <ProductCard key={p.id} product={p} />)}</div>}
+      {q === '' && !category && <p className="t-body-s muted">{t('catalogueNote')}</p>}
     </section>
   );
 
@@ -111,7 +100,6 @@ export default function ShopScreen() {
     <Page>
       <PageTitle title={t('navShop')} subtitle={t('shopSubtitle')}
         trailing={desktop ? undefined : <CartButton count={cartCount(cart)} onClick={() => setCartOpen(true)} />} />
-      <ExampleBanner />
       {desktop ? (
         <div className="shop-layout">
           <div className="stack">
@@ -148,12 +136,14 @@ export default function ShopScreen() {
 
 // ---------------------------------------------------------------------------
 
-function CategoryBubble({ label, photo, selected, onClick }: { label: string; photo?: string; selected: boolean; onClick: () => void }) {
+function CategoryBubble({ label, photo, icon, selected, onClick }: {
+  label: string; photo?: string; icon?: IconName; selected: boolean; onClick: () => void;
+}) {
   return (
     <button type="button" className="shop-cat" aria-pressed={selected} onClick={onClick}>
       {photo
         ? <span className="pic"><img src={asset(photo)} alt="" loading="lazy" /></span>
-        : <span className="pic icon"><Icon name="spa_outlined" size={30} /></span>}
+        : <span className="pic icon"><Icon name={icon ?? 'grid_on'} size={30} /></span>}
       <span className="lbl">{label}</span>
     </button>
   );
@@ -168,14 +158,32 @@ function QuickLink({ icon, tone, title, onClick }: { icon: IconName; tone: Tone;
   );
 }
 
+/** A catalogue section whose products are not in the app yet. */
+function ComingSoonCard({ info }: { info: CategoryInfo }) {
+  const { t, b } = useI18n();
+  const requestFromSales = useStore((s) => s.requestFromSales);
+  return (
+    <JCard>
+      <div className="shop-soon">
+        <TintIcon icon={info.icon ?? 'grid_on'} tone="lime" size={64} />
+        <h3 className="t-title-l">{b(info.name)}</h3>
+        {info.blurb && <p className="t-body-l">{b(info.blurb)}</p>}
+        <p className="t-body-m muted">{t('catalogueSoon')}</p>
+        <Button icon="chat_bubble_outline" onClick={() => {
+          requestFromSales(bi(`Information request: ${info.name.en}`, `Demande d'information : ${info.name.fr}`));
+          showToast(t('requestSavedTitle'), t('requestSavedBody', { item: b(info.name) }));
+        }}>{t('askJogoo')}</Button>
+      </div>
+    </JCard>
+  );
+}
+
 function ProductCard({ product }: { product: Product }) {
   const { t, b } = useI18n();
   const navigate = useNavigate();
   const requestFromSales = useStore((s) => s.requestFromSales);
-  const [asking, setAsking] = useState(false);
-  // No one-tap request: a confirm sheet explains that the app does not send it, then WhatsApp or Call.
-  const record = () => {
-    requestFromSales(bi(`Price request: ${product.name.en}`, `Demande de prix : ${product.name.fr}`));
+  const request = () => {
+    requestFromSales(bi(`Quote: ${product.name.en}`, `Devis : ${product.name.fr}`));
     showToast(t('requestSavedTitle'), t('requestSavedBody', { item: b(product.name) }));
   };
   return (
@@ -185,10 +193,7 @@ function ProductCard({ product }: { product: Product }) {
         <span className="t-title-s">{b(product.name)}</span>
         {product.fitNote && <span className={product.highlightFit ? 'fit hi' : 'fit'}>{b(product.fitNote)}</span>}
       </button>
-      <Button small variant={product.highlightFit ? 'filled' : 'outlined'} onClick={() => setAsking(true)}>{t('request')}</Button>
-      <ContactJogooSheet open={asking} onClose={() => setAsking(false)} title={t('requestPriceTitle')}
-        body={t('requestPriceBody', { item: b(product.name) })}
-        message={t('waPriceRequest', { item: b(product.name) })} onContact={record} />
+      <Button small variant={product.highlightFit ? 'filled' : 'outlined'} onClick={request}>{t('getQuote')}</Button>
     </JCard>
   );
 }
@@ -205,8 +210,8 @@ function CartButton({ count, onClick }: { count: number; onClick: () => void }) 
 }
 
 /**
- * Cart review. No online ordering yet: the cart becomes a WhatsApp message to
- * JOGOO sales (or the client calls), who confirm price, fitting and delivery.
+ * Cart review. No online payment yet: the order request goes to JOGOO
+ * sales, who confirm price, fitting and delivery by phone.
  */
 function CartContents({ onSubmitted }: { onSubmitted?: () => void }) {
   const { t, b } = useI18n();
@@ -222,14 +227,12 @@ function CartContents({ onSubmitted }: { onSubmitted?: () => void }) {
       </div>
     );
   }
-  const lines = cart.map((l) => `• ${b(l.title)} × ${l.quantity}`).join('\n');
-  const message = t('waOrder', { lines, total: formatAmount(cartTotal(cart)) });
   return (
     <div>
       <Divided>
         {cart.map((line) => (
           <ListRow key={line.id} title={b(line.title)}
-            subtitle={`${line.quantity} × ${formatAmount(line.unitPrice)} FCFA`}
+            subtitle={`${line.quantity} × ${formatAmount(line.unitPrice)} F`}
             trailing={<CircleButton icon="delete_outline" label={t('remove')} size={44} background="var(--bg)"
               onClick={() => removeFromCart(line.id)} />} />
         ))}
@@ -238,15 +241,15 @@ function CartContents({ onSubmitted }: { onSubmitted?: () => void }) {
         <span className="t-body-l">{t('total')}</span>
         <span className="t-title-m">{formatAmount(cartTotal(cart))} FCFA</span>
       </div>
-      <p className="t-body-m" style={{ margin: '12px 0' }}>{t('cartNotSent')}</p>
-      <ContactJogooButtons message={message} whatsAppLabel={t('sendOrderRequest')}
-        onContact={(channel) => {
-          // Only a WhatsApp hand-off empties the cart; after a call the client may still want the list.
-          if (channel !== 'whatsapp') return;
+      <div style={{ marginTop: 16 }}>
+        <Button block onClick={() => {
           submitCart();
           onSubmitted?.();
           showToast(t('orderRequestSavedTitle'), t('orderRequestSavedBody'));
-        }} />
+        }}>
+          {t('sendOrderRequest')}
+        </Button>
+      </div>
       <p className="t-body-s center" style={{ marginTop: 8 }}>{t('paymentLater')}</p>
     </div>
   );

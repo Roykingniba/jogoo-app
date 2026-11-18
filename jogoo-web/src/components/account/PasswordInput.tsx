@@ -11,7 +11,7 @@ export function PasswordInput({
   return (
     <div className="acct-pass">
       <input id={id} className="input" type={show ? 'text' : 'password'} value={value} required
-        minLength={minLength} autoComplete={autoComplete} onChange={(e) => onChange(e.target.value)} />
+        minLength={minLength} maxLength={72} autoComplete={autoComplete} onChange={(e) => onChange(e.target.value)} />
       <button type="button" className="acct-eye" aria-label={show ? t('hidePassword') : t('showPassword')}
         aria-pressed={show} onClick={() => setShow((v) => !v)}>
         <Icon name={show ? 'eye_off' : 'eye'} size={20} />

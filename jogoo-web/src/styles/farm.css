@@ -21,7 +21,7 @@
 
 /* Tables for orders and invoices */
 .farm-table { width: 100%; border-collapse: collapse; }
-.farm-table th { text-align: left; font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); padding: 0 12px 12px; }
+.farm-table th { text-align: left; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); padding: 0 12px 12px; }
 .farm-table td { padding: 14px 12px; border-top: 1px solid var(--line); vertical-align: middle; font-size: 14px; }
 .farm-table th:first-child, .farm-table td:first-child { padding-left: 0; }
 .farm-table th:last-child, .farm-table td:last-child { padding-right: 0; }
@@ -55,7 +55,7 @@
 .farm-keydates { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 .card.farm-keydate { text-align: center; padding: 16px 8px; }
 .farm-keydate .v { font-family: var(--display); font-size: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.farm-keydate .l { font-size: 13px; color: var(--muted); margin-top: 4px; }
+.farm-keydate .l { font-size: 12px; color: var(--muted); margin-top: 4px; }
 .btn.farm-btn-magenta { color: var(--magenta); box-shadow: inset 0 0 0 1.5px var(--magenta); }
 .btn.farm-btn-magenta:hover:not(:disabled) { background: var(--tint-pink); }
 .farm-actions { display: flex; flex-direction: column; gap: 10px; }
@@ -81,7 +81,7 @@
 .farm-field > label, .farm-field > .lbl { color: var(--muted); font-size: 15px; flex-shrink: 0; }
 .farm-field .farm-inline {
   flex: 1; min-width: 0; border: 0; outline: 0; background: none; font: inherit; font-size: 15px; font-weight: 700;
-  color: var(--ink); text-align: right; padding: 8px 0; border-bottom: 1.5px solid var(--field-border);
+  color: var(--ink); text-align: right; padding: 8px 0; border-bottom: 1.5px solid transparent;
 }
 .farm-field .farm-inline:focus { border-bottom-color: var(--navy); }
 .farm-field .farm-inline::placeholder { color: var(--muted); font-weight: 500; }
@@ -89,12 +89,12 @@
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5z' fill='%2356657a'/%3E%3C/svg%3E") right center no-repeat; }
 .farm-date { position: relative; flex: 1; min-width: 0; text-align: right; font-weight: 700; padding: 8px 0; }
 .farm-date input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; border: 0; }
-.farm-date:focus-within { outline: 3px solid var(--navy); outline-offset: 2px; border-radius: 8px; }
+.farm-date:focus-within { outline: 3px solid var(--lime-soft); outline-offset: 2px; border-radius: 8px; }
 .farm-check { display: flex; align-items: center; gap: 14px; padding: 12px 0; cursor: pointer; font-weight: 700; }
 .farm-check input { appearance: none; width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--muted); margin: 0; flex-shrink: 0; cursor: pointer; display: grid; place-items: center; }
 .farm-check input:checked { background: var(--lime-soft); border-color: var(--lime-soft); }
 .farm-check input:checked::after { content: ''; width: 6px; height: 11px; border: solid var(--ink); border-width: 0 2.5px 2.5px 0; transform: translateY(-1px) rotate(45deg); }
-.farm-check input:focus-visible { outline: 3px solid var(--navy); outline-offset: 2px; }
+.farm-check input:focus-visible { outline: 3px solid var(--lime-soft); outline-offset: 2px; }
 
 /* Offline library: Flutter order on phones; summary + Wi-Fi above manuals | guides on wider screens. */
 .farm-lib { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); align-items: start; }
@@ -105,3 +105,30 @@
   .farm-lib-man { grid-area: man; }
   .farm-lib-gui { grid-area: gui; }
 }
+
+/* Farm set-up form, equipment sheet and empty states */
+.farm-form-h { margin: 0 0 12px; }
+.farm-form-help { margin: -6px 0 12px; }
+.farm-add-other { display: flex; gap: 8px; align-items: center; margin-top: 12px; }
+.farm-add-other .input { flex: 1 1 auto; min-width: 0; }
+.farm-add-other .btn { flex-shrink: 0; }
+.farm-extra-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) auto; gap: 8px; align-items: center; }
+@media (max-width: 520px) {
+  .farm-extra-row { grid-template-columns: minmax(0, 1fr) auto; }
+  .farm-extra-row .input:nth-child(2) { grid-column: 1; grid-row: 2; }
+  .farm-extra-row .circle-btn, .farm-extra-row > button { grid-column: 2; grid-row: 1 / span 2; }
+}
+.profile-field-suffix { position: relative; }
+.profile-field-suffix .input { padding-right: 48px; width: 100%; }
+.profile-field-suffix .sfx { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: var(--muted); font-weight: 600; }
+.btn.farm-text-danger { color: var(--magenta); }
+.btn.farm-btn-danger { background: var(--magenta); color: #fff; }
+.farm-confirm { background: var(--tint-pink); border-radius: 16px; padding: 14px 16px; }
+.farm-empty { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
+.farm-empty .t-headline, .farm-empty .t-title-m { margin: 0; }
+.farm-empty p { margin: 0; }
+.farm-facts { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 14px 20px; margin-top: 14px; }
+.farm-facts .k { color: var(--muted); font-size: 13.5px; }
+.farm-facts .v { font-weight: 700; overflow-wrap: anywhere; }
+.farm-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.farm-notes { margin: 14px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }

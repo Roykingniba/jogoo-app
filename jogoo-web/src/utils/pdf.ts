@@ -5,6 +5,7 @@ import type { Equipment, FarmDocument, Lang, LogEntry } from '../data/models';
 import { translate } from '../i18n/i18n';
 import { showToast } from '../components/overlays';
 import { shareOrDownload } from './actions';
+import { isNative, shareFileNative } from './native';
 
 // ---------------------------------------------------------------------------
 // Text safety: the built-in Helvetica covers WinAnsi (Latin-1), so French
@@ -178,10 +179,19 @@ function saveBlob(blob: Blob, filename: string) {
   setTimeout(() => URL.revokeObjectURL(url), 10_000);
 }
 
+/** In the Android app: save to the app cache and open the share sheet (open in a PDF viewer, save, send). */
+function nativeShare(lang: Lang, blob: Blob, filename: string, title: string) {
+  shareFileNative(blob, filename, { title }).catch((e) => failed(lang, e));
+}
+
 /** Opens the demo PDF in a new tab (the browser's PDF viewer); downloads it if pop-ups are blocked. */
 export function previewFarmDocument(lang: Lang, document: FarmDocument, equipment: Equipment, target?: Window | null) {
   try {
     const blob = farmDocumentPdf(lang, document, equipment);
+    if (isNative()) {
+      nativeShare(lang, blob, `jogoo-${document.id}.pdf`, lang === 'fr' ? document.title.fr : document.title.en);
+      return;
+    }
     const url = URL.createObjectURL(blob);
     let win = target ?? null;
     if (win) win.location.href = url;
@@ -197,7 +207,12 @@ export function previewFarmDocument(lang: Lang, document: FarmDocument, equipmen
 /** Saves the demo PDF as a file. */
 export function downloadFarmDocument(lang: Lang, document: FarmDocument, equipment: Equipment) {
   try {
-    saveBlob(farmDocumentPdf(lang, document, equipment), `jogoo-${document.id}.pdf`);
+    const blob = farmDocumentPdf(lang, document, equipment);
+    if (isNative()) {
+      nativeShare(lang, blob, `jogoo-${document.id}.pdf`, lang === 'fr' ? document.title.fr : document.title.en);
+      return;
+    }
+    saveBlob(blob, `jogoo-${document.id}.pdf`);
   } catch (e) {
     failed(lang, e);
   }

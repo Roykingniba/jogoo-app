@@ -10,7 +10,13 @@ import { useStore } from '../data/store';
 import type { Bi, Lang } from '../data/models';
 
 // web_*.json hold strings that exist only in the web build (install prompt...).
-export type MsgKey = keyof typeof en | keyof typeof webEn;
+// The staff app adds its own strings at start-up (registerMessages); only their
+// TYPE is imported here, so the client bundle never contains them.
+type StaffKey = keyof typeof import('../staff/staff_en.json');
+export type MsgKey = keyof typeof en | keyof typeof webEn | StaffKey;
+export function registerMessages(lang: Lang, messages: Record<string, string>) {
+  Object.assign(catalogs[lang], messages);
+}
 const catalogs: Record<Lang, Record<string, string>> = { en: { ...en, ...webEn }, fr: { ...fr, ...webFr } };
 const cache = new Map<string, IntlMessageFormat>();
 

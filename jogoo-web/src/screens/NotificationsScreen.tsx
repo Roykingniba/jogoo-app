@@ -1,7 +1,7 @@
 // Screen 19: how and when JOGOO reaches the client.
 // Ported from lib/screens/notifications_screen.dart.
 import { useEffect } from 'react';
-import { Divided, ExampleBanner, JCard, ListRow, Page, ScreenHeader, Switch, TintIcon } from '../components/ui';
+import { Divided, JCard, ListRow, Page, ScreenHeader, Switch, TintIcon } from '../components/ui';
 import { useI18n } from '../i18n/i18n';
 import { useStore } from '../data/store';
 import type { AppNotification, NotificationChannel } from '../data/models';
@@ -39,7 +39,6 @@ export default function NotificationsScreen() {
   return (
     <Page>
       <ScreenHeader title={t('notificationsTitle')} subtitle={t('notificationsSubtitle')} />
-      <ExampleBanner />
       <div className="notif-layout">
         <aside className="notif-side">
           <JCard style={{ paddingTop: 16, paddingBottom: 16 }}>
@@ -54,6 +53,7 @@ export default function NotificationsScreen() {
           </JCard>
         </aside>
         <div className="notif-list stack">
+          {notifications.length === 0 && <JCard><p className="t-body-l" style={{ margin: 0 }}>{t('noNotifications')}</p></JCard>}
           {today.length > 0 && <Section title={t('today')} items={today} />}
           {earlier.length > 0 && <Section title={t('earlier')} items={earlier} />}
         </div>

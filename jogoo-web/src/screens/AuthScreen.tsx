@@ -20,8 +20,6 @@ export default function AuthScreen() {
   const setLang = useStore((s) => s.setLang);
   const [mode, setMode] = useState<Mode>(() => (window.location.hash.includes('signup') ? 'signUp' : 'signIn'));
   const pending = useAuth((s) => s.pending);
-  const notice = useAuth((s) => s.notice);
-  const offline = useAuth((s) => s.offline);
 
   return (
     <div className="acct-page">
@@ -48,22 +46,14 @@ export default function AuthScreen() {
           </div>
         </div>
 
-        <h1 className="sr-only">{t('authWelcome')}</h1>
         <div className="acct-card card">
-          {offline && <p className="acct-notice" role="status"><Icon name="cloud_off_outlined" size={20} /><span>{t('errOffline')}</span></p>}
-          {notice && !pending && (
-            <p className="acct-notice" role="status">
-              <Icon name="error_outline" size={20} />
-              <span>{t(notice === 'sessionExpired' ? 'errSessionExpired' : 'accountDeletedNotice')}</span>
-            </p>
-          )}
           {pending ? (
             <CodeForm onDone={() => setMode('signIn')} />
           ) : mode === 'forgot' ? (
             <ForgotForm onBack={() => setMode('signIn')} />
           ) : (
             <>
-              <div className="pill-wrap acct-modes" role="group" aria-label={t('account')}>
+              <div className="pill-wrap acct-modes" role="tablist">
                 <ChoicePill label={t('signIn')} selected={mode === 'signIn'} onClick={() => setMode('signIn')} />
                 <ChoicePill label={t('signUp')} selected={mode === 'signUp'} onClick={() => setMode('signUp')} />
               </div>
@@ -79,21 +69,16 @@ export default function AuthScreen() {
   );
 }
 
-const isEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
-
-/** Error shown at the top of a form; scrolled into view so it's seen on a phone after tapping the button. */
-function ErrorBox({ msg }: { msg: string }) {
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => { ref.current?.scrollIntoView({ block: 'center', behavior: 'smooth' }); }, [msg]);
+export function ErrorBox({ msg }: { msg: string }) {
   return (
-    <div className="acct-error" role="alert" ref={ref}>
+    <div className="acct-error" role="alert">
       <Icon name="error_outline" size={20} />
       <span>{msg}</span>
     </div>
   );
 }
 
-function SignInForm({ onSwitch, onForgot }: { onSwitch: () => void; onForgot: () => void }) {
+export function SignInForm({ onSwitch, onForgot }: { onSwitch?: () => void; onForgot: () => void }) {
   const { t } = useI18n();
   const signIn = useAuth((s) => s.signIn);
   const [email, setEmail] = useState('');
@@ -103,8 +88,6 @@ function SignInForm({ onSwitch, onForgot }: { onSwitch: () => void; onForgot: ()
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!email.trim() || !password) { setError(t('errMissing')); return; }
-    if (!isEmail(email)) { setError(t('errInvalidEmail')); return; }
     setBusy(true);
     setError('');
     try {
@@ -116,7 +99,7 @@ function SignInForm({ onSwitch, onForgot }: { onSwitch: () => void; onForgot: ()
   };
 
   return (
-    <form className="stack" onSubmit={submit} noValidate>
+    <form className="stack" onSubmit={submit} noValidate={false}>
       <h2 className="t-headline">{t('signIn')}</h2>
       {error && <ErrorBox msg={error} />}
       <div className="field">
@@ -130,10 +113,12 @@ function SignInForm({ onSwitch, onForgot }: { onSwitch: () => void; onForgot: ()
         <button type="button" className="acct-link acct-forgot" onClick={onForgot}>{t('forgotPasswordLink')}</button>
       </div>
       <Button type="submit" block disabled={busy}>{busy ? t('signingIn') : t('signIn')}</Button>
-      <p className="t-body-m center">
-        {t('noAccount')}{' '}
-        <button type="button" className="acct-link" onClick={onSwitch}>{t('signUp')}</button>
-      </p>
+      {onSwitch && (
+        <p className="t-body-m center">
+          {t('noAccount')}{' '}
+          <button type="button" className="acct-link" onClick={onSwitch}>{t('signUp')}</button>
+        </p>
+      )}
     </form>
   );
 }
@@ -149,14 +134,9 @@ function SignUpForm({ onSwitch }: { onSwitch: () => void }) {
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
-    if (!f.fullName.trim() || !f.email.trim() || !f.password) { setError(t('errRequiredFields')); return; }
-    if (!isEmail(f.email)) { setError(t('errInvalidEmail')); return; }
     if (f.password.length < 8) { setError(t('errWeakPassword')); return; }
-    if (new TextEncoder().encode(f.password).length > 72) { setError(t('errPasswordTooLong')); return; }
-    // Accept "2,5", "2.5 ha" or "2 hectares".
-    const farmText = f.farm.trim().replace(/\s*(ha|hectares?)\.?$/i, '').replace(',', '.');
-    const farm = farmText === '' ? null : Number(farmText);
-    if (farm !== null && (!Number.isFinite(farm) || farm < 0 || farm > 100000)) { setError(t('errFarmSize')); return; }
+    const farm = f.farm.trim() === '' ? null : Number(f.farm.replace(',', '.'));
+    if (farm !== null && !Number.isFinite(farm)) { setError(t('errMissing')); return; }
     setBusy(true);
     try {
       await signUp({
@@ -171,7 +151,7 @@ function SignUpForm({ onSwitch }: { onSwitch: () => void }) {
 
   const opt = <span className="acct-opt"> ({t('optional')})</span>;
   return (
-    <form className="stack" onSubmit={submit} noValidate>
+    <form className="stack" onSubmit={submit}>
       <h2 className="t-headline">{t('signUp')}</h2>
       {error && <ErrorBox msg={error} />}
       <div className="field">
@@ -203,13 +183,10 @@ function SignUpForm({ onSwitch }: { onSwitch: () => void }) {
       </div>
       <div className="field">
         <label htmlFor="su-farm">{t('farmSizeOptional')}{opt}</label>
-        <input id="su-farm" className="input" inputMode="decimal" maxLength={16}
+        <input id="su-farm" className="input" inputMode="decimal" maxLength={10}
           value={f.farm} onChange={(e) => set('farm')(e.target.value)} />
       </div>
-      <p className="t-body-s">
-        {t('signUpConsent')}{' '}
-        <a href={`${import.meta.env.BASE_URL}privacy.html`} target="_blank" rel="noopener" style={{ color: 'var(--navy)', fontWeight: 700 }}>{t('privacyLink')}</a>
-      </p>
+      <p className="t-body-s">{t('signUpConsent')}</p>
       <Button type="submit" block disabled={busy}>{busy ? t('creatingAccount') : t('signUp')}</Button>
       <p className="t-body-m center">
         {t('haveAccount')}{' '}
@@ -223,7 +200,7 @@ function SignUpForm({ onSwitch }: { onSwitch: () => void }) {
 const digits = (v: string) => v.replace(/\D/g, '').slice(0, 6);
 
 /** Second step: the 6-digit email code (sign-up confirmation, sign-in, or password reset). */
-function CodeForm({ onDone }: { onDone: () => void }) {
+export function CodeForm({ onDone }: { onDone: () => void }) {
   const { t } = useI18n();
   const pending = useAuth((s) => s.pending)!;
   const { verifyCode, resendCode, confirmPasswordReset, cancelPending } = useAuth.getState();
@@ -232,7 +209,6 @@ function CodeForm({ onDone }: { onDone: () => void }) {
   const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [resending, setResending] = useState(false);
   const [error, setError] = useState('');
   const [wait, setWait] = useState(60);
   const input = useRef<HTMLInputElement>(null);
@@ -248,7 +224,6 @@ function CodeForm({ onDone }: { onDone: () => void }) {
     e?.preventDefault();
     if (code.length !== 6 || busy) return;
     if (reset && password.length < 8) { setError(t('errWeakPassword')); return; }
-    if (reset && new TextEncoder().encode(password).length > 72) { setError(t('errPasswordTooLong')); return; }
     setBusy(true);
     setError('');
     try {
@@ -262,8 +237,6 @@ function CodeForm({ onDone }: { onDone: () => void }) {
       setError(msg);
       setCode('');
       setBusy(false);
-      // An expired code can only be replaced: allow a new one right away.
-      if (err instanceof BackendError && err.code === 'code_expired') setWait(0);
       input.current?.focus();
     }
   };
@@ -276,18 +249,13 @@ function CodeForm({ onDone }: { onDone: () => void }) {
   }, [code]);
 
   const resend = async () => {
-    if (resending) return;
     setError('');
-    setResending(true);
     try {
       await resendCode();
       setWait(60);
       showToast(t('codeResent'), pending.email);
     } catch (err) {
       setError(t(errorKey(err)));
-      if (err instanceof BackendError && err.code === 'wait_before_resend') setWait(60);
-    } finally {
-      setResending(false);
     }
   };
 
@@ -298,11 +266,6 @@ function CodeForm({ onDone }: { onDone: () => void }) {
       <h2 className="t-headline">{title}</h2>
       <p className="t-body-m">{reset ? t('codeSentReset', { email: pending.email }) : t('codeSent', { email: pending.email })}</p>
       {error && <ErrorBox msg={error} />}
-      {/* Before the code field: the code submits itself on the 6th digit. */}
-      <label className="check-row">
-        <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
-        <span className="t-body-m" style={{ color: 'var(--ink)' }}>{t('rememberDevice')}</span>
-      </label>
       <div className="field">
         <label htmlFor="code">{t('codeLabel')}</label>
         <input id="code" ref={input} className="input acct-code" value={code} onChange={(e) => setCode(digits(e.target.value))}
@@ -316,12 +279,16 @@ function CodeForm({ onDone }: { onDone: () => void }) {
           <span className="t-body-s">{t('passwordHint')}</span>
         </div>
       )}
+      <label className="check-row">
+        <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
+        <span className="t-body-m" style={{ color: 'var(--ink)' }}>{t('rememberDevice')}</span>
+      </label>
       <Button type="submit" block disabled={busy || code.length !== 6}>
         {busy ? t('verifying') : reset ? t('savePassword') : t('verify')}
       </Button>
       <div className="row between wrap">
-        <button type="button" className="acct-link" disabled={wait > 0 || resending} onClick={resend}>
-          {resending ? t('sendingCode') : wait > 0 ? t('resendIn', { seconds: wait }) : t('resendCode')}
+        <button type="button" className="acct-link" disabled={wait > 0} onClick={resend}>
+          {wait > 0 ? t('resendIn', { seconds: wait }) : t('resendCode')}
         </button>
         <button type="button" className="acct-link" onClick={() => { cancelPending(); onDone(); }}>
           {reset ? t('backToSignIn') : t('useAnotherAccount')}
@@ -331,7 +298,7 @@ function CodeForm({ onDone }: { onDone: () => void }) {
   );
 }
 
-function ForgotForm({ onBack }: { onBack: () => void }) {
+export function ForgotForm({ onBack }: { onBack: () => void }) {
   const { t } = useI18n();
   const request = useAuth((s) => s.requestPasswordReset);
   const [email, setEmail] = useState('');
@@ -339,7 +306,6 @@ function ForgotForm({ onBack }: { onBack: () => void }) {
   const [error, setError] = useState('');
   const submit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!isEmail(email)) { setError(t('errInvalidEmail')); return; }
     setBusy(true);
     setError('');
     try {
@@ -350,7 +316,7 @@ function ForgotForm({ onBack }: { onBack: () => void }) {
     }
   };
   return (
-    <form className="stack" onSubmit={submit} noValidate>
+    <form className="stack" onSubmit={submit}>
       <h2 className="t-headline">{t('resetTitle')}</h2>
       <p className="t-body-m">{t('resetIntro')}</p>
       {error && <ErrorBox msg={error} />}
@@ -359,7 +325,7 @@ function ForgotForm({ onBack }: { onBack: () => void }) {
         <input id="fp-email" className="input" type="email" inputMode="email" autoComplete="email" required
           value={email} onChange={(e) => setEmail(e.target.value)} />
       </div>
-      <Button type="submit" block disabled={busy}>{busy ? t('sendingCode') : t('sendCode')}</Button>
+      <Button type="submit" block disabled={busy}>{t('sendCode')}</Button>
       <button type="button" className="acct-link" style={{ alignSelf: 'center' }} onClick={onBack}>{t('backToSignIn')}</button>
     </form>
   );

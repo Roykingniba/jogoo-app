@@ -1,0 +1,4 @@
+{
+  "//": "Lowest Android versionCode that can run the current web code. Raise it (and ship a new APK) only when a change needs new native code: a new Capacitor plugin, permission or icon.",
+  "minNative": 6
+}

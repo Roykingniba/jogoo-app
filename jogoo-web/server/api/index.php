@@ -12,7 +12,6 @@
 //   GET  /api/auth/me
 //   PATCH /api/me/profile     {fullName?, phone?, location?, farmSizeHa?, lang?}
 //   POST /api/me/password     {currentPassword, newPassword}
-//   DELETE /api/me            {password}  (deletes the account)
 //   GET  /api/me/journey
 //   GET  /api/admin/clients?q=&stage=&page=      (staff only)
 //   GET  /api/admin/clients/{id}                 (staff only)
@@ -73,16 +72,7 @@ function route(string $method, string $path): void
         $exists = $pdo->prepare('SELECT id, email_verified_at FROM users WHERE email = ?');
         $exists->execute([$email]);
         $old = $exists->fetch();
-        if ($old && $old['email_verified_at'] !== null) {
-            // Don't reveal that this email has an account: answer exactly like
-            // a new sign-up, and tell the owner by email instead.
-            if (too_many('code_sent', 'email', $email, 8, 60)) fail(429, 'too_many_attempts');
-            record_attempt('code_sent', $email);
-            hash_password($password); // same work as a real sign-up
-            set_cookie(CHALLENGE_COOKIE, random_token(), time() + CODE_TTL_MIN * 60);
-            send_account_exists_email($email, $lang);
-            respond(202, ['next' => 'verify_email', 'email' => mask_email($email)]);
-        }
+        if ($old && $old['email_verified_at'] !== null) fail(409, 'email_taken');
 
         $pdo->beginTransaction();
         try {
@@ -240,26 +230,6 @@ function route(string $method, string $path): void
         respond(200, ['ok' => true]);
     }
 
-    if ($path === '/me' && $method === 'DELETE') {
-        // Deletes the account and everything stored about the client
-        // (profile, journey, sessions, codes, trusted devices: ON DELETE CASCADE).
-        $u = require_user();
-        $in = json_body();
-        if (too_many('login_fail', 'email', $u['email'], 8, 15)) fail(429, 'too_many_attempts');
-        $st = db()->prepare('SELECT password_hash FROM users WHERE id = ?');
-        $st->execute([$u['id']]);
-        if (!password_verify((string)($in['password'] ?? ''), (string)$st->fetchColumn())) {
-            record_attempt('login_fail', $u['email']);
-            fail(401, 'invalid_credentials');
-        }
-        db()->prepare('DELETE FROM users WHERE id = ?')->execute([$u['id']]);
-        error_log("JOGOO audit: account {$u['id']} deleted by its owner");
-        set_session_cookie('', time() - 3600);
-        set_cookie(DEVICE_COOKIE, '', time() - 3600);
-        set_cookie(CHALLENGE_COOKIE, '', time() - 3600);
-        respond(200, ['ok' => true]);
-    }
-
     if ($path === '/me/journey' && $method === 'GET') {
         $u = require_user();
         respond(200, journey_for($u['id']));
@@ -270,7 +240,7 @@ function route(string $method, string $path): void
         require_admin();
         $q = trim((string)($_GET['q'] ?? ''));
         $stage = (string)($_GET['stage'] ?? '');
-        $page = min(10000, max(1, (int)($_GET['page'] ?? 1)));
+        $page = max(1, (int)($_GET['page'] ?? 1));
         $per = 50;
         // ?role=staff lists JOGOO staff (for the super admin); default lists clients.
         $where = [($_GET['role'] ?? '') === 'staff' ? "p.role IN ('admin','super_admin')" : "p.role = 'client'"];
@@ -340,7 +310,6 @@ function route(string $method, string $path): void
         $role = (string)(json_body()['role'] ?? '');
         if (!in_array($role, ['client', 'admin'], true)) fail(422, 'invalid_field', ['field' => 'role']);
         db()->prepare('UPDATE profiles SET role = ? WHERE id = ?')->execute([$role, $m[1]]);
-        error_log("JOGOO audit: {$me['id']} set role of {$m[1]} to $role");
         // Their sessions pick up the new role on the next request.
         respond(200, ['profile' => profile_json(require_fresh_user($m[1]))]);
     }

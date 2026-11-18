@@ -1,6 +1,6 @@
 <?php
 // Exports client accounts from MySQL as SQL you can run in the Supabase SQL
-// editor (after the 20261104120000_client_journey migration):
+// editor (after the 20261118120000_client_accounts migration):
 //   php server/tools/export-for-supabase.php > import.sql
 // Passwords move as bcrypt hashes, so clients keep signing in with the same
 // password; nobody has to reset. Run it on the server (cPanel Terminal) or
@@ -18,8 +18,9 @@ foreach (db()->query('SELECT u.*, p.full_name, p.phone, p.location, p.farm_size_
         $q($r['id']), $q($r['email']), $q($hash), $q($r['created_at'] . '+00'));
     printf("insert into auth.identities (id, user_id, provider_id, provider, identity_data, created_at, updated_at) values (gen_random_uuid(), %s, %s, 'email', jsonb_build_object('sub', %s, 'email', %s), now(), now());\n",
         $q($r['id']), $q($r['id']), $q($r['id']), $q($r['email']));
-    printf("insert into public.profiles (id, full_name, phone, location, farm_size_ha, role, lang, created_at) values (%s, %s, %s, %s, %s, %s, %s, %s);\n",
-        $q($r['id']), $q($r['full_name']), $q($r['phone']), $q($r['location']), $r['farm_size_ha'] ?? 'null', $q($r['role']), $q($r['lang']), $q($r['p_created'] . '+00'));
+    printf("insert into public.profiles (id, full_name, phone, location, farm_size_ha, role, lang, email_verified, created_at) values (%s, %s, %s, %s, %s, %s, %s, %s, %s);\n",
+        $q($r['id']), $q($r['full_name']), $q($r['phone']), $q($r['location']), $r['farm_size_ha'] ?? 'null', $q($r['role']), $q($r['lang']),
+        ($r['email_verified_at'] ?? null) ? 'true' : 'false', $q($r['p_created'] . '+00'));
 }
 foreach (db()->query('SELECT * FROM journey_events ORDER BY created_at') as $e) {
     printf("insert into public.journey_events (id, client_id, stage, note, created_by, created_at) values (%s, %s, %s, %s, %s, %s);\n",

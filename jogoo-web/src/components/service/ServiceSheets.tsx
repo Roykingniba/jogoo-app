@@ -4,8 +4,7 @@ import { Icon } from '../Icon';
 import { ListRow, TintIcon } from '../ui';
 import { Sheet, SheetOption, pickMediaFile, showToast } from '../overlays';
 import { useI18n } from '../../i18n/i18n';
-import { ContactJogooSheet } from './ContactJogoo';
-import { equipmentList, useStore } from '../../data/store';
+import { useEquipmentList, useStore } from '../../data/store';
 import { bi, underWarranty, type Equipment } from '../../data/models';
 import '../../styles/service.css';
 
@@ -34,7 +33,7 @@ export function useMediaPicker(): { pick: (video?: boolean) => Promise<Picked>; 
     // Must run inside the click handler so the browser allows the file chooser.
     pickMediaFile({ video: isVideo, camera })
       .then((r) => done?.(r))
-      .catch(() => { showToast(t('cannotOpenCamera'), undefined, 'error'); done?.(null); });
+      .catch(() => { showToast(t('cannotOpenCamera')); done?.(null); });
   };
 
   const pick = (v = false) =>
@@ -54,48 +53,49 @@ export function useMediaPicker(): { pick: (video?: boolean) => Promise<Picked>; 
   return { pick, sheet };
 }
 
-/**
- * Port of bookVisit(): asks which installation needs a visit, then hands the
- * request to JOGOO on WhatsApp or by phone (the app cannot book visits itself).
- */
+/** Port of bookVisit(): asks which installation needs a visit, then passes it to JOGOO. */
 export function BookVisitSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { t, b } = useI18n();
+  const equipmentList = useEquipmentList();
   const requestFromSales = useStore((s) => s.requestFromSales);
-  const [item, setItem] = useState<Equipment | null>(null);
-  const close = () => { setItem(null); onClose(); };
+  const chooseItem = (item: Equipment | null) => {
+    onClose();
+    requestFromSales(item
+      ? bi(`Service visit: ${item.name.en}`, `Visite d'entretien : ${item.name.fr}`)
+      : bi('Service visit: whole farm', "Visite d'entretien : toute l'exploitation"));
+    showToast(t('visitRequestedTitle'), t('visitRequestedBody'));
+  };
   return (
-    <>
-      <Sheet open={open && !item} onClose={close} title={t('bookVisitTitle')}>
-        <p className="t-body-m" style={{ margin: '0 0 8px' }}>{t('bookVisitBody')}</p>
-        {equipmentList.map((it) => (
-          <ListRow key={it.id} leading={<TintIcon icon={it.icon} tone={it.tone} size={44} />} title={b(it.name)}
-            trailing={<Icon name="chevron_right" color="var(--muted)" />} onClick={() => setItem(it)} />
-        ))}
-      </Sheet>
-      <ContactJogooSheet open={open && !!item} onClose={close} title={t('bookVisitTitle')}
-        body={item ? t('bookServiceBody', { equipment: b(item.name) }) : undefined}
-        message={item ? t('waServiceVisit', { equipment: b(item.name) }) : ''}
-        onContact={() => {
-          if (!item) return;
-          requestFromSales(bi(`Service visit: ${item.name.en}`, `Visite d'entretien : ${item.name.fr}`));
-          showToast(t('visitRequestedTitle'), t('visitRequestedBody'));
-        }} />
-    </>
+    <Sheet open={open} onClose={onClose} title={t('bookVisitTitle')}>
+      <p className="t-body-m" style={{ margin: '0 0 8px' }}>{t('bookVisitBody')}</p>
+      {equipmentList.map((item) => (
+        <ListRow key={item.id} leading={<TintIcon icon={item.icon} tone={item.tone} size={44} />} title={b(item.name)}
+          trailing={<Icon name="chevron_right" color="var(--muted)" />} onClick={() => chooseItem(item)} />
+      ))}
+      <ListRow leading={<TintIcon icon="spa_outlined" tone="lime" size={44} />} title={t('wholeFarm')}
+        trailing={<Icon name="chevron_right" color="var(--muted)" />} onClick={() => chooseItem(null)} />
+    </Sheet>
   );
 }
 
 /** Warranty status of each installation. */
 export function WarrantySheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { t, b } = useI18n();
+  const equipmentList = useEquipmentList();
   return (
     <Sheet open={open} onClose={onClose} title={t('actionWarranty')}>
+      {equipmentList.length === 0 && <p className="t-body-l" style={{ margin: '0 0 8px' }}>{t('noEquipmentYet')}</p>}
       {equipmentList.map((item) => {
         const covered = underWarranty(item);
+        if (item.warrantyMonths == null) {
+          return <ListRow key={item.id} leading={<Icon name="gpp_maybe_outlined" color="var(--muted)" />}
+            title={b(item.name)} subtitle={t('warrantyUnknown')} />;
+        }
         return (
           <ListRow key={item.id}
             leading={<Icon name={covered ? 'verified_user_outlined' : 'gpp_maybe_outlined'} color={covered ? 'var(--olive)' : 'var(--brown)'} />}
             title={b(item.name)}
-            subtitle={covered ? t('monthsOf', { left: item.warrantyMonthsLeft, total: item.warrantyMonths }) : t('warrantyEnded')} />
+            subtitle={covered ? t('monthsOf', { left: item.warrantyMonthsLeft ?? 0, total: item.warrantyMonths }) : t('warrantyEnded')} />
         );
       })}
       <p className="t-body-m" style={{ margin: '8px 0 0' }}>{t('warrantyNote')}</p>

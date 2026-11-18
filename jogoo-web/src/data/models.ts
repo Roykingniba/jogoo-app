@@ -42,11 +42,15 @@ export interface Equipment {
   name: Bi;
   shortName: Bi;
   serial: string;
-  health: EquipmentHealth;
-  healthNote: Bi;
-  installedOn: Date;
-  warrantyMonths: number;
-  warrantyMonthsLeft: number;
+  /** Kind chosen by the client (pump, drip, ...), see EQUIPMENT_KINDS. */
+  kind?: string;
+  notes?: string;
+  /** Set by JOGOO after a service visit; unknown for equipment the client adds. */
+  health?: EquipmentHealth;
+  healthNote?: Bi;
+  installedOn?: Date;
+  warrantyMonths?: number;
+  warrantyMonthsLeft?: number;
   icon: IconName;
   tone: Tone;
   photo?: string;
@@ -54,9 +58,13 @@ export interface Equipment {
   nextVisit?: Date;
   maintenance: MaintenanceStep[];
 }
-export const underWarranty = (e: Equipment) => e.warrantyMonthsLeft > 0;
+export const underWarranty = (e: Equipment) => (e.warrantyMonthsLeft ?? 0) > 0;
 
-export type ProductCategory = 'filters' | 'valves' | 'sprinklers' | 'pivots' | 'kits';
+export type ProductCategory =
+  | 'dripline' | 'sprinklers' | 'drippers' | 'dripFittings' | 'micro' | 'pipes' | 'valves'
+  | 'layflatFittings' | 'filtration' | 'largeIrrigation' | 'pumping' | 'automation'
+  // Listed in the catalogue's contents; their pages are still to come.
+  | 'fertilisers' | 'protection' | 'drones';
 
 export interface AddOn {
   id: string;

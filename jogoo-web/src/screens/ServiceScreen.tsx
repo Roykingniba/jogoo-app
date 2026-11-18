@@ -1,13 +1,15 @@
 // Screen 08: after-sales support hub. Ported from lib/screens/service_screen.dart.
-import { useId, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Button, Divided, ExampleBanner, InitialsAvatar, JCard, ListRow, Page, PageTitle, RoundShortcut, SectionTitle, StatusPill, TintIcon,
+  Button, Divided, InitialsAvatar, JCard, ListRow, Page, PageTitle, RoundShortcut, SectionTitle, StatusPill, TintIcon,
 } from '../components/ui';
 import { Icon } from '../components/Icon';
 import { BookVisitSheet, RatingSheet, WarrantySheet } from '../components/service/ServiceSheets';
 import { useI18n } from '../i18n/i18n';
-import { openRequestCount, useStore } from '../data/store';
+import { activeVisits, openRequestCount, useStore } from '../data/store';
+import { VisitRow } from '../components/service/VisitParts';
+import { useEffect } from 'react';
 import { DemoData } from '../data/demoData';
 import { isOpen, type ServiceRequest } from '../data/models';
 import { callJogoo, openWhatsApp } from '../utils/actions';
@@ -22,12 +24,15 @@ export default function ServiceScreen() {
   const open = openRequestCount(requests);
   const [sheet, setSheet] = useState<'visit' | 'warranty' | null>(null);
   const close = () => setSheet(null);
-  const id = useId();
+  const visits = useStore((s) => s.visits);
+  const loadVisits = useStore((s) => s.loadVisits);
+  useEffect(() => { void loadVisits(); }, [loadVisits]);
+  const upcoming = activeVisits(visits);
+  const past = visits.filter((v) => v.status === 'done' || v.status === 'cancelled').slice(0, 3);
 
   return (
     <Page>
       <PageTitle title={t('navService')} subtitle={t('serviceHours')} />
-      <ExampleBanner />
       <div className="service-hub">
         <JCard padding="small" className="a-short">
           <div className="shortcuts">
@@ -38,28 +43,38 @@ export default function ServiceScreen() {
           </div>
         </JCard>
 
-        <JCard className="a-req">
+        <div className="a-req stack">
+        <JCard className="service-visits">
+          <SectionTitle trailing={upcoming.length ? <StatusPill label={t('upcomingCount', { count: upcoming.length })} tone="cyan" /> : undefined}>
+            {t('myVisits')}
+          </SectionTitle>
+          <div style={{ marginTop: 8 }}>
+            {upcoming.length === 0 && past.length === 0
+              ? <p className="t-body-m empty-note">{t('visitsEmpty')}</p>
+              : <Divided>{[...upcoming, ...past].map((v) => <VisitRow key={v.id} visit={v} />)}</Divided>}
+          </div>
+        </JCard>
+        <JCard>
           <SectionTitle trailing={open === 0 ? undefined : <StatusPill label={t('openCount', { count: open })} tone="pink" />}>
             {t('myRequests')}
           </SectionTitle>
           <div style={{ marginTop: 8 }}>
             <Divided>
+              {requests.length === 0 && <p className="t-body-m" style={{ margin: '4px 0 8px' }}>{t('noRequestsYet')}</p>}
               {requests.map((r) => <RequestRow key={r.id} request={r} />)}
             </Divided>
           </div>
         </JCard>
+        </div>
 
-        <JCard padding="small" className="a-agro" onClick={() => navigate(paths.agronomist)}
-          labelledBy={`${id}-agro`} describedBy={`${id}-agro-d`}>
-          <ListRow leading={<TintIcon icon="spa_outlined" tone="lime" size={52} />} title={<span id={`${id}-agro`}>{t('agronomistsTitle')}</span>}
-            subtitle={<span id={`${id}-agro-d`}>{t('repliesWeekdays')}</span>} trailing={<Icon name="chevron_right" color="var(--muted)" />} />
+        <JCard padding="small" className="a-agro" onClick={() => navigate(paths.agronomist)} ariaLabel={t('agronomistsTitle')}>
+          <ListRow leading={<TintIcon icon="spa_outlined" tone="lime" size={52} />} title={t('agronomistsTitle')}
+            subtitle={t('repliesWeekdays')} trailing={<Icon name="chevron_right" color="var(--muted)" />} />
         </JCard>
 
-        <JCard padding="small" className="a-call" onClick={callJogoo}
-          labelledBy={`${id}-call`} describedBy={`${id}-call-d`}>
+        <JCard padding="small" className="a-call" onClick={callJogoo} ariaLabel={t('callJogooCameroon')}>
           <ListRow leading={<span className="service-call-disc"><Icon name="call_outlined" /></span>}
-            title={<span id={`${id}-call`}>{t('callJogooCameroon')}</span>}
-            subtitle={<span id={`${id}-call-d`}>{DemoData.jogooPhoneDisplay}</span>} />
+            title={t('callJogooCameroon')} subtitle={DemoData.jogooPhoneDisplay} />
         </JCard>
       </div>
 

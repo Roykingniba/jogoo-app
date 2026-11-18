@@ -8,9 +8,22 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "package:cpanel": "npm run build && bash server/package-cpanel.sh"
+    "package:cpanel": "npm run build && bash server/package-cpanel.sh",
+    "android:sync": "npm run build && npx cap sync android",
+    "android:apk": "npm run android:sync && cd android && ./gradlew assembleDebug && mkdir -p ../release && cp app/build/outputs/apk/debug/app-debug.apk ../release/jogoo-debug.apk && echo \"APK: release/jogoo-debug.apk\"",
+    "build:staff": "tsc -b && vite build -c vite.staff.config.ts && node -e \"const fs=require('fs');for(const f of ['sw.js','manifest.webmanifest','flutter_service_worker.js','_headers','pwa-192.png','pwa-512.png','pwa-maskable-512.png','apple-touch-icon.png'])fs.rmSync('dist-staff/'+f,{force:true})\"",
+    "android:release": "npm run android:sync && cd android && ./gradlew assembleRelease bundleRelease && cd .. && mkdir -p release && cp android/app/build/outputs/apk/release/app-release.apk release/jogoo-release.apk && cp android/app/build/outputs/bundle/release/app-release.aab release/jogoo-release.aab"
   },
   "dependencies": {
+    "@capacitor/android": "^8.6.2",
+    "@capacitor/app": "^8.1.2",
+    "@capacitor/app-launcher": "^8.0.1",
+    "@capacitor/core": "^8.6.2",
+    "@capacitor/filesystem": "^8.1.5",
+    "@capacitor/share": "^8.0.3",
+    "@capacitor/status-bar": "^8.0.4",
+    "@capgo/capacitor-updater": "8.54.2",
+    "@supabase/supabase-js": "^2.119.0",
     "intl-messageformat": "^12.1.4",
     "jspdf": "^4.2.1",
     "lucide-react": "^1.68.0",
@@ -21,6 +34,7 @@
     "zustand": "^5.0.16"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.6.2",
     "@eslint/js": "^9.25.0",
     "@types/node": "^22.20.5",
     "@types/react": "^19.1.2",

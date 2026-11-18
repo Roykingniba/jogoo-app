@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- JOGOO brand colours -->
+    <color name="colorPrimary">#004A87</color>
+    <color name="colorPrimaryDark">#004A87</color>
+    <color name="colorAccent">#004A87</color>
+    <color name="jogooCream">#F3F0E8</color>
+</resources>

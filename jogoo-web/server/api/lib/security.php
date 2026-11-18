@@ -8,7 +8,6 @@ const DEVICE_COOKIE = 'jogoo_device';
 const SCHEMA_VERSION = 2;
 const CODE_TTL_MIN = 10;
 const CODE_MAX_TRIES = 5;
-const CODE_FAILS_PER_HOUR = 10;
 
 // ---------------------------------------------------------------- migrations
 
@@ -90,18 +89,8 @@ function set_cookie(string $name, string $value, int $expires): void
 
 function code_hash(string $code): string
 {
-    return hash_hmac('sha256', $code, app_secret());
-}
-
-/** The secret for hashing codes: app_secret (or, for older installs, setup_key). Refuses placeholders. */
-function app_secret(): string
-{
-    foreach (['app_secret', 'setup_key'] as $k) {
-        $s = (string)(config()[$k] ?? '');
-        if (strlen($s) >= 16 && strncmp($s, 'CHANGE-ME', 9) !== 0) return $s;
-    }
-    error_log('JOGOO: app_secret is missing or still the sample value; set a long random app_secret in jogoo-private/app.php');
-    fail(500, 'not_configured');
+    $secret = (string)(config()['app_secret'] ?? config()['setup_key'] ?? '');
+    return hash_hmac('sha256', $code, $secret);
 }
 
 // ---------------------------------------------------------------- email
@@ -152,12 +141,7 @@ function send_code_email(string $to, string $name, string $code, string $purpose
         'reset_password' => $fr ? 'choisir un nouveau mot de passe' : 'choose a new password',
     ][$purpose];
     $subject = $fr ? "Votre code JOGOO : $code" : "Your JOGOO code: $code";
-    // Only greet by name on sign-in codes: those go to verified accounts whose
-    // owner chose the name. Sign-up and reset emails can be triggered by
-    // anyone for any address, so they must not carry text a stranger typed.
-    $hello = $purpose === 'login'
-        ? ($fr ? "Bonjour $name," : "Hello $name,")
-        : ($fr ? 'Bonjour,' : 'Hello,');
+    $hello = $fr ? "Bonjour $name," : "Hello $name,";
     $line = $fr ? "Voici votre code pour $what :" : "Here is your code to $what:";
     $valid = $fr ? 'Il est valable ' . CODE_TTL_MIN . ' minutes.' : 'It is valid for ' . CODE_TTL_MIN . ' minutes.';
     $ignore = $fr
@@ -175,25 +159,6 @@ function send_code_email(string $to, string $name, string $code, string $purpose
         . '<p style="margin:0 0 16px;color:#56657a">' . $e($valid) . '</p>'
         . '<p style="margin:0;color:#56657a;font-size:13px">' . $e($ignore) . '</p>'
         . '</td></tr></table></td></tr></table></body></html>';
-    return send_mail($to, $subject, $text, $html);
-}
-
-/** Sent instead of a code when someone signs up with an email that already has an account. */
-function send_account_exists_email(string $to, string $lang): bool
-{
-    $fr = $lang === 'fr';
-    $subject = $fr ? 'Vous avez déjà un compte JOGOO' : 'You already have a JOGOO account';
-    $lines = $fr
-        ? ['Bonjour,', "Quelqu'un (peut-être vous) a essayé de créer un compte JOGOO avec cette adresse e-mail, mais elle a déjà un compte.",
-           'Connectez-vous avec votre mot de passe. Si vous l\'avez oublié, utilisez « Mot de passe oublié ? » sur l\'écran de connexion.',
-           "Si ce n'était pas vous, ignorez cet e-mail : votre compte reste protégé."]
-        : ['Hello,', 'Someone (maybe you) tried to create a JOGOO account with this email address, but it already has an account.',
-           'Sign in with your password. If you forgot it, use "Forgot password?" on the sign-in screen.',
-           "If this wasn't you, ignore this email: your account stays protected."];
-    $text = implode("\n\n", $lines) . "\n\nJOGOO Agriculture";
-    $html = '<!doctype html><html><body style="font-family:Arial,Helvetica,sans-serif;color:#0e2338">'
-        . implode('', array_map(fn($l) => '<p>' . htmlspecialchars($l, ENT_QUOTES) . '</p>', $lines))
-        . '<p>JOGOO Agriculture</p></body></html>';
     return send_mail($to, $subject, $text, $html);
 }
 
@@ -245,13 +210,6 @@ function verify_challenge_code(string $code, array $purposes): array
         db()->prepare('DELETE FROM auth_challenges WHERE token_hash = ?')->execute([$ch['token_hash']]);
         fail(410, 'code_expired');
     }
-    // Cap wrong codes per account across challenges and resends, so a code
-    // can't be guessed by asking for new ones (at most CODE_FAILS_PER_HOUR
-    // guesses an hour out of a million codes).
-    if (too_many('code_fail', 'email', $ch['email'], CODE_FAILS_PER_HOUR, 60)) {
-        db()->prepare('DELETE FROM auth_challenges WHERE token_hash = ?')->execute([$ch['token_hash']]);
-        fail(429, 'too_many_attempts');
-    }
     $code = preg_replace('/\D/', '', $code) ?? '';
     if (strlen($code) !== 6 || !hash_equals($ch['code_hash'], code_hash($code))) {
         record_attempt('code_fail', $ch['email']);
@@ -277,7 +235,7 @@ function resend_challenge(): array
     if (strtotime($ch['last_sent_at'] . ' UTC') > time() - 60) fail(429, 'wait_before_resend', ['retryIn' => 60]);
     $code = str_pad((string)random_int(0, 999999), 6, '0', STR_PAD_LEFT);
     $expires = time() + CODE_TTL_MIN * 60;
-    db()->prepare('UPDATE auth_challenges SET code_hash = ?, sends = sends + 1, last_sent_at = ?, expires_at = ? WHERE token_hash = ?')
+    db()->prepare('UPDATE auth_challenges SET code_hash = ?, attempts = 0, sends = sends + 1, last_sent_at = ?, expires_at = ? WHERE token_hash = ?')
         ->execute([code_hash($code), now_utc(), gmdate('Y-m-d H:i:s', $expires), $ch['token_hash']]);
     set_cookie(CHALLENGE_COOKIE, (string)$_COOKIE[CHALLENGE_COOKIE], $expires);
     if (!send_code_email($ch['email'], $ch['full_name'], $code, $ch['purpose'], $ch['lang'] ?? 'en')) fail(502, 'email_failed');

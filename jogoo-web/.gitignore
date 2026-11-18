@@ -28,3 +28,12 @@ dist-ssr
 !.env.example
 build-cpanel/
 jogoo-meha-cpanel.zip
+
+# Android build output
+release/
+!.env.production
+dist-staff/
+keys/
+
+# Packaged uploads
+*.zip

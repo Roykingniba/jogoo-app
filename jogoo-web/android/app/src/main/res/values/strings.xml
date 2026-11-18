@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Jogoo</string>
+    <string name="title_activity_main">Jogoo</string>
+    <string name="package_name">com.jogoo.meha</string>
+    <string name="custom_url_scheme">com.jogoo.meha</string>
+</resources>

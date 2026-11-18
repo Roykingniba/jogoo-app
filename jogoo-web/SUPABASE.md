@@ -1,38 +1,48 @@
-# Moving client accounts to Supabase
+# Supabase backend
 
-Today client accounts and their status live in MySQL on the cPanel hosting
-(`server/`). Everything was built so the move to Supabase (the backend the
-Flutter mobile app is planned on) is a copy, not a rebuild:
+The app uses Supabase when `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`
+are set at build time (`.env.production`, public values). Without them it falls
+back to the PHP API in `server/` (cPanel).
 
-| Today (MySQL, `server/sql/schema.mysql.sql`) | Supabase |
-|---|---|
-| `users` (uuid id, email, bcrypt hash) | `auth.users` (Supabase Auth, also bcrypt) |
-| `profiles` (role `client`/`admin`) | `public.profiles` |
-| `journey_events` (append-only; latest = current stage) | `public.journey_events` + `client_stage` view |
-| `sessions`, `auth_attempts` | handled by Supabase Auth |
+Project: `kyrajnbcrtxwdnwcgbzz` (https://kyrajnbcrtxwdnwcgbzz.supabase.co).
 
-The web app only talks to the `Backend` interface in
-`src/data/backend/types.ts`. The screens never call the API directly.
+## What's in Supabase
 
-## Steps when you're ready
+| Piece | Where | What it does |
+|---|---|---|
+| Accounts | Supabase Auth | Email + password |
+| `profiles`, `journey_events` | `supabase/migrations/20261118120000_client_accounts.sql` | Client details, role (`client` / `admin` / `super_admin`), the 7 project stages |
+| 2-step verification | same migration (`private.*` tables) + Edge Function `auth-codes` | 6-digit email codes at sign-up and sign-in, trusted devices (30 days), password reset by code |
+| Staff page | SQL functions `admin_*` | List/search clients, move stage, add notes; super admin gives/removes staff access |
 
-1. In the Supabase project used by the mobile app, apply
-   `supabase/migrations/20261104120000_client_journey.sql` (put it in
-   `jogoo-app/supabase/migrations/` next to `farm_tenancy`; it reuses the
-   `private` schema and doesn't touch `farms`).
-2. On the server (cPanel → Terminal): `php server/tools/export-for-supabase.php > import.sql`,
-   then run `import.sql` in the Supabase SQL editor. Passwords carry over, so
-   clients keep their password. Delete `import.sql` afterwards (it contains
-   password hashes).
-3. Add `src/data/backend/supabaseBackend.ts` implementing `Backend` with
-   `@supabase/supabase-js` (sign-up passes `full_name`, `phone`, `location`,
-   `farm_size_ha`, `lang` as user metadata; the trigger creates the profile and
-   the first "Signed up" step). Point `src/data/backend/index.ts` at it and set
-   `VITE_SUPABASE_URL` / `VITE_SUPABASE_PUBLISHABLE_KEY`.
-4. Rebuild, deploy, and remove `/api` from the cPanel site.
+Every table and function requires a session that passed the email code: a
+password alone reads nothing. Super admin emails live in
+`private.super_admin_emails` (seeded with roykingnibajogoo@gmail.com).
 
-Row-level security in the migration gives the same rules as the PHP API:
-clients see only their own profile and journey; staff (`admin` and
-`super_admin`) see everyone and are the only ones who can add steps; only the
-super admin can give or remove staff access (super admins themselves are set
-in the SQL editor).
+## Settings that must be in place
+
+1. **Authentication → Sign In / Providers → Email → "Confirm email": OFF.**
+   Email ownership is confirmed by our own 6-digit code instead.
+2. **Edge Functions → auth-codes → Settings → "Verify JWT with legacy secret": OFF**
+   (the function checks the user's token itself; some actions work signed out).
+3. **Edge Functions → Secrets** (code emails go through the mail relay on the JOGOO hosting):
+   - `MAILER_URL` = `https://jogoo.africa/jogoo-mailer/` (files: `server/mailer/`)
+   - `MAILER_SECRET` = the same value as `secret` in `/home/<cpanel user>/jogoo-private/mailer.php`
+     (outside public_html; never in git). Change it in both places together.
+   - Without the relay, SMTP is used instead: `SMTP_USER`, `SMTP_PASS`, optional `SMTP_HOST`,
+     `SMTP_PORT`, `MAIL_FROM_NAME`. Optional for both: `ALLOWED_ORIGINS`.
+
+## Updating
+
+- SQL: paste the migration into the SQL editor and run it (it is safe to run again),
+  or `npx supabase db push`.
+- Function: `npx supabase functions deploy auth-codes --project-ref kyrajnbcrtxwdnwcgbzz`
+  (`supabase/config.toml` keeps `verify_jwt = false`), or paste
+  `supabase/functions/auth-codes/index.ts` into the dashboard editor.
+
+## Moving accounts from the cPanel version
+
+If anyone signed up on the PHP version: in cPanel → Terminal run
+`php ~/meha.jogoo.africa/../jogoo-web/server/tools/export-for-supabase.php > import.sql`
+(or wherever `server/tools` is uploaded), run `import.sql` in the Supabase SQL
+editor, then delete it. Passwords carry over (bcrypt).

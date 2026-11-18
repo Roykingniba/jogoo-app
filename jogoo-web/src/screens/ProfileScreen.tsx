@@ -2,25 +2,21 @@
 // Ported from lib/screens/profile_screen.dart.
 import { useState } from 'react';
 import {
-  Button, ChoicePill, CircleButton, InitialsAvatar, JCard, Page, SectionTitle, StatusPill, useBack,
+  Button, ChoicePill, CircleButton, InitialsAvatar, JCard, Page, SectionTitle, useBack,
 } from '../components/ui';
 import { Sheet, showToast } from '../components/overlays';
-import { useNavigate } from 'react-router-dom';
 import { PasswordInput } from '../components/account/PasswordInput';
 import { errorKey } from '../components/account/errors';
-import { askSignOut } from '../components/account/SignOut';
-import { ConfirmSheet } from '../components/account/ConfirmSheet';
-import { useAuth, isAdmin } from '../data/auth';
+import { useAuth } from '../data/auth';
 import { backend } from '../data/backend';
-import { paths } from '../routes';
 import { useI18n, type MsgKey } from '../i18n/i18n';
 import { useStore } from '../data/store';
-import type { Lang, SeasonGoal, Tone } from '../data/models';
-import { decimalTrim, initials, monthYear } from '../utils/format';
+import type { Lang, SeasonGoal } from '../data/models';
+import { initials, monthYear } from '../utils/format';
+import { CreateFarmCard, FarmSummary } from '../components/farm/FarmSummary';
 import '../styles/home.css';
 import '../styles/account.css';
 
-const cropTones: Tone[] = ['pink', 'orange', 'lime', 'blue'];
 const goalLabels: [SeasonGoal, MsgKey][] = [
   ['higherYields', 'goalHigherYields'],
   ['moreLandWatered', 'goalMoreLand'],
@@ -29,12 +25,12 @@ const goalLabels: [SeasonGoal, MsgKey][] = [
 ];
 
 export default function ProfileScreen() {
-  const { t, b, lang } = useI18n();
+  const { t, lang } = useI18n();
   const back = useBack();
   const profile = useStore((s) => s.profile);
   const goals = useStore((s) => s.goals);
   const toggleGoal = useStore((s) => s.toggleGoal);
-  const [editing, setEditing] = useState(false);
+  const farm = useStore((s) => s.farm);
 
   return (
     <Page narrow>
@@ -52,20 +48,7 @@ export default function ProfileScreen() {
       <p className="t-body-m profile-since">{t('clientSince', { date: monthYear(lang, profile.clientSince) })}</p>
 
       <div className="split even" style={{ marginTop: 20 }}>
-        <JCard>
-          <SectionTitle trailing={<Button variant="outlined" small onClick={() => setEditing(true)}>{t('edit')}</Button>}>
-            {t('navMyFarm')}
-          </SectionTitle>
-          <div className="profile-facts" style={{ marginTop: 14 }}>
-            <Fact label={t('location')} value={profile.location} />
-            <Fact label={t('area')} value={t('hectares', { value: decimalTrim(lang, profile.areaHa) })} />
-          </div>
-          <div className="pill-wrap" style={{ gap: 8, marginTop: 14 }}>
-            {profile.crops.map((crop, i) => (
-              <StatusPill key={i} label={b(crop)} tone={cropTones[i % cropTones.length]} />
-            ))}
-          </div>
-        </JCard>
+        {farm ? <FarmSummary farm={farm} /> : <CreateFarmCard />}
 
         <JCard>
           <SectionTitle>{t('thisSeasonIWant')}</SectionTitle>
@@ -80,7 +63,6 @@ export default function ProfileScreen() {
 
       <AccountCard />
 
-      {editing && <EditFarmSheet onClose={() => setEditing(false)} />}
     </Page>
   );
 }
@@ -111,57 +93,12 @@ function LanguageToggle() {
   );
 }
 
-/** Dialog to change the farm location and area (Flutter AlertDialog). */
-function EditFarmSheet({ onClose }: { onClose: () => void }) {
-  const { t, lang } = useI18n();
-  const profile = useStore((s) => s.profile);
-  const updateFarm = useStore((s) => s.updateFarm);
-  const [location, setLocation] = useState(profile.location);
-  const [area, setArea] = useState(decimalTrim(lang, profile.areaHa));
-  const [error, setError] = useState('');
-
-  const save = () => {
-    const raw = area.trim().replace(/\s*(ha|hectares?)\.?$/i, '').replace(',', '.');
-    const hectares = raw === '' ? NaN : Number(raw);
-    if (location.trim() === '') { setError(t('errMissing')); return; }
-    if (!Number.isFinite(hectares) || hectares < 0 || hectares > 100000) { setError(t('errFarmSize')); return; }
-    updateFarm(location.trim(), hectares);
-    // Keep the account on the server in step; say so if that didn't work.
-    useAuth.getState().updateProfile({ location: location.trim(), farmSizeHa: hectares })
-      .catch(() => showToast(t('farmSaveLocalOnly'), undefined, 'error'));
-    onClose();
-  };
-
-  return (
-    <Sheet open onClose={onClose} title={t('editFarmTitle')}>
-      <form className="stack" onSubmit={(e) => { e.preventDefault(); save(); }} noValidate>
-        {error && <p className="acct-error" role="alert">{error}</p>}
-        <div className="field">
-          <label htmlFor="profile-location">{t('location')}</label>
-          <input id="profile-location" className="input" value={location} onChange={(e) => setLocation(e.target.value)} autoComplete="address-level2" />
-        </div>
-        <div className="field">
-          <label htmlFor="profile-area">{t('area')}</label>
-          <div className="profile-field-suffix">
-            <input id="profile-area" className="input" inputMode="decimal" value={area} onChange={(e) => setArea(e.target.value)} />
-            <span className="sfx" aria-hidden="true">ha</span>
-          </div>
-        </div>
-        <div className="row" style={{ justifyContent: 'flex-end', marginTop: 8 }}>
-          <Button variant="text" onClick={onClose}>{t('cancel')}</Button>
-          <Button type="submit">{t('save')}</Button>
-        </div>
-      </form>
-    </Sheet>
-  );
-}
-
 /** Signed-in account: contact details, password, sign out, staff page. */
 function AccountCard() {
   const { t } = useI18n();
-  const navigate = useNavigate();
   const account = useAuth((s) => s.profile);
-  const [sheet, setSheet] = useState<'details' | 'password' | 'delete' | null>(null);
+  const signOut = useAuth((s) => s.signOut);
+  const [sheet, setSheet] = useState<'details' | 'password' | null>(null);
   if (!account) return null;
   return (
     <JCard className="acct-account" style={{ marginTop: 16 }}>
@@ -173,17 +110,11 @@ function AccountCard() {
         <Fact label={t('phoneOptional')} value={account.phone || '—'} />
       </div>
       <div className="row wrap" style={{ marginTop: 16 }}>
-        {isAdmin(account) && <Button icon="clients" onClick={() => navigate(paths.admin)}>{t('adminTitle')}</Button>}
         <Button variant="outlined" icon="key" onClick={() => setSheet('password')}>{t('changePassword')}</Button>
-        <Button variant="text" icon="logout" onClick={askSignOut}>{t('signOut')}</Button>
-      </div>
-      <div className="row wrap" style={{ marginTop: 8, justifyContent: 'space-between' }}>
-        <a className="btn text" href={`${import.meta.env.BASE_URL}privacy.html`} target="_blank" rel="noopener">{t('privacyLink')}</a>
-        <Button variant="text" icon="delete_outline" className="acct-danger" onClick={() => setSheet('delete')}>{t('deleteAccount')}</Button>
+        <Button variant="text" icon="logout" onClick={() => void signOut()}>{t('signOut')}</Button>
       </div>
       {sheet === 'details' && <AccountDetailsSheet onClose={() => setSheet(null)} />}
       {sheet === 'password' && <PasswordSheet onClose={() => setSheet(null)} />}
-      {sheet === 'delete' && <DeleteAccountSheet onClose={() => setSheet(null)} />}
     </JCard>
   );
 }
@@ -236,7 +167,6 @@ function PasswordSheet({ onClose }: { onClose: () => void }) {
   const [error, setError] = useState('');
   const save = async () => {
     if (next.length < 8) { setError(t('errWeakPassword')); return; }
-    if (new TextEncoder().encode(next).length > 72) { setError(t('errPasswordTooLong')); return; }
     setBusy(true);
     setError('');
     try {
@@ -267,35 +197,5 @@ function PasswordSheet({ onClose }: { onClose: () => void }) {
         </div>
       </form>
     </Sheet>
-  );
-}
-
-/** Permanently deletes the account (required by app stores, and the client's right). */
-function DeleteAccountSheet({ onClose }: { onClose: () => void }) {
-  const { t } = useI18n();
-  const [password, setPassword] = useState('');
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState('');
-  const confirm = async () => {
-    if (!password) { setError(t('errMissing')); return; }
-    setBusy(true);
-    setError('');
-    try {
-      await useAuth.getState().deleteAccount(password);
-    } catch (e) {
-      setError(t(errorKey(e)));
-      setBusy(false);
-    }
-  };
-  return (
-    <ConfirmSheet open title={t('deleteAccount')} confirmLabel={busy ? t('deleting') : t('deleteAccountConfirm')}
-      busy={busy} danger onClose={onClose} onConfirm={() => void confirm()}>
-      <p className="t-body-l">{t('deleteAccountBody')}</p>
-      {error && <p className="acct-error" role="alert">{error}</p>}
-      <div className="field">
-        <label htmlFor="del-pass">{t('password')}</label>
-        <PasswordInput id="del-pass" value={password} onChange={setPassword} autoComplete="current-password" />
-      </div>
-    </ConfirmSheet>
   );
 }

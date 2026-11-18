@@ -1,6 +1,6 @@
 // Pieces shared by the My farm screens and the offline library.
 import type { EquipmentHealth, FarmDocument, Tone } from '../../data/models';
-import { equipmentById } from '../../data/store';
+import { useEquipmentById } from '../../data/store';
 import { useI18n } from '../../i18n/i18n';
 import { downloadFarmDocument, previewFarmDocument } from '../../utils/pdfActions';
 import type { IconName } from '../Icon';
@@ -8,9 +8,10 @@ import { CircleButton, JCard, Page, ScreenHeader, StatusPill, TintIcon } from '.
 import '../../styles/farm.css';
 
 /** Good / Open / Due soon, shared by My farm and the equipment detail. */
-export function HealthPill({ health }: { health: EquipmentHealth }) {
+export function HealthPill({ health }: { health?: EquipmentHealth }) {
   const { t } = useI18n();
   switch (health) {
+    case undefined: return null;
     case 'good': return <StatusPill label={t('statusGood')} tone="lime" />;
     case 'open': return <StatusPill label={t('statusOpen')} tone="pink" />;
     case 'dueSoon': return <StatusPill label={t('statusDueSoon')} tone="orange" />;
@@ -29,7 +30,7 @@ const docLook: Record<FarmDocument['type'], [IconName, Tone]> = {
 export function DocumentRow({ doc }: { doc: FarmDocument }) {
   const { t, b, lang, fr } = useI18n();
   const [icon, tone] = docLook[doc.type];
-  const equipment = equipmentById(doc.equipmentId);
+  const equipment = useEquipmentById(doc.equipmentId);
   return (
     <div className="list-row farm-docrow">
       <button type="button" className="farm-docrow-main" disabled={!equipment}

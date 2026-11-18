@@ -2,7 +2,7 @@
 //   const navigate = useNavigate(); navigate(paths.equipment('drip-kit'))
 // The first path segment decides which main tab is highlighted.
 
-export type AppTab = 'home' | 'farm' | 'shop' | 'learn' | 'service' | 'status' | 'admin';
+export type AppTab = 'home' | 'farm' | 'shop' | 'learn' | 'service' | 'status';
 
 export const paths = {
   // 01-05, 07, 08: main tabs
@@ -13,6 +13,8 @@ export const paths = {
   service: '/service',
 
   // My farm
+  /** Create the farm, or edit its details. */
+  farmSetup: '/farm/setup',
   equipment: (id: string) => `/farm/equipment/${id}`, // 03
   documents: '/farm/documents', // 16
   maintenanceLog: (equipmentId: string) => `/farm/log/${equipmentId}`, // 17
@@ -41,6 +43,8 @@ export const paths = {
   /** 14. Optional ?equipment=<id> preselects the equipment. */
   reportProblem: (equipmentId?: string) => `/service/report${equipmentId ? `?equipment=${equipmentId}` : ''}`,
   agronomist: '/service/agronomist', // 15
+  /** A planned JOGOO visit: technician, hotel, itinerary. */
+  visit: (id: string) => `/service/visits/${id}`,
 
   // Not under a tab
   mia: '/mia', // 06
@@ -49,12 +53,11 @@ export const paths = {
 
   // Accounts (web v1.1)
   status: '/status', // client journey tracking
-  admin: '/admin', // JOGOO staff: all clients and their stage
 } as const;
 
 export function tabForPath(pathname: string): AppTab | null {
   const seg = pathname.split('/')[1] ?? '';
   if (seg === '') return 'home';
-  if (seg === 'farm' || seg === 'shop' || seg === 'learn' || seg === 'service' || seg === 'status' || seg === 'admin') return seg;
+  if (seg === 'farm' || seg === 'shop' || seg === 'learn' || seg === 'service' || seg === 'status') return seg;
   return null;
 }
